@@ -1,22 +1,12 @@
 import { ClientOption } from './client';
-import { AuthenticationService } from './services/authentication';
 import { BulkRolesService } from './services/bulk_roles';
-import { DefinitionsService } from './services/definitions';
 import { EntitlementsService } from './services/entitlements';
-import { JwkService } from './services/jwk';
-import { PublicAuthenticationService } from './services/public_authentication';
-import { PublicEnvironmentService } from './services/public_environment';
 import { ResourcesService } from './services/resources';
 import { RolesService } from './services/roles';
 import { UsersService } from './services/users';
 export declare class Blimu {
-    readonly authentication: AuthenticationService;
     readonly bulkRoles: BulkRolesService;
-    readonly definitions: DefinitionsService;
     readonly entitlements: EntitlementsService;
-    readonly jwk: JwkService;
-    readonly publicAuthentication: PublicAuthenticationService;
-    readonly publicEnvironment: PublicEnvironmentService;
     readonly resources: ResourcesService;
     readonly roles: RolesService;
     readonly users: UsersService;
@@ -25,13 +15,8 @@ export declare class Blimu {
 export type { ClientOption };
 export * as Schema from './schema';
 export * from './utils';
-export { AuthenticationService } from './services/authentication';
 export { BulkRolesService } from './services/bulk_roles';
-export { DefinitionsService } from './services/definitions';
 export { EntitlementsService } from './services/entitlements';
-export { JwkService } from './services/jwk';
-export { PublicAuthenticationService } from './services/public_authentication';
-export { PublicEnvironmentService } from './services/public_environment';
 export { ResourcesService } from './services/resources';
 export { RolesService } from './services/roles';
 export { UsersService } from './services/users';
