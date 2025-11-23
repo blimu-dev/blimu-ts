@@ -30,9 +30,9 @@ const client = new BlimuClient({
   accessToken: process.env.API_TOKEN,
   headerName: 'access_token', // or 'Authorization' (defaults to Authorization: Bearer <token>)
 });
-// Example: Bulk create roles
+// Example: Bulk create resources
 try {
-  const result = await client.bulkRoles.create({
+  const result = await client.bulkResources.create('resourceType', {
     // Request body data
   });
   console.log('Result:', result);
@@ -107,6 +107,10 @@ import { PaymentService, Schema } from '@blimu/backend';
 
 ## Available Services
 
+### BulkResourcesService
+
+- **create**: POST /v1/resources/{resourceType}/bulk - Bulk create resources
+
 ### BulkRolesService
 
 - **create**: POST /v1/users/roles/bulk - Bulk create roles
@@ -118,7 +122,7 @@ import { PaymentService, Schema } from '@blimu/backend';
 ### ResourcesService
 
 - **list**: GET /v1/resources/{resourceType} - List resources
-- **bulkCreate**: POST /v1/resources/{resourceType} - Bulk create resources
+- **create**: POST /v1/resources/{resourceType} - Create a resource
 - **delete**: DELETE /v1/resources/{resourceType}/{resourceId} - Delete a resource
 - **read**: GET /v1/resources/{resourceType}/{resourceId} - Read a resource
 - **update**: PUT /v1/resources/{resourceType}/{resourceId} - Update a resource
@@ -150,10 +154,10 @@ const client = new BlimuClient({
 });
 
 // All methods are fully typed
-const result: RoleBulkResult = await client.bulkRoles.create(/* ... */);
+const result: ResourceBulkResult = await client.bulkResources.create(/* ... */);
 
 // Schema types are available
-const data: Schema.AuthLoginBody = {
+const data: Schema.EntitlementCheckBody = {
   // Fully typed object
 };
 ```
@@ -180,27 +184,12 @@ const client = new BlimuClient({
 
 The SDK includes the following TypeScript interfaces:
 
-- **AuthLoginBody**
-- **AuthRegisterBody**
-- **AuthResponse**
-- **Branding**
-- **ConsentForm**
-- **Definition**
-- **DefinitionCustomTypesResponse**
-- **DefinitionGenerateSDKBody**
-- **DefinitionGenerateSDKResponse**
-- **DefinitionValidateBody**
-- **DefinitionValidateResponse**
 - **EntitlementCheckBody**
 - **EntitlementCheckResult**
 - **EntitlementType**: Entitlement identifier
-- **EnvironmentByDomain**
-- **OAuthApplication**
-- **OAuthTokenBody**
 - **Resource**
 - **ResourceBulkCreateBody**
 - **ResourceBulkResult**
-- **ResourceCreateBody**
 - **ResourceList**
 - **ResourceType**: Resource type identifier
 - **ResourceUpdateBody**
@@ -209,8 +198,6 @@ The SDK includes the following TypeScript interfaces:
 - **RoleBulkResult**
 - **RoleCreateBody**
 - **RoleList**
-- **SessionUser**
-- **TokenResponse**
 - **User**
 - **UserCreateBody**
 - **UserList**

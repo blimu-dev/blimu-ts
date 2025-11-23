@@ -1,5 +1,5 @@
 import { CoreClient } from '../client';
-import * as Schema from '../schema';
+import { Schema } from '../schema';
 
 export class RolesService {
   constructor(private core: CoreClient) {}

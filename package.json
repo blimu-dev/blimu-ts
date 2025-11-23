@@ -4,9 +4,8 @@
   "author": "viniciusdacal",
   "private": false,
   "license": "MIT",
-  "version": "0.2.0",
+  "version": "0.4.3",
   "description": "TypeScript SDK for Blimu API (auto-generated)",
-  "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
@@ -28,14 +27,14 @@
       "require": "./dist/services/*.js",
       "types": "./dist/services/*.d.ts"
     },
-    "./schema/*": {
+    "./schema": {
       "import": {
-        "default": "./dist/schema/*.mjs",
-        "types": "./dist/schema/*.d.ts"
+        "default": "./dist/schema.mjs",
+        "types": "./dist/schema.d.ts"
       },
       "require": {
-        "default": "./dist/schema/*.js",
-        "types": "./dist/schema/*.d.ts"
+        "default": "./dist/schema.js",
+        "types": "./dist/schema.d.ts"
       }
     }
   },

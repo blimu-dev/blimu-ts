@@ -1,5 +1,5 @@
 import { CoreClient } from '../client';
-import * as Schema from '../schema';
+import { Schema } from '../schema';
 
 export class ResourcesService {
   constructor(private core: CoreClient) {}
@@ -23,13 +23,13 @@ export class ResourcesService {
 
   /**
    * POST /v1/resources/{resourceType}
-   * @summary Bulk create resources
+   * @summary Create a resource
    */
-  bulkCreate(
+  create(
     resourceType: Schema.ResourceType,
-    body: Schema.ResourceBulkCreateBody,
+    body: Schema.ResourceUpdateBody,
     init?: Omit<RequestInit, 'method' | 'body'>,
-  ): Promise<Schema.ResourceBulkResult> {
+  ): Promise<Schema.Resource> {
     return this.core.request({
       method: 'POST',
       path: `/v1/resources/${encodeURIComponent(resourceType)}`,
