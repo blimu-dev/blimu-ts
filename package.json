@@ -4,7 +4,7 @@
   "author": "viniciusdacal",
   "private": false,
   "license": "MIT",
-  "version": "0.4.3",
+  "version": "0.4.5",
   "description": "TypeScript SDK for Blimu API (auto-generated)",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
