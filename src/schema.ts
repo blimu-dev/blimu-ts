@@ -31,6 +31,7 @@ export namespace Schema {
       id?: string;
       name?: string;
       parents?: Array<{ id: string; type: ResourceType }>;
+      roles?: Array<{ role: string; userId: string }>;
     }>;
   }
   export interface ResourceBulkResult {
@@ -38,10 +39,21 @@ export namespace Schema {
     errors: Array<{
       error: string;
       index: number;
-      resource: { id?: string; name?: string; parents?: Array<{ id: string; type: ResourceType }> };
+      resource: {
+        id?: string;
+        name?: string;
+        parents?: Array<{ id: string; type: ResourceType }>;
+        roles?: Array<{ role: string; userId: string }>;
+      };
     }>;
     success: boolean;
     summary: { failed: number; successful: number; total: number };
+  }
+  export interface ResourceCreateBody {
+    id?: string;
+    name?: string;
+    parents?: Array<{ id: string; type: ResourceType }>;
+    roles?: Array<{ role: string; userId: string }>;
   }
   export interface ResourceList {
     items: Array<{
@@ -60,7 +72,8 @@ export namespace Schema {
    */
   export type ResourceType = string;
   export interface ResourceUpdateBody {
-    extraFields?: Record<string, unknown>;
+    name?: string;
+    /** Creates relationships with other resources. Parent resources must already exist. */
     parents?: Array<{ id: string; type: ResourceType }>;
   }
   export interface Role {

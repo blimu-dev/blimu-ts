@@ -190,6 +190,7 @@ The SDK includes the following TypeScript interfaces:
 - **Resource**
 - **ResourceBulkCreateBody**
 - **ResourceBulkResult**
+- **ResourceCreateBody**
 - **ResourceList**
 - **ResourceType**: Resource type identifier
 - **ResourceUpdateBody**

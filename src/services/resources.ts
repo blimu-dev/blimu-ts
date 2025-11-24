@@ -27,7 +27,7 @@ export class ResourcesService {
    */
   create(
     resourceType: Schema.ResourceType,
-    body: Schema.ResourceUpdateBody,
+    body: Schema.ResourceCreateBody,
     init?: Omit<RequestInit, 'method' | 'body'>,
   ): Promise<Schema.Resource> {
     return this.core.request({
