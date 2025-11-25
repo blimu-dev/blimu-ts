@@ -11,3 +11,5 @@
 .env.production
 node_modules
 dist
+packages/*/bin/
+packages/*/dist

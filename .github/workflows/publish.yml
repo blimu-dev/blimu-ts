@@ -1,0 +1,101 @@
+name: Publish to npm
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version tag (e.g., v0.4.5)'
+        required: true
+
+jobs:
+  publish:
+    name: Publish @blimu/backend and @blimu/nestjs
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Get version from tag
+        id: get_version
+        run: |
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            VERSION="${{ github.event.inputs.version }}"
+          else
+            VERSION=${GITHUB_REF#refs/tags/}
+          fi
+          # Remove 'v' prefix if present
+          VERSION=${VERSION#v}
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+          echo "Version: ${VERSION}"
+
+      - name: Update package versions
+        run: |
+          VERSION="${{ steps.get_version.outputs.version }}"
+
+          # Update backend package.json version
+          cd packages/backend
+          node -e "const fs = require('fs'); const pkg = JSON.parse(fs.readFileSync('package.json')); pkg.version = '${VERSION}'; fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\n');"
+          cd ../..
+
+          # Update nestjs package.json version and replace workspace dependency
+          cd packages/nestjs
+          node -e "const fs = require('fs'); const pkg = JSON.parse(fs.readFileSync('package.json')); pkg.version = '${VERSION}'; if (pkg.dependencies && pkg.dependencies['@blimu/backend']) { pkg.dependencies['@blimu/backend'] = '${VERSION}'; } fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\n');"
+          cd ../..
+
+      - name: Install backend dependencies
+        working-directory: packages/backend
+        run: yarn install --frozen-lockfile
+
+      - name: Build @blimu/backend
+        working-directory: packages/backend
+        run: yarn build
+
+      - name: Publish @blimu/backend
+        working-directory: packages/backend
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Wait for npm propagation
+        run: |
+          echo "Waiting for @blimu/backend to be available on npm..."
+          sleep 10
+          # Try to fetch the package to ensure it's available
+          for i in {1..30}; do
+            if npm view @blimu/backend@${{ steps.get_version.outputs.version }} version > /dev/null 2>&1; then
+              echo "Package is available on npm!"
+              break
+            fi
+            echo "Waiting... ($i/30)"
+            sleep 2
+          done
+
+      - name: Install nestjs dependencies
+        working-directory: packages/nestjs
+        run: yarn install --frozen-lockfile
+
+      - name: Build @blimu/nestjs
+        working-directory: packages/nestjs
+        run: yarn build
+
+      - name: Publish @blimu/nestjs
+        working-directory: packages/nestjs
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

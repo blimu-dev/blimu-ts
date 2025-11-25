@@ -1,0 +1,49 @@
+{
+  "name": "@blimu/nestjs",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/blimu/blimu-ts.git"
+  },
+  "version": "0.4.5",
+  "description": "NestJS integration library for Blimu authorization and entitlement system",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "clean": "rm -rf dist"
+  },
+  "keywords": [
+    "nestjs",
+    "authorization",
+    "rbac",
+    "entitlements",
+    "blimu",
+    "access-control"
+  ],
+  "peerDependencies": {
+    "@blimu/backend": ">=0.1.0",
+    "@nestjs/common": ">=10.0.0",
+    "@nestjs/core": ">=10.0.0",
+    "reflect-metadata": ">=0.1.13",
+    "rxjs": ">=7.0.0"
+  },
+  "dependencies": {
+    "@blimu/backend": "workspace:*"
+  },
+  "devDependencies": {
+    "@nestjs/common": ">=10.0.0",
+    "@nestjs/core": ">=10.0.0",
+    "@types/node": ">=24.0.0",
+    "reflect-metadata": ">=0.1.13",
+    "rxjs": ">=7.0.0",
+    "typescript": ">=5.9.3"
+  },
+  "packageManager": "yarn@3.8.7",
+  "volta": {
+    "node": "24.1.0",
+    "yarn": "3.8.7"
+  }
+}

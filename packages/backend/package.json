@@ -4,13 +4,26 @@
   "author": "viniciusdacal",
   "private": false,
   "license": "MIT",
-  "version": "0.4.3",
+  "version": "0.4.5",
   "description": "TypeScript SDK for Blimu API (auto-generated)",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "bin": {
+    "blimu": "./bin/blimu"
+  },
   "files": [
-    "dist/**"
+    "dist/**",
+    "bin/**",
+    "scripts/**"
   ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "eslint .",
+    "format": "eslint --fix . && prettier --write .",
+    "prepublishOnly": "npm run build && npm run typecheck || true",
+    "postinstall": "node scripts/postinstall.js"
+  },
   "exports": {
     ".": {
       "import": {
@@ -37,13 +50,6 @@
         "types": "./dist/schema.d.ts"
       }
     }
-  },
-  "scripts": {
-    "build": "tsc -p tsconfig.json",
-    "typecheck": "tsc -p tsconfig.json --noEmit",
-    "lint": "eslint .",
-    "format": "eslint --fix . && prettier --write .",
-    "prepublishOnly": "npm run build && npm run typecheck || true"
   },
   "engines": {
     "node": "24"

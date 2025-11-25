@@ -1,56 +1,36 @@
 {
-  "name": "@blimu/backend",
+  "name": "blimu-ts-monorepo",
+  "private": true,
+  "version": "0.4.5",
+  "description": "Blimu TypeScript libraries monorepo",
   "repository": "https://github.com/blimu/blimu-ts",
   "author": "viniciusdacal",
-  "private": false,
   "license": "MIT",
-  "version": "0.4.5",
-  "description": "TypeScript SDK for Blimu API (auto-generated)",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "files": [
-    "dist/**"
+  "workspaces": [
+    "packages/*"
   ],
-  "exports": {
-    ".": {
-      "import": {
-        "default": "./dist/index.mjs",
-        "types": "./dist/index.d.ts"
-      },
-      "require": {
-        "default": "./dist/index.js",
-        "types": "./dist/index.d.ts"
-      }
-    },
-    "./services/*": {
-      "import": "./dist/services/*.mjs",
-      "require": "./dist/services/*.js",
-      "types": "./dist/services/*.d.ts"
-    },
-    "./schema": {
-      "import": {
-        "default": "./dist/schema.mjs",
-        "types": "./dist/schema.d.ts"
-      },
-      "require": {
-        "default": "./dist/schema.js",
-        "types": "./dist/schema.d.ts"
-      }
-    }
-  },
-  "scripts": {
-    "build": "tsc -p tsconfig.json",
-    "typecheck": "tsc -p tsconfig.json --noEmit",
-    "lint": "eslint .",
-    "format": "eslint --fix . && prettier --write .",
-    "prepublishOnly": "npm run build && npm run typecheck || true"
-  },
-  "engines": {
-    "node": "24"
-  },
   "packageManager": "yarn@3.8.7",
   "volta": {
     "node": "24.1.0",
     "yarn": "3.8.7"
+  },
+  "files": [
+    "packages/*/dist/**"
+  ],
+  "scripts": {
+    "build": "yarn workspaces foreach -A run build",
+    "build:backend": "yarn workspace @blimu/backend build",
+    "build:nestjs": "yarn workspace @blimu/nestjs build",
+    "typecheck": "yarn workspaces foreach -A run typecheck",
+    "lint": "yarn workspaces foreach -A run lint",
+    "format": "yarn workspaces foreach -A run format",
+    "clean": "yarn workspaces foreach -A run clean",
+    "publish:backend": "yarn workspace @blimu/backend npm publish",
+    "publish:nestjs": "yarn workspace @blimu/nestjs npm publish",
+    "version": "yarn workspaces foreach -A version"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3",
+    "prettier": "^3.0.0"
   }
 }
