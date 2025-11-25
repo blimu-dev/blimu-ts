@@ -28,9 +28,6 @@ jobs:
           node-version: '24'
           registry-url: 'https://registry.npmjs.org'
 
-      - name: Enable Corepack
-        run: corepack enable
-
       - name: Get version from tag
         id: get_version
         run: |
@@ -88,13 +85,11 @@ jobs:
           node -e "const fs = require('fs'); const pkg = JSON.parse(fs.readFileSync('package.json')); pkg.version = '${VERSION}'; if (pkg.dependencies && pkg.dependencies['@blimu/backend']) { pkg.dependencies['@blimu/backend'] = '${VERSION}'; } fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\n');"
           cd ../..
 
-      - name: Install backend dependencies
-        working-directory: packages/backend
-        run: yarn install --frozen-lockfile
+      - name: Install dependencies
+        run: yarn install
 
       - name: Build @blimu/backend
-        working-directory: packages/backend
-        run: yarn build
+        run: yarn workspace @blimu/backend build
 
       - name: Publish @blimu/backend
         working-directory: packages/backend
@@ -116,13 +111,8 @@ jobs:
             sleep 2
           done
 
-      - name: Install nestjs dependencies
-        working-directory: packages/nestjs
-        run: yarn install --frozen-lockfile
-
       - name: Build @blimu/nestjs
-        working-directory: packages/nestjs
-        run: yarn build
+        run: yarn workspace @blimu/nestjs build
 
       - name: Publish @blimu/nestjs
         working-directory: packages/nestjs
