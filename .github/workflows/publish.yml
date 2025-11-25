@@ -44,6 +44,36 @@ jobs:
           echo "version=${VERSION}" >> $GITHUB_OUTPUT
           echo "Version: ${VERSION}"
 
+      - name: Verify CLI release exists
+        run: |
+          VERSION="${{ steps.get_version.outputs.version }}"
+          echo "Checking if CLI release v${VERSION} exists..."
+
+          # Check if CLI release exists via GitHub API
+          RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            "https://api.github.com/repos/blimu-dev/blimu-cli/releases/tags/v${VERSION}")
+
+          if [ "$RESPONSE" = "200" ]; then
+            echo "✅ CLI release v${VERSION} exists"
+          elif [ "$RESPONSE" = "404" ]; then
+            echo "❌ CLI release v${VERSION} not found"
+            echo ""
+            echo "Error: Cannot publish @blimu/backend@${VERSION} because CLI release v${VERSION} does not exist."
+            echo ""
+            echo "Please ensure you have:"
+            echo "1. Created and pushed the CLI release tag: git tag v${VERSION} && git push origin v${VERSION}"
+            echo "2. Waited for the CLI build workflow to complete and create the release"
+            echo "3. Then retry publishing the npm packages"
+            echo ""
+            echo "This ensures version consistency between npm packages and CLI binaries."
+            exit 1
+          else
+            echo "❌ Failed to check CLI release (HTTP ${RESPONSE})"
+            echo "This might be a temporary GitHub API issue. Please retry."
+            exit 1
+          fi
+
       - name: Update package versions
         run: |
           VERSION="${{ steps.get_version.outputs.version }}"

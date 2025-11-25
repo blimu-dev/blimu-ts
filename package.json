@@ -1,7 +1,7 @@
 {
   "name": "blimu-ts-monorepo",
   "private": true,
-  "version": "0.4.5",
+  "version": "0.4.7",
   "description": "Blimu TypeScript libraries monorepo",
   "repository": "https://github.com/blimu/blimu-ts",
   "author": "viniciusdacal",
@@ -30,7 +30,7 @@
     "version": "yarn workspaces foreach -A version"
   },
   "devDependencies": {
-    "typescript": "^5.9.3",
-    "prettier": "^3.0.0"
+    "prettier": "^3.0.0",
+    "typescript": "^5.9.3"
   }
 }

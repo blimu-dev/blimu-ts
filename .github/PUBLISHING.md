@@ -33,16 +33,38 @@ Publishing is automated via GitHub Actions. When you create a new git tag, the w
 
 - `NPM_TOKEN` secret must be configured in GitHub repository settings
 - The token must have publish permissions for `@blimu` scope
+- **CLI release must exist** before publishing npm packages (workflow will fail otherwise)
 
 ## Version Format
 
 - Tags should follow semantic versioning: `v0.4.5`, `v1.0.0`, etc.
 - The `v` prefix is optional but recommended
-- Both packages will be published with the same version number
+- Both npm packages and CLI binary must use the **exact same version number**
+- Version format: `v{major}.{minor}.{patch}` (e.g., `v0.4.5`)
+
+## Version Consistency
+
+When a user installs `@blimu/backend@0.4.5`:
+
+- The `postinstall` script reads the package version (`0.4.5`)
+- It downloads the CLI binary from `blimu-cli` release `v0.4.5`
+- If the CLI release doesn't exist, installation fails with a clear error
+- This ensures all users get the same CLI version for the same npm package version
 
 ## Manual Publishing (if needed)
 
 If you need to publish manually:
+
+**First, ensure CLI release exists:**
+
+```bash
+# Verify CLI release exists
+curl -s -o /dev/null -w "%{http_code}" \
+  https://api.github.com/repos/blimu-dev/blimu-cli/releases/tags/v0.4.5
+# Should return 200
+```
+
+Then proceed with npm publishing:
 
 ```bash
 # 1. Update versions in both packages
@@ -67,3 +89,21 @@ yarn install  # This will fetch @blimu/backend from npm
 yarn build
 npm publish --access public
 ```
+
+## Troubleshooting
+
+### "CLI release v{version} not found" error
+
+This means the CLI release doesn't exist. You must:
+
+1. Create and push the CLI release tag in `blimu-cli` repository
+2. Wait for the CLI build workflow to complete
+3. Verify the release exists on GitHub
+4. Then retry publishing npm packages
+
+### "Failed to download Blimu CLI binary" during npm install
+
+This means the CLI release for the installed package version doesn't exist. The user should:
+
+- Install a different package version that has a corresponding CLI release
+- Or wait for the CLI release to be published

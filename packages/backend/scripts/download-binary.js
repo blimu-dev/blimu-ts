@@ -76,11 +76,15 @@ function downloadFile(url, dest) {
   });
 }
 
-function getLatestReleaseUrl(assetName) {
+function getReleaseUrl(version, assetName) {
   return new Promise((resolve, reject) => {
+    // If no version provided, fall back to latest (for backward compatibility)
+    const tag = version ? `tags/v${version}` : 'latest';
+    const url = `https://api.github.com/repos/${GITHUB_REPO}/releases/${tag}`;
+
     https
       .get(
-        `https://api.github.com/repos/${GITHUB_REPO}/releases/latest`,
+        url,
         {
           headers: {
             'User-Agent': 'blimu-ts-installer',
@@ -93,15 +97,31 @@ function getLatestReleaseUrl(assetName) {
             data += chunk;
           });
           res.on('end', () => {
+            if (res.statusCode === 404) {
+              reject(
+                new Error(
+                  `CLI release v${version} not found. Please ensure the CLI release exists before installing this package version.`,
+                ),
+              );
+              return;
+            }
             if (res.statusCode !== 200) {
-              reject(new Error(`Failed to fetch latest release: ${res.statusCode}`));
+              reject(
+                new Error(
+                  `Failed to fetch ${version ? `release v${version}` : 'latest release'}: ${res.statusCode} ${res.statusMessage}`,
+                ),
+              );
               return;
             }
             try {
               const release = JSON.parse(data);
               const asset = release.assets.find((a) => a.name === assetName);
               if (!asset) {
-                reject(new Error(`Asset ${assetName} not found in latest release`));
+                reject(
+                  new Error(
+                    `Asset ${assetName} not found in ${version ? `release v${version}` : 'latest release'}`,
+                  ),
+                );
                 return;
               }
               resolve(asset.browser_download_url);
@@ -115,8 +135,20 @@ function getLatestReleaseUrl(assetName) {
   });
 }
 
-async function main() {
+async function main(version) {
   try {
+    // If version not provided, try to read from package.json
+    if (!version) {
+      try {
+        const packageJsonPath = path.join(__dirname, '..', 'package.json');
+        const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
+        version = packageJson.version;
+      } catch (err) {
+        // If we can't read package.json, fall back to latest
+        console.warn('Warning: Could not read package.json version, falling back to latest CLI release');
+      }
+    }
+
     const { binaryName, assetName } = getPlatformInfo();
 
     // Create bin directory if it doesn't exist
@@ -133,17 +165,25 @@ async function main() {
         if (process.platform !== 'win32') {
           fs.chmodSync(binaryPath, 0o755);
         }
-        console.log(`✅ Blimu CLI binary already exists at ${binaryPath}`);
+        if (version) {
+          console.log(`✅ Blimu CLI binary (v${version}) already exists at ${binaryPath}`);
+        } else {
+          console.log(`✅ Blimu CLI binary already exists at ${binaryPath}`);
+        }
         return;
       } catch (err) {
         // If we can't check/update permissions, continue to download
       }
     }
 
-    console.log(`📥 Downloading Blimu CLI binary for ${process.platform}/${process.arch}...`);
+    if (version) {
+      console.log(`📥 Downloading Blimu CLI binary v${version} for ${process.platform}/${process.arch}...`);
+    } else {
+      console.log(`📥 Downloading Blimu CLI binary (latest) for ${process.platform}/${process.arch}...`);
+    }
 
-    // Get latest release download URL
-    const downloadUrl = await getLatestReleaseUrl(assetName);
+    // Get release download URL
+    const downloadUrl = await getReleaseUrl(version, assetName);
     console.log(`🔗 Download URL: ${downloadUrl}`);
 
     // Download the binary
@@ -154,12 +194,24 @@ async function main() {
       fs.chmodSync(binaryPath, 0o755);
     }
 
-    console.log(`✅ Blimu CLI binary downloaded successfully to ${binaryPath}`);
+    if (version) {
+      console.log(`✅ Blimu CLI binary v${version} downloaded successfully to ${binaryPath}`);
+    } else {
+      console.log(`✅ Blimu CLI binary downloaded successfully to ${binaryPath}`);
+    }
   } catch (error) {
     console.error(`❌ Failed to download Blimu CLI binary: ${error.message}`);
-    console.error(`\nYou can manually install it by running:`);
-    console.error(`  go install github.com/blimu-dev/blimu-cli/cmd/blimucli@latest`);
-    console.error(`\nOr download from: https://github.com/${GITHUB_REPO}/releases/latest`);
+    if (version) {
+      console.error(`\nVersion ${version} of the CLI binary is required but not available.`);
+      console.error(`Please ensure the CLI release v${version} exists in the blimu-cli repository.`);
+      console.error(`\nYou can manually install it by running:`);
+      console.error(`  go install github.com/blimu-dev/blimu-cli/cmd/blimucli@v${version}`);
+      console.error(`\nOr download from: https://github.com/${GITHUB_REPO}/releases/tag/v${version}`);
+    } else {
+      console.error(`\nYou can manually install it by running:`);
+      console.error(`  go install github.com/blimu-dev/blimu-cli/cmd/blimucli@latest`);
+      console.error(`\nOr download from: https://github.com/${GITHUB_REPO}/releases/latest`);
+    }
     process.exit(1);
   }
 }

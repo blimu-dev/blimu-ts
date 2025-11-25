@@ -1,5 +1,5 @@
 import { CoreClient } from '../client';
-import { Schema } from '../schema';
+import * as Schema from '../schema';
 
 export class ResourcesService {
   constructor(private core: CoreClient) {}
