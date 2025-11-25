@@ -28,9 +28,6 @@ jobs:
           node-version: '24'
           registry-url: 'https://registry.npmjs.org'
 
-      - name: Enable Corepack
-        run: corepack enable
-
       - name: Get version from tag
         id: get_version
         run: |
@@ -90,6 +87,8 @@ jobs:
 
       - name: Install dependencies
         run: yarn install
+        env:
+          YARN_ENABLE_IMMUTABLE_INSTALLS: false
 
       - name: Build @blimu/backend
         run: yarn workspace @blimu/backend build
