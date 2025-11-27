@@ -32,7 +32,7 @@ export type ClientOption = {
   fetch?: typeof fetch;
 };
 
-export class ApiError<T = unknown> extends Error {
+export class FetchError<T = unknown> extends Error {
   constructor(
     message: string,
     readonly status: number,
@@ -40,7 +40,7 @@ export class ApiError<T = unknown> extends Error {
     readonly headers?: Headers,
   ) {
     super(message);
-    this.name = 'ApiError';
+    this.name = 'FetchError';
   }
 }
 
@@ -121,7 +121,7 @@ export class CoreClient {
           parsed = await res.arrayBuffer();
         }
         if (!res.ok) {
-          throw new ApiError(`HTTP ${res.status}`, res.status, parsed, res.headers);
+          throw new FetchError(`HTTP ${res.status}`, res.status, parsed, res.headers);
         }
         return parsed as any;
       } catch (err) {
@@ -150,8 +150,8 @@ export class CoreClient {
           lastError = err;
           continue;
         }
-        if (err instanceof ApiError) throw err;
-        throw new ApiError((err as Error)?.message || 'Network error', status ?? 0);
+        if (err instanceof FetchError) throw err;
+        throw new FetchError((err as Error)?.message || 'Network error', status ?? 0);
       }
     }
     throw lastError as any;

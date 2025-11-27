@@ -1,7 +1,17 @@
 // Generated types from OpenAPI components.schemas
 
 export type Enum<T> = T[keyof T];
+export interface BalanceResponse {
+  balance: number;
+}
+export interface CheckLimitResponse {
+  allowed: boolean;
+  current: number;
+  remaining?: number;
+  requested: number;
+}
 export interface EntitlementCheckBody {
+  amount?: number;
   /** Entitlement identifier */
   entitlement: EntitlementType;
   resourceId: string;
@@ -9,14 +19,29 @@ export interface EntitlementCheckBody {
 }
 export interface EntitlementCheckResult {
   allowed: boolean;
-  reason?: string;
-  requiredRoles?: Array<string>;
-  userRoles?: Array<string>;
+  /** Entitlement identifier */
+  entitlement: EntitlementType;
+  limit?: { allowed: boolean; current?: number; limit?: number; reason?: string; scope?: string };
 }
 /**
  * Entitlement identifier
  */
 export type EntitlementType = string;
+export interface PlanAssignBody {
+  planKey: string;
+}
+export interface PlanDeleteResponse {
+  success: boolean;
+}
+export interface PlanResponse {
+  createdAt: string;
+  environmentId: string;
+  planKey: string;
+  resourceId: string;
+  /** Resource type identifier */
+  resourceType: ResourceType;
+  updatedAt: string;
+}
 export interface Resource {
   createdAt: string;
   id: string;
@@ -123,6 +148,53 @@ export interface RoleList {
   }>;
   total: number;
 }
+export interface TransactionHistoryResponse {
+  items: Array<{
+    amount: number;
+    createdAt: string;
+    environmentId: string;
+    id: string;
+    limitType: string;
+    resourceId: string;
+    resourceType: ResourceType;
+    tags: Record<string, unknown> | null;
+  }>;
+}
+export interface UsageCheckBody {
+  amount: number;
+  limitType: string;
+  period: 'monthly' | 'yearly' | 'lifetime';
+  resourceId: string;
+  /** Resource type identifier */
+  resourceType: ResourceType;
+}
+export interface UsageConsumeBody {
+  amount: number;
+  limitType: string;
+  resourceId: string;
+  /** Resource type identifier */
+  resourceType: ResourceType;
+  tags?: Record<string, unknown>;
+}
+export interface UsageCreditBody {
+  amount: number;
+  limitType: string;
+  resourceId: string;
+  /** Resource type identifier */
+  resourceType: ResourceType;
+  tags?: Record<string, unknown>;
+}
+export interface UsageWalletResponse {
+  amount: number;
+  createdAt: string;
+  environmentId: string;
+  id: string;
+  limitType: string;
+  resourceId: string;
+  /** Resource type identifier */
+  resourceType: ResourceType;
+  tags: Record<string, unknown> | null;
+}
 export interface User {
   avatarUrl: string | null;
   createdAt: string;
@@ -198,6 +270,20 @@ export interface RolesListQuery {
   /** The type of resource */
   resourceType?: ResourceType;
   role?: string;
+}
+/**
+ * Query params for Usage.GetBalance
+ */
+export interface UsageGetBalanceQuery {
+  period: 'monthly' | 'yearly' | 'lifetime';
+}
+/**
+ * Query params for Usage.GetTransactionHistory
+ */
+export interface UsageGetTransactionHistoryQuery {
+  endDate?: string;
+  period?: 'monthly' | 'yearly' | 'lifetime';
+  startDate?: string;
 }
 /**
  * Query params for Users.List

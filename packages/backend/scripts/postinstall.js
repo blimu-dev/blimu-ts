@@ -27,9 +27,7 @@ if (isProductionInstall || process.env.BLIMU_DOWNLOAD_CLI !== 'false') {
       console.error(
         `\nThe package requires CLI version v${version}, but it could not be downloaded.`,
       );
-      console.error(
-        'This ensures version consistency between the npm package and CLI binary.',
-      );
+      console.error('This ensures version consistency between the npm package and CLI binary.');
       console.error(
         `\nPlease ensure the CLI release v${version} exists, or install a different package version.`,
       );

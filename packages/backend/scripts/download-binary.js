@@ -145,7 +145,9 @@ async function main(version) {
         version = packageJson.version;
       } catch (err) {
         // If we can't read package.json, fall back to latest
-        console.warn('Warning: Could not read package.json version, falling back to latest CLI release');
+        console.warn(
+          'Warning: Could not read package.json version, falling back to latest CLI release',
+        );
       }
     }
 
@@ -177,9 +179,13 @@ async function main(version) {
     }
 
     if (version) {
-      console.log(`📥 Downloading Blimu CLI binary v${version} for ${process.platform}/${process.arch}...`);
+      console.log(
+        `📥 Downloading Blimu CLI binary v${version} for ${process.platform}/${process.arch}...`,
+      );
     } else {
-      console.log(`📥 Downloading Blimu CLI binary (latest) for ${process.platform}/${process.arch}...`);
+      console.log(
+        `📥 Downloading Blimu CLI binary (latest) for ${process.platform}/${process.arch}...`,
+      );
     }
 
     // Get release download URL
@@ -203,10 +209,14 @@ async function main(version) {
     console.error(`❌ Failed to download Blimu CLI binary: ${error.message}`);
     if (version) {
       console.error(`\nVersion ${version} of the CLI binary is required but not available.`);
-      console.error(`Please ensure the CLI release v${version} exists in the blimu-cli repository.`);
+      console.error(
+        `Please ensure the CLI release v${version} exists in the blimu-cli repository.`,
+      );
       console.error(`\nYou can manually install it by running:`);
       console.error(`  go install github.com/blimu-dev/blimu-cli/cmd/blimucli@v${version}`);
-      console.error(`\nOr download from: https://github.com/${GITHUB_REPO}/releases/tag/v${version}`);
+      console.error(
+        `\nOr download from: https://github.com/${GITHUB_REPO}/releases/tag/v${version}`,
+      );
     } else {
       console.error(`\nYou can manually install it by running:`);
       console.error(`  go install github.com/blimu-dev/blimu-cli/cmd/blimucli@latest`);

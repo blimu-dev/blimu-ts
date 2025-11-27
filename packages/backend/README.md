@@ -119,6 +119,12 @@ import { PaymentService, Schema } from '@blimu/backend';
 
 - **checkEntitlement**: POST /v1/entitlements/check - Check if a user has a specific entitlement on a resource
 
+### PlansService
+
+- **delete**: DELETE /v1/resources/{resourceType}/{resourceId}/plan - Remove plan assignment from a tenant resource
+- **read**: GET /v1/resources/{resourceType}/{resourceId}/plan - Get the plan assigned to a tenant resource
+- **assign**: POST /v1/resources/{resourceType}/{resourceId}/plan - Assign a plan to a tenant resource
+
 ### ResourcesService
 
 - **list**: GET /v1/resources/{resourceType} - List resources
@@ -132,6 +138,14 @@ import { PaymentService, Schema } from '@blimu/backend';
 - **list**: GET /v1/users/{userId}/roles - List user roles
 - **create**: POST /v1/users/{userId}/roles - Create a role (assign role to user on resource)
 - **delete**: DELETE /v1/users/{userId}/roles/{resourceType}/{resourceId} - Delete a role
+
+### UsageService
+
+- **getBalance**: GET /v1/usage/balance/{resourceType}/{resourceId}/{limitType} - Get wallet balance
+- **checkLimit**: POST /v1/usage/check - Check if consumption is allowed
+- **consume**: POST /v1/usage/consume - Record consumption (inserts negative amount)
+- **credit**: POST /v1/usage/credit - Add credits to wallet (inserts positive amount)
+- **getTransactionHistory**: GET /v1/usage/transactions/{resourceType}/{resourceId}/{limitType} - Get transaction history
 
 ### UsersService
 
@@ -157,7 +171,7 @@ const client = new BlimuClient({
 const result: ResourceBulkResult = await client.bulkResources.create(/* ... */);
 
 // Schema types are available
-const data: Schema.EntitlementCheckBody = {
+const data: Schema.BalanceResponse = {
   // Fully typed object
 };
 ```
@@ -184,9 +198,14 @@ const client = new BlimuClient({
 
 The SDK includes the following TypeScript interfaces:
 
+- **BalanceResponse**
+- **CheckLimitResponse**
 - **EntitlementCheckBody**
 - **EntitlementCheckResult**
 - **EntitlementType**: Entitlement identifier
+- **PlanAssignBody**
+- **PlanDeleteResponse**
+- **PlanResponse**
 - **Resource**
 - **ResourceBulkCreateBody**
 - **ResourceBulkResult**
@@ -199,6 +218,11 @@ The SDK includes the following TypeScript interfaces:
 - **RoleBulkResult**
 - **RoleCreateBody**
 - **RoleList**
+- **TransactionHistoryResponse**
+- **UsageCheckBody**
+- **UsageConsumeBody**
+- **UsageCreditBody**
+- **UsageWalletResponse**
 - **User**
 - **UserCreateBody**
 - **UserList**
