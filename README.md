@@ -16,8 +16,6 @@ The Blimu CLI binary is included with the package and will be available after in
 
 ```bash
 npx blimu
-# or if installed globally
-blimu
 ```
 
 ## Getting Started
@@ -39,6 +37,12 @@ npx blimu auth test
 ```
 
 ### Step 2: Create Your Configuration
+
+Pull your configs from cloud
+
+```bash
+npx blimu pull
+```
 
 Create a `.blimu` directory in your project root and define your authorization schema using YAML files.
 
@@ -130,14 +134,12 @@ plans:
 
 #### Optional: `sdk.yml`
 
-Configure SDK generation (if you want to generate custom SDKs):
+Configure types generation. it will output a `blimu-types.d.ts` file:
 
 ```yaml
 clients:
-  - type: typescript
-    outDir: ./generated-sdk
-    packageName: my-blimu-client
-    name: BlimuClient
+  - type: typescript-types
+    outDir: '../src'
 ```
 
 ### Step 3: Push Your Configuration
