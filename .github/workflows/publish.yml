@@ -41,6 +41,54 @@ jobs:
           echo "version=${VERSION}" >> $GITHUB_OUTPUT
           echo "Version: ${VERSION}"
 
+      - name: Verify package.json versions match tag
+        run: |
+          VERSION="${{ steps.get_version.outputs.version }}"
+          echo "Verifying package.json versions match tag v${VERSION}..."
+
+          # Read versions from package.json files
+          BACKEND_VERSION=$(node -e "const pkg = require('./packages/backend/package.json'); console.log(pkg.version);")
+          NESTJS_VERSION=$(node -e "const pkg = require('./packages/nestjs/package.json'); console.log(pkg.version);")
+          ROOT_VERSION=$(node -e "const pkg = require('./package.json'); console.log(pkg.version);")
+
+          echo "Backend package.json version: ${BACKEND_VERSION}"
+          echo "NestJS package.json version: ${NESTJS_VERSION}"
+          echo "Root package.json version: ${ROOT_VERSION}"
+          echo "Tag version: ${VERSION}"
+
+          ERRORS=0
+
+          if [ "${BACKEND_VERSION}" != "${VERSION}" ]; then
+            echo "❌ Error: @blimu/backend package.json version (${BACKEND_VERSION}) does not match tag version (${VERSION})"
+            ERRORS=$((ERRORS + 1))
+          else
+            echo "✅ @blimu/backend version matches"
+          fi
+
+          if [ "${NESTJS_VERSION}" != "${VERSION}" ]; then
+            echo "❌ Error: @blimu/nestjs package.json version (${NESTJS_VERSION}) does not match tag version (${VERSION})"
+            ERRORS=$((ERRORS + 1))
+          else
+            echo "✅ @blimu/nestjs version matches"
+          fi
+
+          if [ "${ROOT_VERSION}" != "${VERSION}" ]; then
+            echo "⚠️  Warning: Root package.json version (${ROOT_VERSION}) does not match tag version (${VERSION})"
+            echo "   (This is a warning only, root package.json is not published)"
+          else
+            echo "✅ Root package.json version matches"
+          fi
+
+          if [ $ERRORS -gt 0 ]; then
+            echo ""
+            echo "Please update the package.json files to match the tag version before publishing."
+            echo "You can update them manually or use a tool like 'npm version' or 'yarn version'."
+            exit 1
+          fi
+
+          echo ""
+          echo "✅ All package.json versions match the tag version"
+
       - name: Verify CLI release exists
         run: |
           VERSION="${{ steps.get_version.outputs.version }}"

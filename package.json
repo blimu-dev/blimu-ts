@@ -1,7 +1,7 @@
 {
   "name": "blimu-ts-monorepo",
   "private": true,
-  "version": "0.4.8",
+  "version": "0.4.10",
   "description": "Blimu TypeScript libraries monorepo",
   "repository": "https://github.com/blimu/blimu-ts",
   "author": "viniciusdacal",

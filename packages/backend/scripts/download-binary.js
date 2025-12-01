@@ -45,6 +45,45 @@ function getPlatformInfo() {
   };
 }
 
+/**
+ * Verify that an existing binary matches the current platform/architecture
+ * Returns true if the binary is correct, false otherwise
+ */
+function verifyBinaryArchitecture(binaryPath) {
+  try {
+    // Use 'file' command to check binary type (available on macOS and Linux)
+    const output = execSync(`file "${binaryPath}"`, { encoding: 'utf8' });
+    
+    const platform = process.platform;
+    const arch = process.arch;
+    
+    if (platform === 'darwin') {
+      // macOS: should be "Mach-O 64-bit executable arm64" or "Mach-O 64-bit executable x86_64"
+      const expectedArch = arch === 'arm64' ? 'arm64' : 'x86_64';
+      if (!output.includes('Mach-O') || !output.includes(expectedArch)) {
+        return false;
+      }
+    } else if (platform === 'linux') {
+      // Linux: should be "ELF 64-bit LSB executable, x86-64" or "ELF 64-bit LSB executable, ARM aarch64"
+      const expectedArch = arch === 'arm64' ? 'ARM aarch64' : 'x86-64';
+      if (!output.includes('ELF') || !output.includes(expectedArch)) {
+        return false;
+      }
+    } else if (platform === 'win32') {
+      // Windows: should be "PE32+ executable"
+      if (!output.includes('PE32+')) {
+        return false;
+      }
+    }
+    
+    return true;
+  } catch (err) {
+    // If 'file' command fails or is not available, assume binary is incorrect to be safe
+    // This will trigger a re-download
+    return false;
+  }
+}
+
 function downloadFile(url, dest) {
   return new Promise((resolve, reject) => {
     const file = fs.createWriteStream(dest);
@@ -162,19 +201,32 @@ async function main(version) {
 
     // Check if binary already exists and is executable
     if (fs.existsSync(binaryPath)) {
-      try {
-        // Try to make it executable (Unix only)
-        if (process.platform !== 'win32') {
-          fs.chmodSync(binaryPath, 0o755);
+      // Verify the binary matches the current platform/architecture
+      const isCorrectArchitecture = verifyBinaryArchitecture(binaryPath);
+      
+      if (isCorrectArchitecture) {
+        try {
+          // Try to make it executable (Unix only)
+          if (process.platform !== 'win32') {
+            fs.chmodSync(binaryPath, 0o755);
+          }
+          if (version) {
+            console.log(`✅ Blimu CLI binary (v${version}) already exists at ${binaryPath}`);
+          } else {
+            console.log(`✅ Blimu CLI binary already exists at ${binaryPath}`);
+          }
+          return;
+        } catch (err) {
+          // If we can't check/update permissions, continue to download
         }
-        if (version) {
-          console.log(`✅ Blimu CLI binary (v${version}) already exists at ${binaryPath}`);
-        } else {
-          console.log(`✅ Blimu CLI binary already exists at ${binaryPath}`);
+      } else {
+        // Binary exists but is for wrong platform/architecture - delete it
+        console.log(`⚠️  Existing binary is for wrong platform/architecture, will re-download...`);
+        try {
+          fs.unlinkSync(binaryPath);
+        } catch (err) {
+          console.warn(`Warning: Could not delete incorrect binary: ${err.message}`);
         }
-        return;
-      } catch (err) {
-        // If we can't check/update permissions, continue to download
       }
     }
 
