@@ -7,6 +7,8 @@ export class PlansService {
   /**
    * DELETE /v1/resources/{resourceType}/{resourceId}/plan
    * @summary Remove plan assignment from a tenant resource
+   *
+   * @description Removes the billing plan assignment from a tenant resource. After removal, the resource will have no plan and will be subject to default limits.
    */
   delete(
     resourceType: Schema.ResourceType,
@@ -23,6 +25,8 @@ export class PlansService {
   /**
    * GET /v1/resources/{resourceType}/{resourceId}/plan
    * @summary Get the plan assigned to a tenant resource
+   *
+   * @description Retrieves the billing plan currently assigned to a tenant resource, if any.
    */
   read(
     resourceType: Schema.ResourceType,
@@ -39,6 +43,8 @@ export class PlansService {
   /**
    * POST /v1/resources/{resourceType}/{resourceId}/plan
    * @summary Assign a plan to a tenant resource
+   *
+   * @description Assigns a billing plan to a tenant resource. Plans control feature access and usage limits based on your plan definitions. The resource must be marked as a tenant in your resource definitions.
    */
   assign(
     resourceType: Schema.ResourceType,

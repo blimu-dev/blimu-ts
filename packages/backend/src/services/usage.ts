@@ -7,11 +7,13 @@ export class UsageService {
   /**
    * GET /v1/usage/balance/{resourceType}/{resourceId}/{limitType}
    * @summary Get wallet balance
+   *
+   * @description Retrieves the current balance of a usage wallet for a specific resource and limit type within a given time period. The balance reflects all credits and consumption transactions.
    */
   getBalance(
     resourceType: Schema.ResourceType,
     resourceId: string,
-    limitType: string,
+    limitType: Schema.UsageLimitType,
     query?: Schema.UsageGetBalanceQuery,
     init?: Omit<RequestInit, 'method' | 'body'>,
   ): Promise<Schema.BalanceResponse> {
@@ -26,6 +28,8 @@ export class UsageService {
   /**
    * POST /v1/usage/check
    * @summary Check if consumption is allowed
+   *
+   * @description Checks whether a specific amount of consumption is allowed for a resource and limit type within a given time period. Returns the current balance, requested amount, and remaining balance after the consumption.
    */
   checkLimit(
     body: Schema.UsageCheckBody,
@@ -43,6 +47,8 @@ export class UsageService {
   /**
    * POST /v1/usage/consume
    * @summary Record consumption (inserts negative amount)
+   *
+   * @description Records consumption from a usage wallet for a specific resource and limit type. This decreases the available balance. Consumption can be tagged for tracking purposes.
    */
   consume(
     body: Schema.UsageConsumeBody,
@@ -60,6 +66,8 @@ export class UsageService {
   /**
    * POST /v1/usage/credit
    * @summary Add credits to wallet (inserts positive amount)
+   *
+   * @description Adds credits to a usage wallet for a specific resource and limit type. This increases the available balance for usage-based limits. Credits can be tagged for tracking purposes.
    */
   credit(
     body: Schema.UsageCreditBody,
@@ -77,11 +85,13 @@ export class UsageService {
   /**
    * GET /v1/usage/transactions/{resourceType}/{resourceId}/{limitType}
    * @summary Get transaction history
+   *
+   * @description Retrieves the transaction history for a usage wallet, including all credits and consumption records. Supports filtering by time period and date range.
    */
   getTransactionHistory(
     resourceType: Schema.ResourceType,
     resourceId: string,
-    limitType: string,
+    limitType: Schema.UsageLimitType,
     query?: Schema.UsageGetTransactionHistoryQuery,
     init?: Omit<RequestInit, 'method' | 'body'>,
   ): Promise<Schema.TransactionHistoryResponse> {

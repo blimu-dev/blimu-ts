@@ -6,6 +6,7 @@ import {
   InjectionToken,
   OptionalFactoryDependency,
 } from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
 import { EntitlementGuard } from '../guards/entitlement.guard';
 import type { BlimuConfig } from '../config/blimu.config';
 import { BLIMU_CONFIG } from '../config/blimu.config';
@@ -31,7 +32,7 @@ export class BlimuModule {
    * @Module({
    *   imports: [
    *     BlimuModule.forRoot({
-   *       apiSecretKey: 'your-api-secret-key',
+   *       apiKey: 'your-api-secret-key',
    *       baseURL: 'https://runtime.blimu.com', // optional
    *       environmentId: 'your-environment-id', // optional
    *       timeoutMs: 30000, // optional
@@ -52,7 +53,7 @@ export class BlimuModule {
    * @Module({
    *   imports: [
    *     BlimuModule.forRoot<AuthenticatedRequest>({
-   *       apiSecretKey: 'your-api-secret-key',
+   *       apiKey: 'your-api-secret-key',
    *       getUserId: (req) => req.user.id, // req is typed as AuthenticatedRequest
    *     }),
    *   ],
@@ -65,29 +66,30 @@ export class BlimuModule {
       module: BlimuModule,
       global: true,
       providers: [
+        Reflector,
+        EntitlementGuard,
         {
           provide: BLIMU_CONFIG,
           useValue: {
-            apiSecretKey: config.apiSecretKey,
+            apiKey: config.apiKey,
             baseURL: config.baseURL || 'https://runtime.blimu.com',
             environmentId: config.environmentId,
             timeoutMs: config.timeoutMs ?? 30000,
             getUserId: config.getUserId,
           },
         },
-        EntitlementGuard,
         {
           provide: Blimu,
           useFactory: (config: BlimuConfig) =>
             new Blimu({
-              apiKeyAuth: config.apiSecretKey,
+              apiKey: config.apiKey,
               baseURL: config.baseURL || 'https://runtime.blimu.com',
               timeoutMs: config.timeoutMs ?? 30000,
             }),
           inject: [BLIMU_CONFIG],
         },
       ],
-      exports: [EntitlementGuard, Blimu, BLIMU_CONFIG],
+      exports: [Reflector, EntitlementGuard, Blimu, BLIMU_CONFIG],
     };
   }
 
@@ -108,7 +110,7 @@ export class BlimuModule {
    *     ConfigModule.forRoot(),
    *     BlimuModule.forRootAsync({
    *       useFactory: (configService: ConfigService) => ({
-   *         apiSecretKey: configService.get('BLIMU_API_SECRET_KEY'),
+   *         apiKey: configService.get('BLIMU_API_SECRET_KEY'),
    *         baseURL: configService.get('BLIMU_BASE_URL'),
    *         environmentId: configService.get('BLIMU_ENVIRONMENT_ID'),
    *         timeoutMs: configService.get('BLIMU_TIMEOUT_MS'),
@@ -132,7 +134,7 @@ export class BlimuModule {
    *   imports: [
    *     BlimuModule.forRootAsync<AuthenticatedRequest>({
    *       useFactory: (configService: ConfigService) => ({
-   *         apiSecretKey: configService.get('BLIMU_API_SECRET_KEY'),
+   *         apiKey: configService.get('BLIMU_API_SECRET_KEY'),
    *         getUserId: (req) => req.user.id, // req is typed as AuthenticatedRequest
    *       }),
    *       inject: [ConfigService],
@@ -152,7 +154,7 @@ export class BlimuModule {
    *       useFactory: async (myConfigService: MyConfigService) => {
    *         const config = await myConfigService.getBlimuConfig();
    *         return {
-   *           apiSecretKey: config.apiKey,
+   *           apiKey: config.apiKey,
    *           baseURL: config.baseUrl,
    *           environmentId: config.environmentId,
    *           getUserId: (req) => req.user?.id,
@@ -181,12 +183,14 @@ export class BlimuModule {
         Type<unknown> | DynamicModule | Promise<DynamicModule> | ForwardReference
       >,
       providers: [
+        Reflector,
+        EntitlementGuard,
         {
           provide: BLIMU_CONFIG,
           useFactory: async (...args: unknown[]) => {
             const config = await options.useFactory(...args);
             return {
-              apiSecretKey: config.apiSecretKey,
+              apiKey: config.apiKey,
               baseURL: config.baseURL || 'https://runtime.blimu.com',
               environmentId: config.environmentId,
               timeoutMs: config.timeoutMs ?? 30000,
@@ -195,19 +199,18 @@ export class BlimuModule {
           },
           inject: options.inject,
         },
-        EntitlementGuard,
         {
           provide: Blimu,
           useFactory: (config: BlimuConfig) =>
             new Blimu({
-              apiKeyAuth: config.apiSecretKey,
+              apiKey: config.apiKey,
               baseURL: config.baseURL || 'https://runtime.blimu.com',
               timeoutMs: config.timeoutMs ?? 30000,
             }),
           inject: [BLIMU_CONFIG],
         },
       ],
-      exports: [EntitlementGuard, Blimu, BLIMU_CONFIG],
+      exports: [Reflector, EntitlementGuard, Blimu, BLIMU_CONFIG],
     };
   }
 }

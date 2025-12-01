@@ -79,23 +79,13 @@ const client = new BlimuClient({
 
 This SDK supports the following authentication methods:
 
-### ApiKeyAuth
+### ApiKey
 
 API Key authentication (header):
 
 ```typescript
 const client = new BlimuClient({
-  apiKeyAuth: 'your-api-key',
-});
-```
-
-### Bearer
-
-Bearer token authentication:
-
-```typescript
-const client = new BlimuClient({
-  bearer: 'your-bearer-token',
+  apiKey: 'your-api-key',
 });
 ```
 
@@ -203,9 +193,11 @@ The SDK includes the following TypeScript interfaces:
 - **EntitlementCheckBody**
 - **EntitlementCheckResult**
 - **EntitlementType**: Entitlement identifier
+- **LimitType**: Limit type identifier
 - **PlanAssignBody**
 - **PlanDeleteResponse**
 - **PlanResponse**
+- **PlanType**: Plan type identifier
 - **Resource**
 - **ResourceBulkCreateBody**
 - **ResourceBulkResult**
@@ -222,6 +214,7 @@ The SDK includes the following TypeScript interfaces:
 - **UsageCheckBody**
 - **UsageConsumeBody**
 - **UsageCreditBody**
+- **UsageLimitType**: Usage-based limit type identifier
 - **UsageWalletResponse**
 - **User**
 - **UserCreateBody**

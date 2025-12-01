@@ -7,6 +7,8 @@ export class ResourcesService {
   /**
    * GET /v1/resources/{resourceType}
    * @summary List resources
+   *
+   * @description Retrieves a paginated list of resources of the specified type. Supports search and filtering. Resources are returned with their parent relationships and metadata.
    */
   list(
     resourceType: Schema.ResourceType,
@@ -24,6 +26,8 @@ export class ResourcesService {
   /**
    * POST /v1/resources/{resourceType}
    * @summary Create a resource
+   *
+   * @description Creates a new resource of the specified type. Resources can have parent relationships to form hierarchies. You can optionally assign initial roles to users when creating the resource. Parent resources must already exist.
    */
   create(
     resourceType: Schema.ResourceType,
@@ -42,6 +46,8 @@ export class ResourcesService {
   /**
    * DELETE /v1/resources/{resourceType}/{resourceId}
    * @summary Delete a resource
+   *
+   * @description Deletes a resource by its type and ID. This operation is permanent and cannot be undone. Deleting a resource may affect child resources that depend on it.
    */
   delete(
     resourceType: Schema.ResourceType,
@@ -58,6 +64,8 @@ export class ResourcesService {
   /**
    * GET /v1/resources/{resourceType}/{resourceId}
    * @summary Read a resource
+   *
+   * @description Retrieves a single resource by its type and ID. Returns the resource with its parent relationships and metadata.
    */
   read(
     resourceType: Schema.ResourceType,
@@ -74,6 +82,8 @@ export class ResourcesService {
   /**
    * PUT /v1/resources/{resourceType}/{resourceId}
    * @summary Update a resource
+   *
+   * @description Updates an existing resource. You can update the resource name and modify parent relationships. Parent resources must already exist.
    */
   update(
     resourceType: Schema.ResourceType,

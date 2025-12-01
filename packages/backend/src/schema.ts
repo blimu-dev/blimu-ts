@@ -19,16 +19,39 @@ export interface EntitlementCheckBody {
 }
 export interface EntitlementCheckResult {
   allowed: boolean;
-  /** Entitlement identifier */
-  entitlement: EntitlementType;
-  limit?: { allowed: boolean; current?: number; limit?: number; reason?: string; scope?: string };
+  limit?: {
+    allowed: boolean;
+    current?: number;
+    limit?: number;
+    plan?: string | null;
+    reason?: string;
+    remaining?: number;
+    scope?: string;
+  } | null;
+  plans?: {
+    allowed: boolean;
+    allowedPlans?: Array<string>;
+    plan?: string | null;
+    reason?: string;
+  } | null;
+  roles?: {
+    allowed: boolean;
+    allowedRoles?: Array<string>;
+    reason?: string;
+    userRoles?: Array<string>;
+  } | null;
 }
 /**
  * Entitlement identifier
  */
 export type EntitlementType = string;
+/**
+ * Limit type identifier
+ */
+export type LimitType = string;
 export interface PlanAssignBody {
-  planKey: string;
+  /** Plan type identifier */
+  planKey: PlanType;
 }
 export interface PlanDeleteResponse {
   success: boolean;
@@ -36,12 +59,17 @@ export interface PlanDeleteResponse {
 export interface PlanResponse {
   createdAt: string;
   environmentId: string;
-  planKey: string;
+  /** Plan type identifier */
+  planKey: PlanType;
   resourceId: string;
   /** Resource type identifier */
   resourceType: ResourceType;
   updatedAt: string;
 }
+/**
+ * Plan type identifier
+ */
+export type PlanType = string;
 export interface Resource {
   createdAt: string;
   id: string;
@@ -154,7 +182,7 @@ export interface TransactionHistoryResponse {
     createdAt: string;
     environmentId: string;
     id: string;
-    limitType: string;
+    limitType: LimitType;
     resourceId: string;
     resourceType: ResourceType;
     tags: Record<string, unknown> | null;
@@ -162,7 +190,8 @@ export interface TransactionHistoryResponse {
 }
 export interface UsageCheckBody {
   amount: number;
-  limitType: string;
+  /** Usage-based limit type identifier */
+  limitType: UsageLimitType;
   period: 'monthly' | 'yearly' | 'lifetime';
   resourceId: string;
   /** Resource type identifier */
@@ -170,7 +199,8 @@ export interface UsageCheckBody {
 }
 export interface UsageConsumeBody {
   amount: number;
-  limitType: string;
+  /** Usage-based limit type identifier */
+  limitType: UsageLimitType;
   resourceId: string;
   /** Resource type identifier */
   resourceType: ResourceType;
@@ -178,18 +208,24 @@ export interface UsageConsumeBody {
 }
 export interface UsageCreditBody {
   amount: number;
-  limitType: string;
+  /** Usage-based limit type identifier */
+  limitType: UsageLimitType;
   resourceId: string;
   /** Resource type identifier */
   resourceType: ResourceType;
   tags?: Record<string, unknown>;
 }
+/**
+ * Usage-based limit type identifier
+ */
+export type UsageLimitType = string;
 export interface UsageWalletResponse {
   amount: number;
   createdAt: string;
   environmentId: string;
   id: string;
-  limitType: string;
+  /** Usage-based limit type identifier */
+  limitType: UsageLimitType;
   resourceId: string;
   /** Resource type identifier */
   resourceType: ResourceType;
@@ -254,42 +290,66 @@ export interface UserUpdateBody {
 // Operation query parameter interfaces
 /**
  * Query params for Resources.List
+ *
+ * Retrieves a paginated list of resources of the specified type. Supports search and filtering. Resources are returned with their parent relationships and metadata.
  */
 export interface ResourcesListQuery {
+  /** Number of items per page (minimum: 1, maximum: 100) */
   limit?: number;
+  /** Page number for pagination */
   page?: number;
+  /** Search query to filter resources by name */
   search?: string;
 }
 /**
  * Query params for Roles.List
+ *
+ * Retrieves a paginated list of roles assigned to a user. Supports filtering by resource type, resource ID, and role name. Returns both directly assigned roles and inherited roles.
  */
 export interface RolesListQuery {
+  /** Number of items per page (minimum: 1, maximum: 100) */
   limit?: number;
+  /** Page number for pagination */
   page?: number;
+  /** Filter roles by specific resource ID */
   resourceId?: string;
-  /** The type of resource */
+  /** Filter roles by resource type */
   resourceType?: ResourceType;
+  /** Filter by role name */
   role?: string;
 }
 /**
  * Query params for Usage.GetBalance
+ *
+ * Retrieves the current balance of a usage wallet for a specific resource and limit type within a given time period. The balance reflects all credits and consumption transactions.
  */
 export interface UsageGetBalanceQuery {
+  /** Time period for the balance calculation */
   period: 'monthly' | 'yearly' | 'lifetime';
 }
 /**
  * Query params for Usage.GetTransactionHistory
+ *
+ * Retrieves the transaction history for a usage wallet, including all credits and consumption records. Supports filtering by time period and date range.
  */
 export interface UsageGetTransactionHistoryQuery {
+  /** End date for filtering transactions (ISO 8601 format) */
   endDate?: string;
+  /** Time period for filtering transactions */
   period?: 'monthly' | 'yearly' | 'lifetime';
+  /** Start date for filtering transactions (ISO 8601 format) */
   startDate?: string;
 }
 /**
  * Query params for Users.List
+ *
+ * Retrieves a paginated list of users in your environment. Supports search functionality to filter users by email, name, or lookup key.
  */
 export interface UsersListQuery {
+  /** Number of items per page (minimum: 1, maximum: 100) */
   limit?: number;
+  /** Page number for pagination */
   page?: number;
+  /** Search query to filter users by email, name, or lookup key */
   search?: string;
 }

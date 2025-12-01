@@ -9,3 +9,6 @@ export * from './guards/entitlement.guard';
 
 // Decorators
 export * from './decorators/entitlement.decorator';
+
+// Exceptions
+export * from './exceptions/blimu-forbidden.exception';

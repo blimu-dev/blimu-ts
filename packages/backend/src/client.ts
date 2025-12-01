@@ -27,8 +27,7 @@ export type ClientOption = {
   envBaseURLs?: { sandbox: string; production: string };
   accessToken?: string | (() => string | Promise<string>);
   headerName?: string;
-  apiKeyAuth?: string;
-  bearer?: string;
+  apiKey?: string;
   fetch?: typeof fetch;
 };
 
@@ -94,8 +93,7 @@ export class CoreClient {
       if (name.toLowerCase() === 'authorization') headers.set(name, `Bearer ${String(token)}`);
       else headers.set(name, String(token));
     }
-    if (this.cfg?.apiKeyAuth) headers.set('X-API-KEY', String(this.cfg?.apiKeyAuth));
-    if (this.cfg.bearer) headers.set('Authorization', `Bearer ${this.cfg.bearer}`);
+    if (this.cfg?.apiKey) headers.set('X-API-KEY', String(this.cfg?.apiKey));
     const doFetch = async (attempt: number) => {
       if (this.cfg.onRequest) await this.cfg.onRequest({ url: url.toString(), init, attempt });
       let controller: AbortController | undefined;

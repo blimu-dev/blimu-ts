@@ -7,6 +7,8 @@ export class RolesService {
   /**
    * GET /v1/users/{userId}/roles
    * @summary List user roles
+   *
+   * @description Retrieves a paginated list of roles assigned to a user. Supports filtering by resource type, resource ID, and role name. Returns both directly assigned roles and inherited roles.
    */
   list(
     userId: string,
@@ -24,6 +26,8 @@ export class RolesService {
   /**
    * POST /v1/users/{userId}/roles
    * @summary Create a role (assign role to user on resource)
+   *
+   * @description Assigns a role to a user on a specific resource. The role must be defined in your resource definitions for the specified resource type. Roles can be inherited from parent resources based on your resource configuration.
    */
   create(
     userId: string,
@@ -42,6 +46,8 @@ export class RolesService {
   /**
    * DELETE /v1/users/{userId}/roles/{resourceType}/{resourceId}
    * @summary Delete a role
+   *
+   * @description Removes a role assignment from a user on a specific resource. This only removes the direct role assignment and does not affect inherited roles from parent resources.
    */
   delete(
     userId: string,

@@ -10,16 +10,25 @@ import { Reflector } from '@nestjs/core';
 import { Blimu, Schema } from '@blimu/backend';
 import type { BlimuConfig } from '../config/blimu.config';
 import { BLIMU_CONFIG } from '../config/blimu.config';
+import { BlimuForbiddenException } from '../exceptions/blimu-forbidden.exception';
 
 export const ENTITLEMENT_KEY = 'entitlement';
 export const ENTITLEMENT_METADATA_KEY = Symbol('entitlement');
+
+/**
+ * Entitlement information returned by the getEntitlementInfo callback
+ */
+export interface EntitlementInfo {
+  resourceId: string;
+  amount?: number; // Amount to check against usage limit (for consumption)
+}
 
 /**
  * Metadata interface for entitlement checks
  */
 export interface EntitlementMetadata<TRequest = any> {
   entitlementKey: Schema.EntitlementType;
-  resourceIdExtractor: (request: TRequest) => string | Promise<string>;
+  getEntitlementInfo: (request: TRequest) => EntitlementInfo | Promise<EntitlementInfo>;
 }
 
 /**
@@ -28,11 +37,11 @@ export interface EntitlementMetadata<TRequest = any> {
  */
 export const SetEntitlementMetadata = <TRequest = any>(
   entitlementKey: string,
-  resourceIdExtractor: (request: TRequest) => string | Promise<string>,
+  getEntitlementInfo: (request: TRequest) => EntitlementInfo | Promise<EntitlementInfo>,
 ) =>
   SetMetadata(ENTITLEMENT_METADATA_KEY, {
     entitlementKey,
-    resourceIdExtractor,
+    getEntitlementInfo,
   } as EntitlementMetadata<TRequest>);
 
 /**
@@ -78,10 +87,10 @@ export class EntitlementGuard<TRequest = any> implements CanActivate {
       throw new ForbiddenException('User ID is required for entitlement check');
     }
 
-    // Extract resourceId from request
-    const resourceId = await metadata.resourceIdExtractor(request);
+    // Extract entitlement info from request
+    const entitlementInfo = await metadata.getEntitlementInfo(request);
 
-    if (!resourceId) {
+    if (!entitlementInfo || !entitlementInfo.resourceId) {
       throw new ForbiddenException('Resource ID is required for entitlement check');
     }
 
@@ -90,18 +99,22 @@ export class EntitlementGuard<TRequest = any> implements CanActivate {
       const result = await this.runtime.entitlements.checkEntitlement({
         userId,
         entitlement: metadata.entitlementKey,
-        resourceId,
+        resourceId: entitlementInfo.resourceId,
+        amount: entitlementInfo.amount,
       });
 
       if (!result.allowed) {
-        throw new ForbiddenException(
-          result.reason || `User does not have required entitlement: ${metadata.entitlementKey}`,
+        throw new BlimuForbiddenException(
+          result,
+          metadata.entitlementKey,
+          entitlementInfo.resourceId,
+          userId,
         );
       }
 
       return true;
     } catch (error) {
-      if (error instanceof ForbiddenException) {
+      if (error instanceof BlimuForbiddenException || error instanceof ForbiddenException) {
         throw error;
       }
 

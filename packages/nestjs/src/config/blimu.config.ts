@@ -5,7 +5,7 @@ export interface BlimuConfig<TRequest = any> {
   /**
    * The API secret key for authenticating with Blimu Runtime API
    */
-  apiSecretKey: string;
+  apiKey: string;
 
   /**
    * The base URL for the Blimu Runtime API
