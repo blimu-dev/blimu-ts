@@ -45,6 +45,22 @@ export interface EntitlementCheckResult {
  * Entitlement identifier
  */
 export type EntitlementType = string;
+export interface EntitlementsListResult {
+  results: Array<{
+    entitlements: Array<{
+      allowed: boolean;
+      allowedByPlan: boolean;
+      allowedByRole: boolean;
+      allowedPlans?: Array<string>;
+      allowedRoles: Array<string>;
+      currentPlan?: string;
+      currentRole?: string;
+      entitlement: EntitlementType;
+    }>;
+    resourceId: string;
+    resourceType: ResourceType;
+  }>;
+}
 /**
  * Limit type identifier
  */
@@ -114,6 +130,28 @@ export interface ResourceList {
     name: string | null;
     parents?: Array<{ id: string; type: ResourceType }>;
     type: ResourceType;
+  }>;
+  limit: number;
+  page: number;
+  total: number;
+}
+export interface ResourceMemberList {
+  items: Array<{
+    inherited: boolean;
+    role: string;
+    user: {
+      avatarUrl: string | null;
+      createdAt: string;
+      email: string;
+      emailVerified: boolean;
+      firstName: string | null;
+      id: string;
+      lastLoginAt: string | null;
+      lastName: string | null;
+      lookupKey: string | null;
+      updatedAt: string;
+    };
+    userId: string;
   }>;
   limit: number;
   page: number;
@@ -288,6 +326,37 @@ export interface UserUpdateBody {
 }
 
 // Operation query parameter interfaces
+/**
+ * Query params for Entitlements.ListForResource
+ *
+ * Returns entitlements for a specific resource and user. Only evaluates roles and plans (excludes limits). Provides detailed information about why entitlements are allowed or denied, including current roles, allowed roles, current plan, and allowed plans. Results are cached per resource for performance.
+ */
+export interface EntitlementsListForResourceQuery {
+  /** The unique identifier of the user */
+  userId: string;
+}
+/**
+ * Query params for Entitlements.ListForTenant
+ *
+ * Returns entitlements for a tenant resource and all its descendant resources. This endpoint scopes queries to a single tenant, preventing cross-tenant data access. Only evaluates roles and plans (excludes limits). Results are cached per resource for performance. The tenant resource type is automatically determined from the environment definition (resource marked as `is_tenant: true`).
+ */
+export interface EntitlementsListForTenantQuery {
+  /** The unique identifier of the user */
+  userId: string;
+}
+/**
+ * Query params for Resource Members.List
+ *
+ * Retrieves a paginated list of users who have roles (direct or inherited) on the specified resource. Supports search functionality to filter users by email or name.
+ */
+export interface ResourceMembersListQuery {
+  /** Number of items per page (minimum: 1, maximum: 100) */
+  limit?: number;
+  /** Page number for pagination */
+  page?: number;
+  /** Search query to filter members by email or name */
+  search?: string;
+}
 /**
  * Query params for Resources.List
  *

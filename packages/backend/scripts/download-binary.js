@@ -53,10 +53,10 @@ function verifyBinaryArchitecture(binaryPath) {
   try {
     // Use 'file' command to check binary type (available on macOS and Linux)
     const output = execSync(`file "${binaryPath}"`, { encoding: 'utf8' });
-    
+
     const platform = process.platform;
     const arch = process.arch;
-    
+
     if (platform === 'darwin') {
       // macOS: should be "Mach-O 64-bit executable arm64" or "Mach-O 64-bit executable x86_64"
       const expectedArch = arch === 'arm64' ? 'arm64' : 'x86_64';
@@ -75,7 +75,7 @@ function verifyBinaryArchitecture(binaryPath) {
         return false;
       }
     }
-    
+
     return true;
   } catch (err) {
     // If 'file' command fails or is not available, assume binary is incorrect to be safe
@@ -203,7 +203,7 @@ async function main(version) {
     if (fs.existsSync(binaryPath)) {
       // Verify the binary matches the current platform/architecture
       const isCorrectArchitecture = verifyBinaryArchitecture(binaryPath);
-      
+
       if (isCorrectArchitecture) {
         try {
           // Try to make it executable (Unix only)

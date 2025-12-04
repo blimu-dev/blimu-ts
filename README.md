@@ -416,7 +416,7 @@ if (result.allowed) {
   console.log('User has permission to delete workspace');
 } else {
   console.log('Permission denied:', result.reason);
-  console.log('Required roles:', result.requiredRoles);
+  console.log('Required roles:', result.allowedRoles);
   console.log('User roles:', result.userRoles);
 }
 ```

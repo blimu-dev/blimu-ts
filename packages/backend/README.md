@@ -108,12 +108,18 @@ import { PaymentService, Schema } from '@blimu/backend';
 ### EntitlementsService
 
 - **checkEntitlement**: POST /v1/entitlements/check - Check if a user has a specific entitlement on a resource
+- **listForResource**: GET /v1/entitlements/list-for-resource/{resourceType}/{resourceId} - List entitlements for a specific resource
+- **listForTenant**: GET /v1/entitlements/list-for-tenant/{tenantResourceId} - List entitlements for a tenant and all its sub-resources
 
 ### PlansService
 
 - **delete**: DELETE /v1/resources/{resourceType}/{resourceId}/plan - Remove plan assignment from a tenant resource
 - **read**: GET /v1/resources/{resourceType}/{resourceId}/plan - Get the plan assigned to a tenant resource
 - **assign**: POST /v1/resources/{resourceType}/{resourceId}/plan - Assign a plan to a tenant resource
+
+### ResourceMembersService
+
+- **list**: GET /v1/resources/{resourceType}/{resourceId}/members - List members for a resource
 
 ### ResourcesService
 
@@ -193,6 +199,7 @@ The SDK includes the following TypeScript interfaces:
 - **EntitlementCheckBody**
 - **EntitlementCheckResult**
 - **EntitlementType**: Entitlement identifier
+- **EntitlementsListResult**
 - **LimitType**: Limit type identifier
 - **PlanAssignBody**
 - **PlanDeleteResponse**
@@ -203,6 +210,7 @@ The SDK includes the following TypeScript interfaces:
 - **ResourceBulkResult**
 - **ResourceCreateBody**
 - **ResourceList**
+- **ResourceMemberList**
 - **ResourceType**: Resource type identifier
 - **ResourceUpdateBody**
 - **Role**
