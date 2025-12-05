@@ -25,8 +25,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          # When triggered by workflow_run, checkout the commit from that workflow
-          ref: ${{ github.event.workflow_run.head_sha || github.ref }}
+          # Checkout default branch to get the version updates committed by update-versions workflow
+          # For workflow_dispatch, use the provided ref or default branch
+          ref: ${{ github.event_name == 'workflow_dispatch' && github.ref || github.event.repository.default_branch }}
+          fetch-depth: 0
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -36,44 +38,30 @@ jobs:
 
       - name: Get version from tag or input
         id: get_version
+        env:
+          EVENT_JSON: ${{ toJSON(github.event.workflow_run.event) }}
         run: |
           if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
             VERSION="${{ github.event.inputs.version }}"
           else
             # Extract version from the workflow_run event payload
             # The original event that triggered update-versions contains the ref
-            node << 'EOF'
-            const eventPayload = process.env.EVENT_PAYLOAD || '{}';
-            let eventData;
-            try {
-              eventData = JSON.parse(eventPayload);
-            } catch (e) {
-              eventData = {};
-            }
-            
-            // Try to get ref from the event payload
-            let ref = eventData.ref || '';
-            
-            // If no ref in payload, try head_branch (might be empty for tags)
-            if (!ref && '${{ github.event.workflow_run.head_branch }}') {
-              ref = 'refs/tags/${{ github.event.workflow_run.head_branch }}';
-            }
-            
-            // Extract version from ref
-            if (ref) {
-              const match = ref.match(/refs\/tags\/(.+)/);
-              if (match) {
-                const version = match[1].replace(/^v/, '');
-                console.log(version);
-                process.exit(0);
+            VERSION=$(node -e "
+              try {
+                const eventData = JSON.parse(process.env.EVENT_JSON || '{}');
+                const ref = eventData.ref || '';
+                const match = ref.match(/refs\/tags\/(.+)/);
+                if (match) {
+                  console.log(match[1].replace(/^v/, ''));
+                } else {
+                  console.error('Could not extract version from workflow_run event. Ref was: ' + ref);
+                  process.exit(1);
+                }
+              } catch (e) {
+                console.error('Error parsing event data: ' + e.message);
+                process.exit(1);
               }
-            }
-            
-            // Fallback: if we still don't have it, exit with error
-            console.error('Could not extract version from workflow_run event');
-            process.exit(1);
-            EOF
-            VERSION=$(EVENT_PAYLOAD='${{ toJSON(github.event.workflow_run.event) }}' node -e "const eventData = JSON.parse(process.env.EVENT_PAYLOAD || '{}'); const ref = eventData.ref || ''; const match = ref.match(/refs\/tags\/(.+)/); console.log(match ? match[1].replace(/^v/, '') : '');")
+            ")
           fi
           # Remove 'v' prefix if present (in case it wasn't removed above)
           VERSION=${VERSION#v}
@@ -158,19 +146,8 @@ jobs:
             exit 1
           fi
 
-      - name: Update package versions
-        run: |
-          VERSION="${{ steps.get_version.outputs.version }}"
-
-          # Update backend package.json version
-          cd packages/backend
-          node -e "const fs = require('fs'); const pkg = JSON.parse(fs.readFileSync('package.json')); pkg.version = '${VERSION}'; fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\n');"
-          cd ../..
-
-          # Update nestjs package.json version and replace workspace dependency
-          cd packages/nestjs
-          node -e "const fs = require('fs'); const pkg = JSON.parse(fs.readFileSync('package.json')); pkg.version = '${VERSION}'; if (pkg.dependencies && pkg.dependencies['@blimu/backend']) { pkg.dependencies['@blimu/backend'] = '${VERSION}'; } fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\n');"
-          cd ../..
+      # Note: Package versions are already updated by the "Update package versions from tag" workflow
+      # which runs before this workflow via workflow_run trigger
 
       - name: Install dependencies
         run: yarn install
