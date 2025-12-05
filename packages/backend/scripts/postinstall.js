@@ -9,29 +9,16 @@ const { main } = require('./download-binary');
 const isProductionInstall = __dirname.includes('node_modules');
 
 if (isProductionInstall || process.env.BLIMU_DOWNLOAD_CLI !== 'false') {
-  // Read version from package.json
-  let version;
-  try {
-    const packageJsonPath = path.join(__dirname, '..', 'package.json');
-    const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
-    version = packageJson.version;
-  } catch (err) {
-    console.warn('Warning: Could not read package.json version');
-  }
-
-  main(version).catch((error) => {
-    // Fail the install if binary download fails - version consistency is critical
+  // Always download the latest CLI version
+  main(null).catch((error) => {
+    // Fail the install if binary download fails
     console.error('Error: Failed to download Blimu CLI binary during install.');
     console.error(error.message);
-    if (version) {
-      console.error(
-        `\nThe package requires CLI version v${version}, but it could not be downloaded.`,
-      );
-      console.error('This ensures version consistency between the npm package and CLI binary.');
-      console.error(
-        `\nPlease ensure the CLI release v${version} exists, or install a different package version.`,
-      );
-    }
+    console.error('\nThe package will download the latest available CLI version.');
+    console.error(
+      '\nYou can manually install it by running:',
+    );
+    console.error('  go install github.com/blimu-dev/blimu-cli/cmd/blimucli@latest');
     process.exit(1);
   });
 } else {
