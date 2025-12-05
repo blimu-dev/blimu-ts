@@ -15,9 +15,7 @@ if (isProductionInstall || process.env.BLIMU_DOWNLOAD_CLI !== 'false') {
     console.error('Error: Failed to download Blimu CLI binary during install.');
     console.error(error.message);
     console.error('\nThe package will download the latest available CLI version.');
-    console.error(
-      '\nYou can manually install it by running:',
-    );
+    console.error('\nYou can manually install it by running:');
     console.error('  go install github.com/blimu-dev/blimu-cli/cmd/blimucli@latest');
     process.exit(1);
   });

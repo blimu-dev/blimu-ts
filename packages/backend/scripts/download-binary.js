@@ -146,9 +146,7 @@ function getReleaseUrl(version, assetName) {
             }
             if (res.statusCode !== 200) {
               reject(
-                new Error(
-                  `Failed to fetch latest release: ${res.statusCode} ${res.statusMessage}`,
-                ),
+                new Error(`Failed to fetch latest release: ${res.statusCode} ${res.statusMessage}`),
               );
               return;
             }
@@ -156,11 +154,7 @@ function getReleaseUrl(version, assetName) {
               const release = JSON.parse(data);
               const asset = release.assets.find((a) => a.name === assetName);
               if (!asset) {
-                reject(
-                  new Error(
-                    `Asset ${assetName} not found in latest release`,
-                  ),
-                );
+                reject(new Error(`Asset ${assetName} not found in latest release`));
                 return;
               }
               resolve(asset.browser_download_url);
