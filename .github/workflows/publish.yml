@@ -1,33 +1,22 @@
 name: Publish to npm
 
 on:
-  workflow_run:
-    workflows: ['Update package versions from tag']
-    types:
-      - completed
-  workflow_dispatch:
-    inputs:
-      version:
-        description: 'Version tag (e.g., v0.4.5)'
-        required: true
+  push:
+    branches:
+      - main
 
 jobs:
   publish:
     name: Publish @blimu/backend and @blimu/nestjs
-    # Only run if update-versions workflow succeeded
-    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
       id-token: write
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          # Checkout default branch to get the version updates committed by update-versions workflow
-          # For workflow_dispatch, use the provided ref or default branch
-          ref: ${{ github.event_name == 'workflow_dispatch' && github.ref || github.event.repository.default_branch }}
           fetch-depth: 0
 
       - name: Set up Node.js
@@ -36,152 +25,46 @@ jobs:
           node-version: '24'
           registry-url: 'https://registry.npmjs.org'
 
-      - name: Get version from tag or input
-        id: get_version
-        env:
-          EVENT_JSON: ${{ toJSON(github.event.workflow_run.event) }}
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Check for unversioned changesets
+        id: check_changesets
         run: |
-          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
-            VERSION="${{ github.event.inputs.version }}"
+          # Check if there are any unversioned changeset files
+          if [ -n "$(find .changeset -name '*.md' -type f 2>/dev/null | grep -v README)" ]; then
+            echo "has_unversioned_changesets=true" >> $GITHUB_OUTPUT
+            echo "Found unversioned changeset files - skipping publish (version PR should be created first)"
           else
-            # Extract version from the workflow_run event payload
-            # The original event that triggered update-versions contains the ref
-            VERSION=$(node -e "
-              try {
-                const eventData = JSON.parse(process.env.EVENT_JSON || '{}');
-                const ref = eventData.ref || '';
-                const match = ref.match(/refs\/tags\/(.+)/);
-                if (match) {
-                  console.log(match[1].replace(/^v/, ''));
-                } else {
-                  console.error('Could not extract version from workflow_run event. Ref was: ' + ref);
-                  process.exit(1);
-                }
-              } catch (e) {
-                console.error('Error parsing event data: ' + e.message);
-                process.exit(1);
-              }
-            ")
+            echo "has_unversioned_changesets=false" >> $GITHUB_OUTPUT
+            echo "No unversioned changeset files found - ready to publish"
           fi
-          # Remove 'v' prefix if present (in case it wasn't removed above)
-          VERSION=${VERSION#v}
+
+      - name: Get version from package.json
+        id: get_version
+        if: steps.check_changesets.outputs.has_unversioned_changesets == 'false'
+        run: |
+          # Read version from package.json (updated by changeset version)
+          VERSION=$(node -e "const pkg = require('./packages/backend/package.json'); console.log(pkg.version);")
           echo "version=${VERSION}" >> $GITHUB_OUTPUT
           echo "Version: ${VERSION}"
 
-      - name: Verify package.json versions match tag
-        run: |
-          VERSION="${{ steps.get_version.outputs.version }}"
-          echo "Verifying package.json versions match tag v${VERSION}..."
+      - name: Build packages
+        if: steps.check_changesets.outputs.has_unversioned_changesets == 'false'
+        run: yarn build
 
-          # Read versions from package.json files
-          BACKEND_VERSION=$(node -e "const pkg = require('./packages/backend/package.json'); console.log(pkg.version);")
-          NESTJS_VERSION=$(node -e "const pkg = require('./packages/nestjs/package.json'); console.log(pkg.version);")
-          ROOT_VERSION=$(node -e "const pkg = require('./package.json'); console.log(pkg.version);")
-
-          echo "Backend package.json version: ${BACKEND_VERSION}"
-          echo "NestJS package.json version: ${NESTJS_VERSION}"
-          echo "Root package.json version: ${ROOT_VERSION}"
-          echo "Tag version: ${VERSION}"
-
-          ERRORS=0
-
-          if [ "${BACKEND_VERSION}" != "${VERSION}" ]; then
-            echo "❌ Error: @blimu/backend package.json version (${BACKEND_VERSION}) does not match tag version (${VERSION})"
-            ERRORS=$((ERRORS + 1))
-          else
-            echo "✅ @blimu/backend version matches"
-          fi
-
-          if [ "${NESTJS_VERSION}" != "${VERSION}" ]; then
-            echo "❌ Error: @blimu/nestjs package.json version (${NESTJS_VERSION}) does not match tag version (${VERSION})"
-            ERRORS=$((ERRORS + 1))
-          else
-            echo "✅ @blimu/nestjs version matches"
-          fi
-
-          if [ "${ROOT_VERSION}" != "${VERSION}" ]; then
-            echo "⚠️  Warning: Root package.json version (${ROOT_VERSION}) does not match tag version (${VERSION})"
-            echo "   (This is a warning only, root package.json is not published)"
-          else
-            echo "✅ Root package.json version matches"
-          fi
-
-          if [ $ERRORS -gt 0 ]; then
-            echo ""
-            echo "Please update the package.json files to match the tag version before publishing."
-            echo "You can update them manually or use a tool like 'npm version' or 'yarn version'."
-            exit 1
-          fi
-
-          echo ""
-          echo "✅ All package.json versions match the tag version"
-
-      - name: Verify CLI release exists
-        run: |
-          VERSION="${{ steps.get_version.outputs.version }}"
-          echo "Checking if CLI release v${VERSION} exists..."
-
-          # Check if CLI release exists via GitHub API
-          RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" \
-            -H "Accept: application/vnd.github.v3+json" \
-            "https://api.github.com/repos/blimu-dev/blimu-cli/releases/tags/v${VERSION}")
-
-          if [ "$RESPONSE" = "200" ]; then
-            echo "✅ CLI release v${VERSION} exists"
-          elif [ "$RESPONSE" = "404" ]; then
-            echo "❌ CLI release v${VERSION} not found"
-            echo ""
-            echo "Error: Cannot publish @blimu/backend@${VERSION} because CLI release v${VERSION} does not exist."
-            echo ""
-            echo "Please ensure you have:"
-            echo "1. Created and pushed the CLI release tag: git tag v${VERSION} && git push origin v${VERSION}"
-            echo "2. Waited for the CLI build workflow to complete and create the release"
-            echo "3. Then retry publishing the npm packages"
-            echo ""
-            echo "This ensures version consistency between npm packages and CLI binaries."
-            exit 1
-          else
-            echo "❌ Failed to check CLI release (HTTP ${RESPONSE})"
-            echo "This might be a temporary GitHub API issue. Please retry."
-            exit 1
-          fi
-
-      # Note: Package versions are already updated by the "Update package versions from tag" workflow
-      # which runs before this workflow via workflow_run trigger
-
-      - name: Install dependencies
-        run: yarn install
-        env:
-          YARN_ENABLE_IMMUTABLE_INSTALLS: false
-
-      - name: Build @blimu/backend
-        run: yarn workspace @blimu/backend build
-
-      - name: Publish @blimu/backend
-        working-directory: packages/backend
-        run: npm publish --access public
+      - name: Publish to npm
+        if: steps.check_changesets.outputs.has_unversioned_changesets == 'false'
+        run: yarn changeset publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Wait for npm propagation
+      - name: Create git tag
+        if: steps.check_changesets.outputs.has_unversioned_changesets == 'false'
         run: |
-          echo "Waiting for @blimu/backend to be available on npm..."
-          sleep 10
-          # Try to fetch the package to ensure it's available
-          for i in {1..30}; do
-            if npm view @blimu/backend@${{ steps.get_version.outputs.version }} version > /dev/null 2>&1; then
-              echo "Package is available on npm!"
-              break
-            fi
-            echo "Waiting... ($i/30)"
-            sleep 2
-          done
-
-      - name: Build @blimu/nestjs
-        run: yarn workspace @blimu/nestjs build
-
-      - name: Publish @blimu/nestjs
-        working-directory: packages/nestjs
-        run: npm publish --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          VERSION="${{ steps.get_version.outputs.version }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -a "v${VERSION}" -m "Release v${VERSION}"
+          git push origin "v${VERSION}"

@@ -1,0 +1,73 @@
+name: Version Packages
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  version:
+    name: Version Packages
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Validate changesets (prevent major versions)
+        id: validate_changesets
+        run: |
+          # Check if there are any changeset files
+          if [ -z "$(find .changeset -name '*.md' -type f 2>/dev/null | grep -v README)" ]; then
+            echo "has_changesets=false" >> $GITHUB_OUTPUT
+            echo "No changeset files found - skipping version workflow"
+            exit 0
+          fi
+
+          echo "has_changesets=true" >> $GITHUB_OUTPUT
+          echo "Found changeset files - validating version types..."
+
+          # Check each changeset file for major version requests
+          MAJOR_FOUND=false
+          for file in .changeset/*.md; do
+            if [ -f "$file" ] && [ "$(basename "$file")" != "README.md" ]; then
+              # Check if file contains "major" (case-insensitive)
+              if grep -qi "major" "$file"; then
+                echo "❌ Found major version request in: $file"
+                MAJOR_FOUND=true
+              fi
+            fi
+          done
+
+          if [ "$MAJOR_FOUND" = "true" ]; then
+            echo ""
+            echo "❌ Error: Major version bumps are not allowed during pre-1.0.0 development."
+            echo "Please update your changesets to use 'minor' or 'patch' instead."
+            echo ""
+            exit 1
+          fi
+
+          echo "✅ All changesets are valid (minor or patch only)"
+
+      - name: Create Release Pull Request
+        if: steps.validate_changesets.outputs.has_changesets == 'true'
+        uses: changesets/action@v1
+        with:
+          version: yarn changeset version
+          commit: 'chore: version packages'
+          title: 'chore: version packages'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

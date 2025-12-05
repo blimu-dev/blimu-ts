@@ -16,3 +16,7 @@ packages/*/dist
 .yarn/cache
 .yarn/install-state.gz
 .yarn/sdks
+# Changeset files (keep config and README, ignore generated files)
+.changeset/*.md
+!.changeset/config.json
+!.changeset/README.md
