@@ -1,0 +1,98 @@
+name: Update package versions from tag
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  update-versions:
+    name: Update package.json versions
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Get version from tag
+        id: get_version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/}
+          # Remove 'v' prefix if present
+          VERSION=${VERSION#v}
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+          echo "Extracted version from tag: ${VERSION}"
+
+      - name: Update package.json versions
+        run: |
+          VERSION="${{ steps.get_version.outputs.version }}"
+          echo "Updating all package.json files to version ${VERSION}..."
+
+          # Update root package.json
+          node -e "
+            const fs = require('fs');
+            const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+            pkg.version = '${VERSION}';
+            fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\n');
+            console.log('✅ Updated root package.json to ${VERSION}');
+          "
+
+          # Update backend package.json
+          node -e "
+            const fs = require('fs');
+            const pkg = JSON.parse(fs.readFileSync('packages/backend/package.json', 'utf8'));
+            pkg.version = '${VERSION}';
+            fs.writeFileSync('packages/backend/package.json', JSON.stringify(pkg, null, 2) + '\n');
+            console.log('✅ Updated packages/backend/package.json to ${VERSION}');
+          "
+
+          # Update nestjs package.json
+          node -e "
+            const fs = require('fs');
+            const pkg = JSON.parse(fs.readFileSync('packages/nestjs/package.json', 'utf8'));
+            pkg.version = '${VERSION}';
+            fs.writeFileSync('packages/nestjs/package.json', JSON.stringify(pkg, null, 2) + '\n');
+            console.log('✅ Updated packages/nestjs/package.json to ${VERSION}');
+          "
+
+          echo ""
+          echo "✅ All package.json files updated to version ${VERSION}"
+
+      - name: Check for changes
+        id: check_changes
+        run: |
+          if git diff --quiet package.json packages/backend/package.json packages/nestjs/package.json; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+            echo "No changes detected in package.json files"
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+            echo "Changes detected in package.json files"
+            git diff package.json packages/backend/package.json packages/nestjs/package.json
+          fi
+
+      - name: Commit and push changes
+        if: steps.check_changes.outputs.changed == 'true'
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add package.json packages/backend/package.json packages/nestjs/package.json
+          git commit -m "chore: update package versions to ${{ steps.get_version.outputs.version }}"
+          git push
+
+      - name: Summary
+        run: |
+          if [ "${{ steps.check_changes.outputs.changed }}" == "true" ]; then
+            echo "✅ Successfully updated and committed package.json versions to ${{ steps.get_version.outputs.version }}"
+          else
+            echo "ℹ️  Package.json versions were already at ${{ steps.get_version.outputs.version }}"
+          fi

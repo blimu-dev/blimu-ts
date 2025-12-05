@@ -1,9 +1,10 @@
 name: Publish to npm
 
 on:
-  push:
-    tags:
-      - 'v*'
+  workflow_run:
+    workflows: ['Update package versions from tag']
+    types:
+      - completed
   workflow_dispatch:
     inputs:
       version:
@@ -13,6 +14,8 @@ on:
 jobs:
   publish:
     name: Publish @blimu/backend and @blimu/nestjs
+    # Only run if update-versions workflow succeeded
+    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -21,6 +24,9 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          # When triggered by workflow_run, checkout the commit from that workflow
+          ref: ${{ github.event.workflow_run.head_sha || github.ref }}
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -28,15 +34,48 @@ jobs:
           node-version: '24'
           registry-url: 'https://registry.npmjs.org'
 
-      - name: Get version from tag
+      - name: Get version from tag or input
         id: get_version
         run: |
           if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
             VERSION="${{ github.event.inputs.version }}"
           else
-            VERSION=${GITHUB_REF#refs/tags/}
+            # Extract version from the workflow_run event payload
+            # The original event that triggered update-versions contains the ref
+            node << 'EOF'
+            const eventPayload = process.env.EVENT_PAYLOAD || '{}';
+            let eventData;
+            try {
+              eventData = JSON.parse(eventPayload);
+            } catch (e) {
+              eventData = {};
+            }
+            
+            // Try to get ref from the event payload
+            let ref = eventData.ref || '';
+            
+            // If no ref in payload, try head_branch (might be empty for tags)
+            if (!ref && '${{ github.event.workflow_run.head_branch }}') {
+              ref = 'refs/tags/${{ github.event.workflow_run.head_branch }}';
+            }
+            
+            // Extract version from ref
+            if (ref) {
+              const match = ref.match(/refs\/tags\/(.+)/);
+              if (match) {
+                const version = match[1].replace(/^v/, '');
+                console.log(version);
+                process.exit(0);
+              }
+            }
+            
+            // Fallback: if we still don't have it, exit with error
+            console.error('Could not extract version from workflow_run event');
+            process.exit(1);
+            EOF
+            VERSION=$(EVENT_PAYLOAD='${{ toJSON(github.event.workflow_run.event) }}' node -e "const eventData = JSON.parse(process.env.EVENT_PAYLOAD || '{}'); const ref = eventData.ref || ''; const match = ref.match(/refs\/tags\/(.+)/); console.log(match ? match[1].replace(/^v/, '') : '');")
           fi
-          # Remove 'v' prefix if present
+          # Remove 'v' prefix if present (in case it wasn't removed above)
           VERSION=${VERSION#v}
           echo "version=${VERSION}" >> $GITHUB_OUTPUT
           echo "Version: ${VERSION}"
