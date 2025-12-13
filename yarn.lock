@@ -999,6 +999,14 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"blimu@workspace:packages/blimu":
+  version: 0.0.0-use.local
+  resolution: "blimu@workspace:packages/blimu"
+  bin:
+    blimu: ./bin/blimu
+  languageName: unknown
+  linkType: soft
+
 "braces@npm:^3.0.3":
   version: 3.0.3
   resolution: "braces@npm:3.0.3"

@@ -1,0 +1,33 @@
+{
+  "name": "blimu",
+  "version": "0.0.2",
+  "description": "Blimu - Authorization as a Service",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "bin": "./bin/blimu",
+  "files": [
+    "index.js",
+    "index.d.ts",
+    "README.md",
+    "bin/**",
+    "scripts/**"
+  ],
+  "scripts": {
+    "postinstall": "node scripts/postinstall.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/blimu/blimu-ts"
+  },
+  "author": "viniciusdacal",
+  "license": "MIT",
+  "keywords": [
+    "authorization",
+    "rbac",
+    "access-control",
+    "permissions"
+  ],
+  "engines": {
+    "node": ">=18"
+  }
+}
