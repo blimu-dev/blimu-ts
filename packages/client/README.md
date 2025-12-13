@@ -101,6 +101,10 @@ import { PaymentService, Schema } from '@blimu/client';
 - **refresh**: POST /v1/auth/refresh - Refresh session token
 - **getSession**: GET /v1/auth/session - Get current session
 
+### EntitlementsService
+
+- **listForTenant**: GET /v1/client/entitlements/list-for-tenant/{tenantResourceId} - List entitlements for a tenant and all its sub-resources
+
 ## TypeScript Support
 
 This SDK is written in TypeScript and provides full type safety:
@@ -116,7 +120,7 @@ const client = new BlimuClient({
 const result: unknown = await client.auth.logout(/* ... */);
 
 // Schema types are available
-const data: Schema.RefreshResponse = {
+const data: Schema.EntitlementType = {
   // Fully typed object
 };
 ```
@@ -143,7 +147,10 @@ const client = new BlimuClient({
 
 The SDK includes the following TypeScript interfaces:
 
+- **EntitlementType**: Entitlement identifier
+- **EntitlementsListResult**
 - **RefreshResponse**
+- **ResourceType**: Resource type identifier
 - **SessionResponse**
 
 All types are available under the `Schema` namespace:

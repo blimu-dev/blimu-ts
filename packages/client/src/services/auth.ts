@@ -17,6 +17,14 @@ export class AuthService {
   }
 
   /**
+   * @summary Get query keys for logout
+   * @returns ['v1/auth/logout']
+   */
+  logout__queryKeys() {
+    return ['v1/auth/logout'] as const;
+  }
+
+  /**
    * POST /v1/auth/refresh
    * @summary Refresh session token
    */
@@ -29,6 +37,14 @@ export class AuthService {
   }
 
   /**
+   * @summary Get query keys for refresh
+   * @returns ['v1/auth/refresh']
+   */
+  refresh__queryKeys() {
+    return ['v1/auth/refresh'] as const;
+  }
+
+  /**
    * GET /v1/auth/session
    * @summary Get current session
    */
@@ -38,5 +54,13 @@ export class AuthService {
       path: `/v1/auth/session`,
       ...(init || {}),
     });
+  }
+
+  /**
+   * @summary Get query keys for getSession
+   * @returns ['v1/auth/session']
+   */
+  getSession__queryKeys() {
+    return ['v1/auth/session'] as const;
   }
 }

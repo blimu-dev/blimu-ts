@@ -1,12 +1,15 @@
 import { CoreClient, ClientOption, FetchError } from './client';
 import { AuthService } from './services/auth';
+import { EntitlementsService } from './services/entitlements';
 
 export class Blimu {
   readonly auth: AuthService;
+  readonly entitlements: EntitlementsService;
 
   constructor(options?: ClientOption) {
     const core = new CoreClient(options);
     this.auth = new AuthService(core);
+    this.entitlements = new EntitlementsService(core);
   }
 }
 
@@ -20,3 +23,4 @@ export const BlimuError = FetchError;
 export * from './utils';
 export * as Schema from './schema';
 export { AuthService } from './services/auth';
+export { EntitlementsService } from './services/entitlements';
