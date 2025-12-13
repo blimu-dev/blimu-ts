@@ -37,7 +37,7 @@ export type ClientOption = {
   envBaseURLs?: { sandbox: string; production: string };
   accessToken?: string | undefined | (() => string | undefined | Promise<string | undefined>);
   headerName?: string;
-  apiKey?: string;
+  bearer?: string;
   fetch?: typeof fetch;
 };
 
@@ -108,7 +108,7 @@ export class CoreClient {
         else headers.set(name, String(token));
       }
     }
-    if (this.cfg?.apiKey) headers.set('X-API-KEY', String(this.cfg?.apiKey));
+    if (this.cfg.bearer) headers.set('Authorization', `Bearer ${this.cfg.bearer}`);
 
     const doFetch = async (attempt: number) => {
       // Clone init to prevent mutations from affecting concurrent requests

@@ -11,6 +11,7 @@ import { EntitlementGuard } from '../guards/entitlement.guard';
 import type { BlimuConfig } from '../config/blimu.config';
 import { BLIMU_CONFIG } from '../config/blimu.config';
 import { Blimu } from '@blimu/backend';
+import { JWKService } from '../services/jwk.service';
 
 /**
  * Blimu NestJS Module
@@ -68,6 +69,7 @@ export class BlimuModule {
       providers: [
         Reflector,
         EntitlementGuard,
+        JWKService,
         {
           provide: BLIMU_CONFIG,
           useValue: {
@@ -89,7 +91,7 @@ export class BlimuModule {
           inject: [BLIMU_CONFIG],
         },
       ],
-      exports: [Reflector, EntitlementGuard, Blimu, BLIMU_CONFIG],
+      exports: [Reflector, EntitlementGuard, Blimu, BLIMU_CONFIG, JWKService],
     };
   }
 
@@ -185,6 +187,7 @@ export class BlimuModule {
       providers: [
         Reflector,
         EntitlementGuard,
+        JWKService,
         {
           provide: BLIMU_CONFIG,
           useFactory: async (...args: unknown[]) => {
@@ -210,7 +213,7 @@ export class BlimuModule {
           inject: [BLIMU_CONFIG],
         },
       ],
-      exports: [Reflector, EntitlementGuard, Blimu, BLIMU_CONFIG],
+      exports: [Reflector, EntitlementGuard, Blimu, BLIMU_CONFIG, JWKService],
     };
   }
 }

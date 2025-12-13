@@ -12,3 +12,6 @@ export * from './decorators/entitlement.decorator';
 
 // Exceptions
 export * from './exceptions/blimu-forbidden.exception';
+
+// Services
+export * from './services';
