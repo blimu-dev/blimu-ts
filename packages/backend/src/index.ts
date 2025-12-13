@@ -52,3 +52,4 @@ export { ResourcesService } from './services/resources';
 export { RolesService } from './services/roles';
 export { UsageService } from './services/usage';
 export { UsersService } from './services/users';
+export * from './token-verifier';
