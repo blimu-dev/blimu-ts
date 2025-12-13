@@ -19,10 +19,14 @@ This will:
 
 ## Releasing
 
-Releases are automated via GitHub Actions. When changesets are merged to main:
+Releases are automated via GitHub Actions. The workflow is:
 
-1. A PR is automatically created with version bumps and changelog updates
-2. When that PR is merged, packages are published to npm
+1. **Add changesets**: When you create a PR with changes, add a changeset using `yarn changeset`
+2. **Merge PR**: When your PR (with changesets) is merged to `main`, a "Version Packages" PR is automatically created/updated
+3. **Review and merge**: Review the version PR (it contains version bumps and changelog updates)
+4. **Automatic publish**: When the version PR is merged, packages are automatically published to npm
+
+The "Version Packages" PR is kept up-to-date automatically as new changesets are merged to `main`.
 
 ## Manual Release (if needed)
 

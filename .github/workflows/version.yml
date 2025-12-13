@@ -62,7 +62,7 @@ jobs:
 
           echo "✅ All changesets are valid (minor or patch only)"
 
-      - name: Create Release Pull Request
+      - name: Create or Update Release Pull Request
         if: steps.validate_changesets.outputs.has_changesets == 'true'
         uses: changesets/action@v1
         with:
