@@ -1,18 +1,20 @@
 # Publishing Guide
 
-This document describes how to publish new versions of `@blimu/backend` and `@blimu/nestjs` to npm.
+This document describes how to publish new versions of `@blimu/backend`, `@blimu/client`, and `@blimu/nestjs` to npm.
 
 ## Automated Publishing
 
 Publishing is automated via GitHub Actions. When you create a new git tag, the workflow will:
 
 1. Extract the version from the tag (e.g., `v0.4.5` → `0.4.5`)
-2. Update both package.json files with the new version
+2. Update all package.json files with the new version
 3. Replace `workspace:*` dependency in `@blimu/nestjs` with the actual version
-4. Build both packages
+4. Build all packages
 5. Publish `@blimu/backend` to npm first
 6. Wait for npm propagation
-7. Publish `@blimu/nestjs` to npm
+7. Publish `@blimu/client` to npm
+8. Wait for npm propagation
+9. Publish `@blimu/nestjs` to npm
 
 ## How to Release
 
@@ -67,8 +69,11 @@ curl -s -o /dev/null -w "%{http_code}" \
 Then proceed with npm publishing:
 
 ```bash
-# 1. Update versions in both packages
+# 1. Update versions in all packages
 cd packages/backend
+npm version 0.4.5 --no-git-tag-version
+
+cd ../client
 npm version 0.4.5 --no-git-tag-version
 
 cd ../nestjs
@@ -83,7 +88,14 @@ npm publish --access public
 
 # 3. Wait a few seconds for npm propagation
 
-# 4. Build and publish nestjs
+# 4. Build and publish client
+cd ../client
+yarn build
+npm publish --access public
+
+# 5. Wait a few seconds for npm propagation
+
+# 6. Build and publish nestjs
 cd ../nestjs
 yarn install  # This will fetch @blimu/backend from npm
 yarn build

@@ -3,7 +3,7 @@
   "repository": "https://github.com/blimu/blimu-ts",
   "author": "viniciusdacal",
   "license": "MIT",
-  "version": "0.4.11",
+  "version": "0.5.0",
   "description": "TypeScript SDK for Blimu API (auto-generated)",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
