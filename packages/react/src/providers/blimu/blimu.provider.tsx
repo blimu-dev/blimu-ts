@@ -1,18 +1,74 @@
-import { useStore } from '../../hooks/use-store';
-import React, { useEffect, useMemo } from 'react';
+import React, { useMemo } from 'react';
 
 import { BlimuRuntimeClientWrapper } from '../../client/runtime-client';
+import { useStore } from '../../hooks/use-store';
+import type { BlimuRadiusPreset, BlimuTheme } from '../../types';
 import { AuthProvider } from '../auth/auth.provider';
-import { ThemeProvider } from '../theme';
-import { BlimuContext, type AppearanceConfig } from './blimu.context';
+import { BlimuContext } from './blimu.context';
 
 interface BlimuProviderProps {
   publishableKey: string;
   children: React.ReactNode;
-  /**
-   * Appearance configuration for theming and customization
-   */
-  appearance?: AppearanceConfig;
+  theme?: BlimuTheme;
+}
+
+/**
+ * Convert theme configuration to CSS custom properties
+ */
+function themeToStyleVars(theme?: BlimuTheme): React.CSSProperties {
+  if (!theme) return {};
+
+  const vars: Record<string, string> = {};
+
+  // Map colors to CSS variables
+  if (theme.colors) {
+    const colorMap: Record<keyof typeof theme.colors, string> = {
+      background: '--blimu-background',
+      foreground: '--blimu-foreground',
+      card: '--blimu-card',
+      cardForeground: '--blimu-card-foreground',
+      popover: '--blimu-popover',
+      popoverForeground: '--blimu-popover-foreground',
+      primary: '--blimu-primary',
+      primaryForeground: '--blimu-primary-foreground',
+      secondary: '--blimu-secondary',
+      secondaryForeground: '--blimu-secondary-foreground',
+      muted: '--blimu-muted',
+      mutedForeground: '--blimu-muted-foreground',
+      accent: '--blimu-accent',
+      accentForeground: '--blimu-accent-foreground',
+      destructive: '--blimu-destructive',
+      destructiveForeground: '--blimu-destructive-foreground',
+      border: '--blimu-border',
+      input: '--blimu-input',
+      ring: '--blimu-ring',
+    };
+
+    Object.entries(theme.colors).forEach(([key, value]) => {
+      if (value) {
+        const varName = colorMap[key as keyof typeof theme.colors];
+        if (varName) {
+          vars[varName] = value;
+        }
+      }
+    });
+  }
+
+  // Map radius to CSS variable
+  if (theme.radius) {
+    const radiusMap: Record<BlimuRadiusPreset, string> = {
+      none: '0',
+      sm: '0.25rem',
+      md: '0.5rem',
+      lg: '0.75rem',
+      xl: '1rem',
+      full: '9999px',
+    };
+
+    vars['--blimu-radius'] = radiusMap[theme.radius as BlimuRadiusPreset] ?? theme.radius;
+  }
+
+  return vars as React.CSSProperties;
 }
 
 /**
@@ -32,72 +88,46 @@ interface BlimuProviderProps {
  * }
  * ```
  *
- * @example With appearance configuration
+ * @example With theme customization
  * ```tsx
- * <BlimuProvider
- *   publishableKey="pk_..."
- *   appearance={{
- *     baseTheme: 'dark',
- *     inheritTheme: true,
- *     variables: {
- *       colorPrimary: '#3b82f6',
- *     },
- *   }}
- * >
- *   <YourApp />
- * </BlimuProvider>
+ * function App() {
+ *   return (
+ *     <BlimuProvider
+ *       publishableKey="pk_..."
+ *       theme={{
+ *         colors: {
+ *           primary: 'oklch(0.5 0.2 250)',
+ *           background: '#ffffff',
+ *         },
+ *         radius: 'lg',
+ *       }}
+ *     >
+ *       <YourApp />
+ *     </BlimuProvider>
+ *   );
+ * }
  * ```
  */
-export function BlimuProvider({ publishableKey, children, appearance }: BlimuProviderProps) {
+export function BlimuProvider({ publishableKey, children, theme }: BlimuProviderProps) {
   const client = useMemo(() => new BlimuRuntimeClientWrapper({ publishableKey }), [publishableKey]);
   const state = useStore(client.store);
+  const themeVars = useMemo(() => themeToStyleVars(theme), [theme]);
 
-  // Apply CSS variable overrides if provided
-  useEffect(() => {
-    if (appearance?.variables && typeof document !== 'undefined') {
-      const root = document.documentElement;
-      const variables = appearance.variables;
-      Object.entries(variables).forEach(([key, value]) => {
-        // Ensure key starts with -- if not already
-        const cssVar = key.startsWith('--') ? key : `--${key}`;
-        root.style.setProperty(cssVar, value);
-      });
-
-      return () => {
-        // Cleanup: remove custom variables on unmount
-        if (variables) {
-          Object.keys(variables).forEach((key) => {
-            const cssVar = key.startsWith('--') ? key : `--${key}`;
-            root.style.removeProperty(cssVar);
-          });
-        }
-      };
-    }
-  }, [appearance?.variables]);
-
-  const value = useMemo(
-    () => ({
-      client,
-      state,
-      config: {
-        publishableKey,
-        redirectUri: typeof window !== 'undefined' ? window.location.origin : '',
-      },
-      appearance,
-    }),
-    [client, state, publishableKey, appearance],
-  );
-
-  const themeProviderProps = {
-    defaultTheme: appearance?.baseTheme || 'system',
-    autoDetect: appearance?.inheritTheme !== false,
+  const value = {
+    client,
+    state,
+    config: {
+      publishableKey,
+      redirectUri: window.location.origin,
+      theme,
+    },
   };
 
   return (
-    <BlimuContext.Provider value={value}>
-      <ThemeProvider {...themeProviderProps}>
+    <div data-blimu style={themeVars}>
+      <BlimuContext.Provider value={value}>
         <AuthProvider>{children}</AuthProvider>
-      </ThemeProvider>
-    </BlimuContext.Provider>
+      </BlimuContext.Provider>
+    </div>
   );
 }

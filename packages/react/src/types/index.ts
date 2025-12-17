@@ -1,8 +1,50 @@
+/**
+ * Theme colors that can be customized
+ */
+export interface BlimuThemeColors {
+  background?: string;
+  foreground?: string;
+  card?: string;
+  cardForeground?: string;
+  popover?: string;
+  popoverForeground?: string;
+  primary?: string;
+  primaryForeground?: string;
+  secondary?: string;
+  secondaryForeground?: string;
+  muted?: string;
+  mutedForeground?: string;
+  accent?: string;
+  accentForeground?: string;
+  destructive?: string;
+  destructiveForeground?: string;
+  border?: string;
+  input?: string;
+  ring?: string;
+}
+
+/**
+ * Border radius presets
+ */
+export type BlimuRadiusPreset = 'none' | 'sm' | 'md' | 'lg' | 'xl' | 'full';
+
+/**
+ * Theme configuration for Blimu components
+ */
+export interface BlimuTheme {
+  /** Color overrides using CSS color values (e.g., 'oklch(0.5 0.2 250)', '#3b82f6') */
+  colors?: BlimuThemeColors;
+  /** Border radius preset or custom CSS value */
+  radius?: BlimuRadiusPreset | string;
+}
+
 export interface BlimuConfig {
   /** Redirect URI for auth flow (where to return after authentication) */
   redirectUri?: string;
   /** Publishable key for the environment (contains full UI domain) */
   publishableKey: string;
+  /** Theme customization */
+  theme?: BlimuTheme;
 }
 
 export interface User {
@@ -81,5 +123,19 @@ export interface AuthContextValue {
   getAuthState: () => AuthState;
 }
 
-// Re-export appearance config from providers
-export type { AppearanceConfig } from '../providers/blimu/blimu.context';
+/**
+ * Component customization props for className overrides
+ */
+export interface ComponentClasses {
+  [key: string]: string | undefined;
+}
+
+/**
+ * Common props for all Blimu components
+ */
+export interface BlimuComponentProps {
+  /** Custom className to apply to the root element */
+  className?: string;
+  /** Object of classNames to apply to specific sub-elements */
+  classes?: ComponentClasses;
+}
