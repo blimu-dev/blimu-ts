@@ -1,7 +1,7 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
-@custom-variant dark (&:is(.dark *));
+@variant dark (&:where(.dark, .dark *));
 
 /*
  * Blimu React Components - Default Theme
@@ -148,6 +148,7 @@
 @layer base {
   /* Scoped to Blimu components to avoid conflicts */
   [data-blimu] * {
-    @apply border-border outline-ring/50;
+    border-color: var(--border);
+    outline-color: color-mix(in srgb, var(--ring) 50%, transparent);
   }
 }
