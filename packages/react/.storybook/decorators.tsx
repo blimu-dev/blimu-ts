@@ -38,11 +38,22 @@ export interface AuthenticatedUserOptions {
 export const withAuthenticatedUser = (options: AuthenticatedUserOptions = {}): Decorator => {
   const { publishableKey = STORYBOOK_PUBLISHABLE_KEY } = options;
 
-  return (Story) => (
-    <BlimuProvider publishableKey={publishableKey}>
-      <div className="min-h-screen p-8">
-        <Story />
-      </div>
-    </BlimuProvider>
-  );
+  return (Story, context) => {
+    // Get theme from Storybook globals (set by toolbar)
+    const theme = context.globals.theme || 'light';
+
+    return (
+      <BlimuProvider
+        publishableKey={publishableKey}
+        appearance={{
+          baseTheme: theme,
+          inheritTheme: false, // Don't auto-detect, use Storybook toolbar value
+        }}
+      >
+        <div className="p-8">
+          <Story />
+        </div>
+      </BlimuProvider>
+    );
+  };
 };

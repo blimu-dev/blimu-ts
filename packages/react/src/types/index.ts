@@ -80,3 +80,6 @@ export interface AuthContextValue {
   getToken: (options: { template: 'web' }) => Promise<string | null>;
   getAuthState: () => AuthState;
 }
+
+// Re-export appearance config from providers
+export type { AppearanceConfig } from '../providers/blimu/blimu.context';

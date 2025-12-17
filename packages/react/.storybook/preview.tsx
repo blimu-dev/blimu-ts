@@ -1,11 +1,12 @@
+import '../src/index.css';
+
 import React, { useEffect, useState } from 'react';
 import type { Preview } from '@storybook/react';
 import { setupWorker } from 'msw/browser';
 import Cookies from 'js-cookie';
-import '../src/index.css';
-import '../src/styles/globals.css';
 import { handlers } from './msw-handlers';
 import { createMockJWT } from './jwt-utils';
+import { ThemeProvider } from '../src/providers';
 
 // Pre-set a session cookie for Storybook so components start authenticated
 const SESSION_COOKIE_NAME = '__bli_session';
@@ -57,47 +58,72 @@ const preview: Preview = {
         date: /Date$/i,
       },
     },
+    // Add theme switcher to toolbar
+    backgrounds: {
+      disable: true, // Disable default backgrounds addon
+    },
+  },
+  globalTypes: {
+    theme: {
+      description: 'Global theme for components',
+      defaultValue: 'light',
+      toolbar: {
+        title: 'Theme',
+        icon: 'circlehollow',
+        items: [
+          { value: 'light', title: 'Light', icon: 'sun' },
+          { value: 'dark', title: 'Dark', icon: 'moon' },
+          { value: 'system', title: 'System', icon: 'computer' },
+        ],
+        dynamicTitle: true,
+      },
+    },
   },
   decorators: [
-    // Dark mode decorator - syncs with system preference or Storybook theme
-    (Story) => {
-      useEffect(() => {
-        // Check system preference on mount
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    // Theme decorator - syncs with Storybook toolbar theme selector
+    // This applies the theme class to the document, and BlimuProvider will handle ThemeProvider
+    (Story, context) => {
+      const theme = context.globals.theme || 'light';
 
-        const updateDarkMode = (isDark: boolean) => {
-          if (isDark) {
-            document.documentElement.classList.add('dark');
-            document.body.classList.add('dark');
+      useEffect(() => {
+        const updateTheme = (newTheme: string) => {
+          const root = document.documentElement;
+          root.classList.remove('light', 'dark');
+
+          if (newTheme === 'system') {
+            const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches
+              ? 'dark'
+              : 'light';
+            root.classList.add(systemTheme);
           } else {
-            document.documentElement.classList.remove('dark');
-            document.body.classList.remove('dark');
+            root.classList.add(newTheme);
           }
         };
 
-        // Initial update based on system preference
-        updateDarkMode(prefersDark);
+        updateTheme(theme);
 
-        // Listen for system preference changes
-        const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-        const handleChange = (e: MediaQueryListEvent) => {
-          updateDarkMode(e.matches);
-        };
+        // Listen for system preference changes when theme is 'system'
+        if (theme === 'system') {
+          const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+          const handleChange = (e: MediaQueryListEvent) => {
+            const systemTheme = e.matches ? 'dark' : 'light';
+            document.documentElement.classList.remove('light', 'dark');
+            document.documentElement.classList.add(systemTheme);
+          };
 
-        // Modern browsers
-        if (mediaQuery.addEventListener) {
-          mediaQuery.addEventListener('change', handleChange);
-          return () => {
-            mediaQuery.removeEventListener('change', handleChange);
-          };
-        } else {
-          // Fallback for older browsers
-          mediaQuery.addListener(handleChange);
-          return () => {
-            mediaQuery.removeListener(handleChange);
-          };
+          if (mediaQuery.addEventListener) {
+            mediaQuery.addEventListener('change', handleChange);
+            return () => {
+              mediaQuery.removeEventListener('change', handleChange);
+            };
+          } else {
+            mediaQuery.addListener(handleChange);
+            return () => {
+              mediaQuery.removeListener(handleChange);
+            };
+          }
         }
-      }, []);
+      }, [theme]);
 
       return <Story />;
     },
@@ -117,7 +143,7 @@ const preview: Preview = {
       }
 
       return (
-        <div style={{ padding: '2rem', minHeight: '100vh' }}>
+        <div style={{ padding: '2rem', minHeight: 'calc(100vh - 4rem)' }}>
           <Story />
         </div>
       );

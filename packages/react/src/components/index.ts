@@ -1,3 +1,10 @@
 export type { RedirectToSignInProps } from './redirect-to-sign-in';
 export { RedirectToSignIn } from './redirect-to-sign-in';
+export type { UserButtonProps } from './user-button';
 export { UserButton } from './user-button';
+export type { UserAvatarProps } from './user-avatar';
+export { UserAvatar } from './user-avatar';
+export type { SignInButtonProps } from './sign-in-button';
+export { SignInButton } from './sign-in-button';
+export type { MembersListProps } from './members-list';
+export { MembersList } from './members-list';

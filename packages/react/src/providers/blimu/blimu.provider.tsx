@@ -1,13 +1,18 @@
-import { useStore } from '@blimu/react/hooks';
-import React, { useMemo } from 'react';
+import { useStore } from '../../hooks/use-store';
+import React, { useEffect, useMemo } from 'react';
 
 import { BlimuRuntimeClientWrapper } from '../../client/runtime-client';
 import { AuthProvider } from '../auth/auth.provider';
-import { BlimuContext } from './blimu.context';
+import { ThemeProvider } from '../theme';
+import { BlimuContext, type AppearanceConfig } from './blimu.context';
 
 interface BlimuProviderProps {
   publishableKey: string;
   children: React.ReactNode;
+  /**
+   * Appearance configuration for theming and customization
+   */
+  appearance?: AppearanceConfig;
 }
 
 /**
@@ -26,23 +31,73 @@ interface BlimuProviderProps {
  *   );
  * }
  * ```
+ *
+ * @example With appearance configuration
+ * ```tsx
+ * <BlimuProvider
+ *   publishableKey="pk_..."
+ *   appearance={{
+ *     baseTheme: 'dark',
+ *     inheritTheme: true,
+ *     variables: {
+ *       colorPrimary: '#3b82f6',
+ *     },
+ *   }}
+ * >
+ *   <YourApp />
+ * </BlimuProvider>
+ * ```
  */
-export function BlimuProvider({ publishableKey, children }: BlimuProviderProps) {
+export function BlimuProvider({ publishableKey, children, appearance }: BlimuProviderProps) {
   const client = useMemo(() => new BlimuRuntimeClientWrapper({ publishableKey }), [publishableKey]);
   const state = useStore(client.store);
 
-  const value = {
-    client,
-    state,
-    config: {
-      publishableKey,
-      redirectUri: window.location.origin,
-    },
+  // Apply CSS variable overrides if provided
+  useEffect(() => {
+    if (appearance?.variables && typeof document !== 'undefined') {
+      const root = document.documentElement;
+      const variables = appearance.variables;
+      Object.entries(variables).forEach(([key, value]) => {
+        // Ensure key starts with -- if not already
+        const cssVar = key.startsWith('--') ? key : `--${key}`;
+        root.style.setProperty(cssVar, value);
+      });
+
+      return () => {
+        // Cleanup: remove custom variables on unmount
+        if (variables) {
+          Object.keys(variables).forEach((key) => {
+            const cssVar = key.startsWith('--') ? key : `--${key}`;
+            root.style.removeProperty(cssVar);
+          });
+        }
+      };
+    }
+  }, [appearance?.variables]);
+
+  const value = useMemo(
+    () => ({
+      client,
+      state,
+      config: {
+        publishableKey,
+        redirectUri: typeof window !== 'undefined' ? window.location.origin : '',
+      },
+      appearance,
+    }),
+    [client, state, publishableKey, appearance],
+  );
+
+  const themeProviderProps = {
+    defaultTheme: appearance?.baseTheme || 'system',
+    autoDetect: appearance?.inheritTheme !== false,
   };
 
   return (
     <BlimuContext.Provider value={value}>
-      <AuthProvider>{children}</AuthProvider>
+      <ThemeProvider {...themeProviderProps}>
+        <AuthProvider>{children}</AuthProvider>
+      </ThemeProvider>
     </BlimuContext.Provider>
   );
 }

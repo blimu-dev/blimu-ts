@@ -1,4 +1,4 @@
-import { CoreClient, ClientOption, FetchError } from './client';
+import { CoreClient, FetchError, type ClientOption } from './client';
 import { AuthService } from './services/auth';
 import { EntitlementsService } from './services/entitlements';
 
