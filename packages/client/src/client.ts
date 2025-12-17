@@ -39,6 +39,7 @@ export type ClientOption = {
   headerName?: string;
   bearer?: string;
   fetch?: typeof fetch;
+  credentials?: RequestCredentials;
 };
 
 export class FetchError<T = unknown> extends Error {
@@ -123,12 +124,33 @@ export class CoreClient {
         ...init,
         headers: requestHeaders,
       };
+      // Set credentials from config if provided (can be overridden by onRequest)
+      if (this.cfg.credentials !== undefined) {
+        fetchInit.credentials = this.cfg.credentials;
+      }
       if (this.cfg.onRequest)
         await this.cfg.onRequest({ url: url.toString(), init: fetchInit, attempt });
       let controller: AbortController | undefined;
       let timeoutId: any;
+      const existingSignal = fetchInit.signal;
+
       if (this.cfg.timeoutMs && typeof AbortController !== 'undefined') {
         controller = new AbortController();
+
+        // If there's an existing signal, combine it with the timeout signal
+        // The combined controller will abort when either signal aborts
+        if (existingSignal) {
+          // If existing signal is already aborted, abort the new controller immediately
+          if (existingSignal.aborted) {
+            controller.abort();
+          } else {
+            // Listen to the existing signal and abort the combined controller when it aborts
+            existingSignal.addEventListener('abort', () => {
+              controller?.abort();
+            });
+          }
+        }
+
         fetchInit.signal = controller.signal;
         timeoutId = setTimeout(() => controller?.abort(), this.cfg.timeoutMs);
       }
@@ -152,7 +174,12 @@ export class CoreClient {
           parsed = await res.arrayBuffer();
         }
         if (!res.ok) {
-          throw new FetchError(`HTTP ${res.status}`, res.status, parsed, res.headers);
+          throw new FetchError(
+            parsed?.message || `HTTP ${res.status}`,
+            res.status,
+            parsed,
+            res.headers,
+          );
         }
         return parsed as any;
       } catch (err) {
@@ -181,7 +208,9 @@ export class CoreClient {
           lastError = err;
           continue;
         }
+        if (err instanceof DOMException) throw err;
         if (err instanceof FetchError) throw err;
+        if (typeof err === 'string') throw new FetchError(err, status ?? 0);
         throw new FetchError((err as Error)?.message || 'Network error', status ?? 0);
       }
     }

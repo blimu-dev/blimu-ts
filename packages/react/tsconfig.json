@@ -8,9 +8,17 @@
     "declarationMap": true,
     "emitDeclarationOnly": true,
     "outDir": "dist",
+    "baseUrl": "./src",
+    "rootDir": ".",
+    "paths": {
+      "@/*": ["./*"]
+    },
+
     "strict": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
     "verbatimModuleSyntax": true
-  }
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"]
 }
