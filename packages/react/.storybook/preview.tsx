@@ -6,7 +6,6 @@ import { setupWorker } from 'msw/browser';
 import Cookies from 'js-cookie';
 import { handlers } from './msw-handlers';
 import { createMockJWT } from './jwt-utils';
-import { ThemeProvider } from '../src/providers';
 
 // Pre-set a session cookie for Storybook so components start authenticated
 const SESSION_COOKIE_NAME = '__bli_session';
@@ -98,6 +97,12 @@ const preview: Preview = {
           } else {
             root.classList.add(newTheme);
           }
+
+          // Update canvas background color based on theme
+          const isDark =
+            newTheme === 'dark' ||
+            (newTheme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+          root.style.backgroundColor = isDark ? 'oklch(0.145 0 0)' : 'oklch(1 0 0)';
         };
 
         updateTheme(theme);
@@ -109,6 +114,10 @@ const preview: Preview = {
             const systemTheme = e.matches ? 'dark' : 'light';
             document.documentElement.classList.remove('light', 'dark');
             document.documentElement.classList.add(systemTheme);
+            // Update background color on system theme change
+            document.documentElement.style.backgroundColor = e.matches
+              ? 'oklch(0.145 0 0)'
+              : 'oklch(1 0 0)';
           };
 
           if (mediaQuery.addEventListener) {

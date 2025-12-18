@@ -2,10 +2,10 @@ import type { Meta, StoryObj } from '@storybook/react';
 import React, { useState } from 'react';
 import { Settings, CreditCard, User } from 'lucide-react';
 
-import { withAuthenticatedUser } from '../../.storybook/decorators';
-import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
-import { DropdownMenuItem } from './ui/dropdown-menu';
-import { useAuth, useUser } from '../hooks/use-auth';
+import { withAuthenticatedUser } from '../../../.storybook/decorators';
+import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
+import { DropdownMenuItem } from '../ui/dropdown-menu';
+import { useAuth, useUser } from '../../hooks/use-auth';
 import { UserButton } from './user-button';
 
 // Subtle debug component - shows a small dot indicator in the corner

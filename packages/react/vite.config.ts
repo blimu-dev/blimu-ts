@@ -5,11 +5,8 @@ import tailwindcss from '@tailwindcss/vite';
 import tsconfigPaths from 'vite-tsconfig-paths';
 
 export default defineConfig({
-  plugins: [
-    react(),
-    tailwindcss(),
-    tsconfigPaths(),
-  ],
+  plugins: [react(), tailwindcss(), tsconfigPaths()],
+
   build: {
     lib: {
       entry: {
@@ -18,26 +15,23 @@ export default defineConfig({
         providers: resolve(__dirname, 'src/providers/index.ts'),
         components: resolve(__dirname, 'src/components/index.ts'),
       },
-      formats: ['es'],
-      fileName: (format, entryName) => `${entryName}.js`,
+      formats: ['es', 'cjs'],
+      // IMPORTANT: ensure ESM and CJS don't write to the same filenames.
+      // Otherwise the CJS build overwrites the ESM build, and browsers importing ESM
+      // will see "does not provide an export named ...".
+      fileName: (format, entryName) => (format === 'es' ? `${entryName}.js` : `${entryName}.cjs`),
     },
     rollupOptions: {
-      external: [
-        'react',
-        'react-dom',
-        'react/jsx-runtime',
-        'tailwindcss',
-        '@blimu/client',
-      ],
+      external: ['react', 'react-dom', 'react/jsx-runtime', 'tailwindcss', '@blimu/client'],
       output: {
         preserveModules: true,
         preserveModulesRoot: 'src',
-        entryFileNames: '[name].js',
+        // Note: leave entryFileNames unset so Vite can apply `lib.fileName` per-format.
         assetFileNames: (assetInfo) => {
-          if (assetInfo.name?.endsWith('.css')) {
-            return 'styles/[name][extname]';
+          if (assetInfo.names?.[0]?.endsWith('.css')) {
+            return 'styles/[name].[extname]';
           }
-          return 'assets/[name][extname]';
+          return 'assets/[name].[extname]';
         },
       },
     },

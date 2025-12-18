@@ -1,0 +1,11 @@
+/*
+ * Blimu React Components - Full Styles
+ * For use in non-Tailwind projects (includes Tailwind base styles)
+ *
+ * Usage:
+ * import '@blimu/react/styles';
+ */
+
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "./tw-styles.css";

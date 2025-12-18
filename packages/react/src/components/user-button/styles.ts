@@ -4,13 +4,13 @@ import { cva, type VariantProps } from 'class-variance-authority';
  * UserButton trigger variant styles
  */
 export const userButtonTriggerVariants = cva(
-  'inline-flex items-center justify-center rounded-full transition-colors outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blimu-ring focus-visible:ring-offset-2 focus-visible:ring-offset-blimu-background disabled:pointer-events-none disabled:opacity-50 hover:opacity-80',
+  'inline-flex items-center justify-center rounded-full transition-colors outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blimu-ring focus-visible:ring-offset-2 focus-visible:ring-offset-blimu-background disabled:pointer-events-none disabled:opacity-50 hover:opacity-80 text-blimu-foreground p-1',
   {
     variants: {
       variant: {
         default: 'bg-transparent',
         outline: 'border border-blimu-input bg-blimu-background',
-        ghost: 'hover:bg-blimu-accent',
+        ghost: 'hover:bg-blimu-accent hover:text-blimu-accent-foreground',
       },
       size: {
         default: 'h-10 min-w-[2.5rem]',

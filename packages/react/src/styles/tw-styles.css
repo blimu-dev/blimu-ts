@@ -1,0 +1,120 @@
+@variant dark (&:where(.dark, .dark *));
+
+/*
+ * Blimu React Components - Tailwind-Compatible Styles
+ * For use with existing Tailwind projects (v3 or v4)
+ *
+ * Usage:
+ * - Tailwind v4: Import this file in your main CSS
+ * - Tailwind v3: Import this file + add blimuPlugin to tailwind.config.js
+ */
+
+:root {
+  /* Background & Foreground */
+  --blimu-background: var(--background, oklch(1 0 0));
+  --blimu-foreground: var(--foreground, oklch(0.145 0 0));
+
+  /* Card */
+  --blimu-card: var(--card, oklch(1 0 0));
+  --blimu-card-foreground: var(--card-foreground, oklch(0.145 0 0));
+
+  /* Popover */
+  --blimu-popover: var(--popover, oklab(0.27 0 0 / 1));
+  --blimu-popover-foreground: var(--popover-foreground, oklch(0.145 0 0));
+
+  /* Primary */
+  --blimu-primary: var(--primary, oklch(0.205 0 0));
+  --blimu-primary-foreground: var(--primary-foreground, oklch(0.985 0 0));
+
+  /* Secondary */
+  --blimu-secondary: var(--secondary, oklch(0.97 0 0));
+  --blimu-secondary-foreground: var(--secondary-foreground, oklch(0.205 0 0));
+
+  /* Muted */
+  --blimu-muted: var(--muted, oklch(0.97 0 0));
+  --blimu-muted-foreground: var(--muted-foreground, oklch(0.556 0 0));
+
+  /* Accent */
+  --blimu-accent: var(--accent, oklch(0.97 0 0));
+  --blimu-accent-foreground: var(--accent-foreground, oklch(0.205 0 0));
+
+  /* Destructive */
+  --blimu-destructive: var(--destructive, oklch(0.577 0.245 27.325));
+  --blimu-destructive-foreground: var(
+    --destructive-foreground,
+    oklch(0.577 0.245 27.325)
+  );
+
+  /* Border & Input */
+  --blimu-border: var(--border, oklch(0.922 0 0));
+  --blimu-input: var(--input, oklch(0.922 0 0));
+  --blimu-ring: var(--ring, oklch(0.708 0 0));
+
+  /* Border Radius */
+  --blimu-radius: var(--radius, 0.625rem);
+  --blimu-rounded-sm: var(--blimu-rounded-sm, 0.25rem);
+  --blimu-rounded-md: var(--blimu-rounded-md, 0.5rem);
+  --blimu-rounded-lg: var(--blimu-rounded-lg, 0.75rem);
+  --blimu-rounded-xl: var(--blimu-rounded-xl, 1rem);
+  --blimu-rounded-full: var(--blimu-rounded-full, 9999px);
+}
+
+.dark {
+  /* Dark mode theme */
+  --blimu-background: var(--background, oklch(0.145 0 0));
+  --blimu-foreground: var(--foreground, lab(98.26% 0 0));
+  --blimu-card: var(--card, oklch(0.145 0 0));
+  --blimu-card-foreground: var(--card-foreground, lab(98.26% 0 0));
+  --blimu-popover: var(--popover, oklab(0.27 0 0 / 1));
+  --blimu-popover-foreground: var(--popover-foreground, lab(98.26% 0 0));
+  --blimu-primary: var(--primary, lab(98.26% 0 0));
+  --blimu-primary-foreground: var(--primary-foreground, oklch(0.205 0 0));
+  --blimu-secondary: var(--secondary, oklch(0.269 0 0));
+  --blimu-secondary-foreground: var(--secondary-foreground, lab(98.26% 0 0));
+  --blimu-muted: var(--muted, oklch(0.269 0 0));
+  --blimu-muted-foreground: var(--muted-foreground, oklch(0.708 0 0));
+  --blimu-accent: var(--accent, lab(27.036% 0 0));
+  --blimu-accent-foreground: var(--accent-foreground, lab(98.26% 0 0));
+  --blimu-destructive: var(--destructive, oklch(0.396 0.141 25.723));
+  --blimu-destructive-foreground: var(
+    --destructive-foreground,
+    oklch(0.637 0.237 25.331)
+  );
+  --blimu-border: var(--border, lab(100% 0 0 / 0.1));
+  --blimu-input: var(--input, oklch(0.269 0 0));
+  --blimu-ring: var(--ring, oklch(0.439 0 0));
+}
+
+/*
+ * Tailwind v4 theme tokens
+ * NOTE: `@theme` must be top-level to be picked up by Tailwind.
+ */
+@theme inline {
+  --color-blimu-background: var(--blimu-background);
+  --color-blimu-foreground: var(--blimu-foreground);
+  --color-blimu-card: var(--blimu-card);
+  --color-blimu-card-foreground: var(--blimu-card-foreground);
+  --color-blimu-popover: var(--blimu-popover);
+  --color-blimu-popover-foreground: var(--blimu-popover-foreground);
+  --color-blimu-primary: var(--blimu-primary);
+  --color-blimu-primary-foreground: var(--blimu-primary-foreground);
+  --color-blimu-secondary: var(--blimu-secondary);
+  --color-blimu-secondary-foreground: var(--blimu-secondary-foreground);
+  --color-blimu-muted: var(--blimu-muted);
+  --color-blimu-muted-foreground: var(--blimu-muted-foreground);
+  --color-blimu-accent: var(--blimu-accent);
+  --color-blimu-accent-foreground: var(--blimu-accent-foreground);
+  --color-blimu-destructive: var(--blimu-destructive);
+  --color-blimu-destructive-foreground: var(--blimu-destructive-foreground);
+  --color-blimu-border: var(--blimu-border);
+  --color-blimu-input: var(--blimu-input);
+  --color-blimu-ring: var(--blimu-ring);
+
+  /* Radius utilities */
+  --radius-blimu: var(--blimu-radius);
+  --radius-blimu-sm: calc(var(--blimu-radius) - 4px);
+  --radius-blimu-md: calc(var(--blimu-radius) - 2px);
+  --radius-blimu-lg: var(--blimu-radius);
+  --radius-blimu-xl: calc(var(--blimu-radius) + 4px);
+}
+/* Tailwind v4 theme mapping */
