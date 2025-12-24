@@ -2,7 +2,7 @@ import { Blimu } from '@blimu/client';
 
 import type { AuthState, BlimuConfig, User } from '../types';
 import { getAuthApiUrl, getAuthDomainFromPublishableKey } from '../utils/publishable-key';
-import { AuthSessionService, SESSION_URL_PARAM_NAME } from './auth.service';
+import { AuthSessionService, LOCALHOST_JWT_URL_PARAM_NAME } from './auth.service';
 import { ExternalStore } from './external-store';
 
 export class BlimuRuntimeClientWrapper {
@@ -13,7 +13,6 @@ export class BlimuRuntimeClientWrapper {
 
   public config: BlimuConfig;
   public isLive: boolean;
-  private authApiUrl: string | null = null;
   private initializePromise: Promise<void> | null = null;
   private initializeAbortController: AbortController | null = null;
 
@@ -44,11 +43,11 @@ export class BlimuRuntimeClientWrapper {
     this.client = new Blimu({
       baseURL: authApiUrl,
       accessToken: () => this.session.getSessionToken(),
-      credentials: 'include',
       headers: { 'x-blimu-publishable-key': config.publishableKey },
     });
 
     this.session = new AuthSessionService(
+      this.isLive,
       this.client,
       this.store,
       authApiUrl,
@@ -72,18 +71,10 @@ export class BlimuRuntimeClientWrapper {
 
     this.initializeAbortController = new AbortController();
 
-    const url = new URL(window.location.href);
-    const sessionToken = url.searchParams.get(SESSION_URL_PARAM_NAME) ?? undefined;
-
-    // Clean up URL parameter immediately to prevent re-processing on re-renders
-    if (sessionToken) {
-      url.searchParams.delete(SESSION_URL_PARAM_NAME);
-      // Update URL without page reload
-      window.history.replaceState({}, '', url.toString());
-    }
-
     this.initializePromise = this.session
-      .initialize({ sessionJWT: sessionToken, signal: this.initializeAbortController.signal })
+      .initialize({
+        signal: this.initializeAbortController.signal,
+      })
       .then((result) => {
         if (result.error) {
           this.store.setState({
@@ -179,33 +170,6 @@ export class BlimuRuntimeClientWrapper {
       });
     }
   };
-
-  /**
-   * Get current authenticated user
-   * Uses the session endpoint on the auth domain
-   */
-  async getCurrentUser(): Promise<User | null> {
-    try {
-      if (this.store.getSnapshot().status !== 'authenticated') return null;
-
-      const session = await this.client.auth.getSession();
-
-      if (!session.user) {
-        return null;
-      }
-
-      return {
-        id: session.user.id,
-        email: session.user.email,
-        firstName: session.user.firstName || undefined,
-        lastName: session.user.lastName || undefined,
-        emailVerified: session.user.emailVerified,
-      };
-    } catch (error) {
-      console.error('Failed to get current user:', error);
-      throw error;
-    }
-  }
 
   /**
    * Get the current session token

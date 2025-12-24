@@ -40,3 +40,9 @@ export interface SessionResponse {
 }
 
 // Operation query parameter interfaces
+/**
+ * Query params for Auth.Refresh
+ */
+export interface AuthRefreshQuery {
+  __lh_jwt?: string;
+}

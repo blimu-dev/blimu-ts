@@ -28,20 +28,24 @@ export class AuthService {
    * POST /v1/auth/refresh
    * @summary Refresh session token
    */
-  refresh(init?: Omit<RequestInit, 'method' | 'body'>): Promise<Schema.RefreshResponse> {
+  refresh(
+    query?: Schema.AuthRefreshQuery,
+    init?: Omit<RequestInit, 'method' | 'body'>,
+  ): Promise<Schema.RefreshResponse> {
     return this.core.request({
       method: 'POST',
       path: `/v1/auth/refresh`,
+      query,
       ...(init || {}),
     });
   }
 
   /**
    * @summary Get query keys for refresh
-   * @returns ['v1/auth/refresh']
+   * @returns ['v1/auth/refresh', query]
    */
-  refresh__queryKeys() {
-    return ['v1/auth/refresh'] as const;
+  refresh__queryKeys(query?: Schema.AuthRefreshQuery) {
+    return ['v1/auth/refresh', query] as const;
   }
 
   /**

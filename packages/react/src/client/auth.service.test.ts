@@ -5,7 +5,7 @@ import { http, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { AuthSessionService, SESSION_COOKIE_NAME } from './auth.service';
+import { AuthSessionService, LOCALHOST_JWT_COOKIE_NAME, SESSION_COOKIE_NAME } from './auth.service';
 
 const ONE_MINUTE = 60;
 const NINE_SECONDS = 9;
@@ -20,6 +20,7 @@ import fetchPolyfill, { Request as RequestPolyfill } from 'node-fetch';
 
 import type { AuthState } from '../types';
 import { ExternalStore } from './external-store';
+import { AuthRefreshQuery } from '@blimu/client/schema';
 
 Object.defineProperty(global, 'fetch', {
   // MSW will overwrite this to intercept requests
@@ -139,8 +140,15 @@ describe('AuthService', () => {
       error: null,
       status: 'idle',
     });
-    authService = new AuthSessionService(client, store, 'http://localhost:3020', PUBLISHABLE_KEY);
+    authService = new AuthSessionService(
+      true,
+      client,
+      store,
+      'http://localhost:3020',
+      PUBLISHABLE_KEY,
+    );
     Cookies.remove(SESSION_COOKIE_NAME);
+    Cookies.remove(LOCALHOST_JWT_COOKIE_NAME);
   });
 
   afterAll(() => {
@@ -171,14 +179,18 @@ describe('AuthService', () => {
 
   describe('initialize', () => {
     it('should set initial session token when provided', async () => {
-      const sessionJWT = jwt.sign(ONE_MINUTE_PAYLOAD, 'test_secret');
+      const localhostJWT = jwt.sign(ONE_MINUTE_PAYLOAD, 'test_secret');
 
-      await authService.initialize({ sessionJWT });
+      await authService.initialize({ localhostJWT });
 
-      expect(Cookies.get(SESSION_COOKIE_NAME)).toBe(sessionJWT);
+      expect(Cookies.get(LOCALHOST_JWT_COOKIE_NAME)).toBe(localhostJWT);
     });
 
     it('should return null if the session token is not set', async () => {
+      // Ensure no cookies are set
+      Cookies.remove(SESSION_COOKIE_NAME);
+      Cookies.remove(LOCALHOST_JWT_COOKIE_NAME);
+
       const result = await authService.initialize();
       expect(result.error).toBeNull();
       expect(result.user).toBeNull();
@@ -569,6 +581,9 @@ describe('AuthService', () => {
         sessionToken: jwt.sign(ONE_MINUTE_PAYLOAD, 'test_secret'),
       };
 
+      // Ensure no localhost JWT cookie is set
+      Cookies.remove(LOCALHOST_JWT_COOKIE_NAME);
+
       const refreshSpy = vi
         .spyOn(authService['localClient'].auth, 'refresh')
         .mockResolvedValue(mockRefreshResponse);
@@ -576,21 +591,28 @@ describe('AuthService', () => {
       const result = await authService['refreshSession']();
 
       expect(refreshSpy).toHaveBeenCalledTimes(1);
-      expect(refreshSpy).toHaveBeenCalledWith({
-        signal: expect.any(AbortSignal),
-      });
+      expect(refreshSpy).toHaveBeenCalledWith(
+        { __lh_jwt: undefined },
+        {
+          signal: expect.any(AbortSignal),
+        },
+      );
       expect(result).toEqual(mockRefreshResponse);
       expect(authService['refreshPromise']).toBeNull();
       expect(authService['refreshingSignalAbortController']).toBeNull();
       expect(authService['refreshingSignals'].size).toBe(0);
     });
 
-    it('should successfully refresh session token with signal', async () => {
+    it('should successfully refresh session token with __lh_jwt in query', async () => {
       const abortController = new AbortController();
       const signal = abortController.signal;
+      const localhostJWT = jwt.sign(ONE_MINUTE_PAYLOAD, 'test_secret');
       const mockRefreshResponse = {
         sessionToken: jwt.sign(ONE_MINUTE_PAYLOAD, 'test_secret'),
       };
+
+      // Set the localhost JWT cookie
+      Cookies.set(LOCALHOST_JWT_COOKIE_NAME, localhostJWT);
 
       const refreshSpy = vi
         .spyOn(authService['localClient'].auth, 'refresh')
@@ -601,9 +623,12 @@ describe('AuthService', () => {
 
       expect(addEventListenerSpy).toHaveBeenCalledWith('abort', expect.any(Function));
       expect(refreshSpy).toHaveBeenCalledTimes(1);
-      expect(refreshSpy).toHaveBeenCalledWith({
-        signal: expect.any(AbortSignal),
-      });
+      expect(refreshSpy).toHaveBeenCalledWith(
+        { __lh_jwt: localhostJWT },
+        {
+          signal: expect.any(AbortSignal),
+        },
+      );
       expect(result).toEqual(mockRefreshResponse);
       expect(authService['refreshPromise']).toBeNull();
       expect(authService['refreshingSignalAbortController']).toBeNull();
@@ -655,12 +680,14 @@ describe('AuthService', () => {
       let receivedSignal: AbortSignal | undefined;
       const refreshSpy = vi
         .spyOn(authService['localClient'].auth, 'refresh')
-        .mockImplementation((init?: Omit<RequestInit, 'method' | 'body'>) => {
-          receivedSignal = (init as { signal?: AbortSignal })?.signal;
-          return Promise.resolve({
-            sessionToken: jwt.sign(ONE_MINUTE_PAYLOAD, 'test_secret'),
-          });
-        });
+        .mockImplementation(
+          (query?: AuthRefreshQuery, init?: Omit<RequestInit, 'method' | 'body'>) => {
+            receivedSignal = (init as { signal?: AbortSignal })?.signal;
+            return Promise.resolve({
+              sessionToken: jwt.sign(ONE_MINUTE_PAYLOAD, 'test_secret'),
+            });
+          },
+        );
 
       const promise1 = authService['refreshSession']({ signal: signal1 });
       const promise2 = authService['refreshSession']({ signal: signal2 });

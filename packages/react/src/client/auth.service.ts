@@ -7,7 +7,8 @@ import type { AuthState, User } from '../types';
 import { ExternalStore } from './external-store';
 
 export const SESSION_COOKIE_NAME = '__bli_session';
-export const SESSION_URL_PARAM_NAME = '__session';
+export const LOCALHOST_JWT_URL_PARAM_NAME = '__lh_jwt';
+export const LOCALHOST_JWT_COOKIE_NAME = '__lh_jwt';
 export const SESSION_EXPIRATION_BUFFER = 10;
 
 /**
@@ -69,6 +70,7 @@ export class AuthSessionService {
   private localClient: Blimu;
 
   constructor(
+    private readonly isLive: boolean,
     private readonly client: Blimu,
     private readonly store: ExternalStore<AuthState>,
     baseURL: string,
@@ -82,7 +84,22 @@ export class AuthSessionService {
     this.handleRequestError = this.handleRequestError.bind(this);
   }
 
-  // initialize(sessionJWT: string): void {}
+  /**
+   * Set cookie with appropriate security settings based on environment
+   */
+  private setCookie(name: string, value: string, options: { maxAge?: number } = {}): void {
+    const cookieOptions: Cookies.CookieAttributes = {
+      secure: this.isLive, // true for live environments, false for localhost
+      sameSite: 'lax',
+      path: '/',
+    };
+
+    if (options.maxAge !== undefined) {
+      cookieOptions.expires = options.maxAge / (24 * 60 * 60); // Convert seconds to days
+    }
+
+    Cookies.set(name, value, cookieOptions);
+  }
 
   getSessionPayload(): {
     sub: string;
@@ -134,6 +151,8 @@ export class AuthSessionService {
   async handleRequestError(error: unknown): Promise<{ error: string; user: null }> {
     if (error instanceof BlimuError && [401, 500].includes(error.status)) {
       Cookies.remove(SESSION_COOKIE_NAME);
+      Cookies.remove(LOCALHOST_JWT_COOKIE_NAME);
+
       return {
         error: error.message,
         user: null,
@@ -159,15 +178,32 @@ export class AuthSessionService {
     };
   }
 
-  async initialize({
-    sessionJWT,
-    signal,
-  }: { sessionJWT?: string; signal?: AbortSignal } = {}): Promise<{
+  async initialize({ signal }: { signal?: AbortSignal } = {}): Promise<{
     error: string | null;
     user: User | null;
   }> {
-    if (sessionJWT) {
-      Cookies.set(SESSION_COOKIE_NAME, sessionJWT);
+    const url = new URL(window.location.href);
+    const localhostJWT = url.searchParams.get(LOCALHOST_JWT_URL_PARAM_NAME) ?? undefined;
+
+    // Clean up URL parameters immediately to prevent re-processing on re-renders
+    if (localhostJWT) {
+      url.searchParams.delete(LOCALHOST_JWT_URL_PARAM_NAME);
+      window.history.replaceState({}, '', url.toString());
+    }
+
+    // Handle localhost JWT from URL parameter
+    if (localhostJWT) {
+      // Set localhost JWT cookie on customer app domain
+      this.setCookie(LOCALHOST_JWT_COOKIE_NAME, localhostJWT, {
+        maxAge: 30 * 24 * 60 * 60, // 30 days
+      });
+    }
+
+    const localhostJWTCookie = Cookies.get(LOCALHOST_JWT_COOKIE_NAME);
+
+    if (localhostJWTCookie && !Cookies.get(SESSION_COOKIE_NAME)) {
+      const result = await this.refreshSession({ signal }).catch(this.handleRequestError);
+      if ('error' in result) return result;
     }
 
     const sessionPayload = this.getSessionPayload();
@@ -180,11 +216,11 @@ export class AuthSessionService {
     }
 
     if (isExpiredIn(sessionPayload.exp, SESSION_EXPIRATION_BUFFER)) {
-      const result = await this.refreshSession({ signal }).catch(this.handleRequestError);
+      const result = await this.refreshSession().catch(this.handleRequestError);
       if ('error' in result) return result;
     }
 
-    const result = await this.client.auth.getSession({ signal }).catch(this.handleRequestError);
+    const result = await this.client.auth.getSession().catch(this.handleRequestError);
     if ('error' in result) return result;
 
     return {
@@ -227,9 +263,10 @@ export class AuthSessionService {
       // Calculate timeout delay: refresh SESSION_EXPIRATION_BUFFER seconds before expiration
       const timeoutDelayMS = calculateTimeoutDelay(sessionPayload.exp, SESSION_EXPIRATION_BUFFER);
 
-      // Prevent scheduling if timeout is too short (less than 1 second)
+      // Prevent scheduling if timeout is negative (token already expired)
+      // Allow 0ms delays to handle edge cases where we're exactly at the refresh point
       // This prevents immediate re-scheduling that could cause infinite loops
-      if (timeoutDelayMS < 1000) {
+      if (timeoutDelayMS < 0) {
         return;
       }
 
@@ -306,15 +343,28 @@ export class AuthSessionService {
       this.refreshingSignals.clear();
     });
 
+    // Get localhost_jwt from cookie to send as query parameter
+    const localhostJWT = Cookies.get(LOCALHOST_JWT_COOKIE_NAME);
+
     // Use local client to avoid infinite recursion. Regular client calls getSessionToken() which calls refreshSession().
     // There are hacks to avoid infinite recursion, but they are not reliable.
+    // The localhost_jwt is sent as a query parameter
+    // Note: Type assertion needed because the generated SDK type doesn't include 'query' in RequestInit,
+    // but the underlying CoreClient.request() method does support it
     this.refreshPromise = this.localClient.auth
-      .refresh({ signal: this.refreshingSignalAbortController.signal })
+      .refresh(
+        { __lh_jwt: localhostJWT },
+        {
+          signal: this.refreshingSignalAbortController.signal,
+        },
+      )
       .then((response) => {
-        // Update cookie with new session token from response
-        // Server also sets it via Set-Cookie header, but we set it manually to ensure it works
+        // Update cookie with new session token from response body
+        // Server also sets it via Set-Cookie header on auth domain, but we set it manually on customer domain
         if (response.sessionToken) {
-          Cookies.set(SESSION_COOKIE_NAME, response.sessionToken);
+          this.setCookie(SESSION_COOKIE_NAME, response.sessionToken, {
+            maxAge: 30 * 24 * 60 * 60, // 30 days
+          });
         }
         return response;
       })
