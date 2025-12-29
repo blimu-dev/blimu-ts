@@ -1,5 +1,13 @@
 # @blimu/nestjs
 
+## 0.6.2
+
+### Patch Changes
+
+- Fix peerdeps
+- Updated dependencies
+  - @blimu/backend@0.6.2
+
 ## 0.6.1
 
 ### Patch Changes

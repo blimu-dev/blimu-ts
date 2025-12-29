@@ -1,5 +1,11 @@
 # @blimu/backend
 
+## 0.6.2
+
+### Patch Changes
+
+- Fix peerdeps
+
 ## 0.6.1
 
 ### Patch Changes
