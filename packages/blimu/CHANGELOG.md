@@ -1,5 +1,11 @@
 # blimu
 
+## 0.6.1
+
+### Patch Changes
+
+- Fix publishing
+
 ## 0.1.0
 
 ### Minor Changes

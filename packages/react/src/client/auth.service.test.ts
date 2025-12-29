@@ -181,9 +181,33 @@ describe('AuthService', () => {
     it('should set initial session token when provided', async () => {
       const localhostJWT = jwt.sign(ONE_MINUTE_PAYLOAD, 'test_secret');
 
-      await authService.initialize({ localhostJWT });
+      // Mock window.location.href with the JWT in the query string
+      Object.defineProperty(window, 'location', {
+        value: {
+          href: `http://localhost:3000?__lh_jwt=${localhostJWT}`,
+        },
+        writable: true,
+        configurable: true,
+      });
+
+      // Mock window.history.replaceState to avoid errors
+      const replaceStateSpy = vi.spyOn(window.history, 'replaceState').mockImplementation(() => {});
+
+      await authService.initialize();
 
       expect(Cookies.get(LOCALHOST_JWT_COOKIE_NAME)).toBe(localhostJWT);
+      expect(replaceStateSpy).toHaveBeenCalled();
+
+      // Restore window.location to a clean URL
+      Object.defineProperty(window, 'location', {
+        value: {
+          href: 'http://localhost:3000',
+        },
+        writable: true,
+        configurable: true,
+      });
+
+      replaceStateSpy.mockRestore();
     });
 
     it('should return null if the session token is not set', async () => {

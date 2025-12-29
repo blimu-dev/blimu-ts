@@ -1,8 +1,11 @@
 {
   "name": "@blimu/client",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "description": "TypeScript SDK for Blimu API (auto-generated)",
-  "repository": "https://github.com/blimu/blimu-ts",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/blimu-dev/blimu-ts"
+  },
   "author": "viniciusdacal",
   "license": "MIT",
   "publishConfig": {
