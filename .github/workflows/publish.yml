@@ -7,7 +7,7 @@ on:
 
 jobs:
   publish:
-    name: Publish @blimu/backend, @blimu/client, and @blimu/nestjs
+    name: Publish @blimu/backend, @blimu/client, @blimu/nestjs, and @blimu/react
     runs-on: ubuntu-latest
     permissions:
       contents: write
