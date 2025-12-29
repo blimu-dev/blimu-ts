@@ -28,7 +28,8 @@
     "clean": "yarn workspaces foreach -A run clean",
     "changeset": "changeset",
     "version": "changeset version",
-    "publish": "changeset publish"
+    "replace-workspace-deps": "node scripts/replace-workspace-deps.js",
+    "publish": "yarn replace-workspace-deps && changeset publish"
   },
   "devDependencies": {
     "@changesets/cli": "^2.29.8",
