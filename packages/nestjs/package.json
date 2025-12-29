@@ -4,7 +4,7 @@
     "type": "git",
     "url": "git+https://github.com/blimu/blimu-ts.git"
   },
-  "version": "0.5.0",
+  "version": "1.0.0",
   "description": "NestJS integration library for Blimu authorization and entitlement system",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -24,7 +24,7 @@
     "access-control"
   ],
   "peerDependencies": {
-    "@blimu/backend": ">=0.5.0",
+    "@blimu/backend": ">=0.6.0",
     "@nestjs/common": ">=10.0.0",
     "@nestjs/core": ">=10.0.0",
     "reflect-metadata": ">=0.1.13",
