@@ -1,5 +1,11 @@
 # blimu
 
+## 0.6.3
+
+### Patch Changes
+
+- Fix dep versions
+
 ## 0.6.2
 
 ### Patch Changes
