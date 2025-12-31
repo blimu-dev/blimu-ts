@@ -34,7 +34,7 @@ export class BlimuModule {
    *   imports: [
    *     BlimuModule.forRoot({
    *       apiKey: 'your-api-secret-key',
-   *       baseURL: 'https://runtime.blimu.com', // optional
+   *       baseURL: 'https://api.blimu.dev', // optional
    *       environmentId: 'your-environment-id', // optional
    *       timeoutMs: 30000, // optional
    *       getUserId: (req) => req.user?.id, // required
@@ -74,7 +74,7 @@ export class BlimuModule {
           provide: BLIMU_CONFIG,
           useValue: {
             apiKey: config.apiKey,
-            baseURL: config.baseURL || 'https://runtime.blimu.com',
+            baseURL: config.baseURL || 'https://api.blimu.dev',
             environmentId: config.environmentId,
             timeoutMs: config.timeoutMs ?? 30000,
             getUserId: config.getUserId,
@@ -85,7 +85,7 @@ export class BlimuModule {
           useFactory: (config: BlimuConfig) =>
             new Blimu({
               apiKey: config.apiKey,
-              baseURL: config.baseURL || 'https://runtime.blimu.com',
+              baseURL: config.baseURL || 'https://api.blimu.dev',
               timeoutMs: config.timeoutMs ?? 30000,
             }),
           inject: [BLIMU_CONFIG],
@@ -194,7 +194,7 @@ export class BlimuModule {
             const config = await options.useFactory(...args);
             return {
               apiKey: config.apiKey,
-              baseURL: config.baseURL || 'https://runtime.blimu.com',
+              baseURL: config.baseURL || 'https://api.blimu.dev',
               environmentId: config.environmentId,
               timeoutMs: config.timeoutMs ?? 30000,
               getUserId: config.getUserId,
@@ -207,7 +207,7 @@ export class BlimuModule {
           useFactory: (config: BlimuConfig) =>
             new Blimu({
               apiKey: config.apiKey,
-              baseURL: config.baseURL || 'https://runtime.blimu.com',
+              baseURL: config.baseURL || 'https://api.blimu.dev',
               timeoutMs: config.timeoutMs ?? 30000,
             }),
           inject: [BLIMU_CONFIG],

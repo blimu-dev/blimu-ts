@@ -9,7 +9,7 @@ export interface BlimuConfig<TRequest = any> {
 
   /**
    * The base URL for the Blimu Runtime API
-   * @default 'https://runtime.blimu.com'
+   * @default 'https://api.blimu.dev'
    */
   baseURL?: string;
 
