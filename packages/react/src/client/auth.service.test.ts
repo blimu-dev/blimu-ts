@@ -600,7 +600,7 @@ describe('AuthService', () => {
   });
 
   describe('refreshSession', () => {
-    it('should successfully refresh session token without signal', async () => {
+    it('should successfully refresh session token without signal (live mode - no __lh_jwt)', async () => {
       const mockRefreshResponse = {
         sessionToken: jwt.sign(ONE_MINUTE_PAYLOAD, 'test_secret'),
       };
@@ -615,8 +615,9 @@ describe('AuthService', () => {
       const result = await authService['refreshSession']();
 
       expect(refreshSpy).toHaveBeenCalledTimes(1);
+      // In live mode, __lh_jwt should not be sent at all
       expect(refreshSpy).toHaveBeenCalledWith(
-        { __lh_jwt: undefined },
+        {},
         {
           signal: expect.any(AbortSignal),
         },
@@ -627,7 +628,20 @@ describe('AuthService', () => {
       expect(authService['refreshingSignals'].size).toBe(0);
     });
 
-    it('should successfully refresh session token with __lh_jwt in query', async () => {
+    it('should successfully refresh session token with __lh_jwt in query (non-live mode)', async () => {
+      // Create a new auth service with isLive: false for this test
+      const nonLiveAuthService = new AuthSessionService(
+        false, // isLive: false
+        client,
+        new ExternalStore<AuthState>({
+          user: null,
+          error: null,
+          status: 'idle',
+        }),
+        'http://localhost:3020',
+        PUBLISHABLE_KEY,
+      );
+
       const abortController = new AbortController();
       const signal = abortController.signal;
       const localhostJWT = jwt.sign(ONE_MINUTE_PAYLOAD, 'test_secret');
@@ -639,11 +653,11 @@ describe('AuthService', () => {
       Cookies.set(LOCALHOST_JWT_COOKIE_NAME, localhostJWT);
 
       const refreshSpy = vi
-        .spyOn(authService['localClient'].auth, 'refresh')
+        .spyOn(nonLiveAuthService['localClient'].auth, 'refresh')
         .mockResolvedValue(mockRefreshResponse);
       const addEventListenerSpy = vi.spyOn(signal, 'addEventListener');
 
-      const result = await authService['refreshSession']({ signal });
+      const result = await nonLiveAuthService['refreshSession']({ signal });
 
       expect(addEventListenerSpy).toHaveBeenCalledWith('abort', expect.any(Function));
       expect(refreshSpy).toHaveBeenCalledTimes(1);
@@ -654,9 +668,35 @@ describe('AuthService', () => {
         },
       );
       expect(result).toEqual(mockRefreshResponse);
-      expect(authService['refreshPromise']).toBeNull();
-      expect(authService['refreshingSignalAbortController']).toBeNull();
-      expect(authService['refreshingSignals'].size).toBe(0);
+      expect(nonLiveAuthService['refreshPromise']).toBeNull();
+      expect(nonLiveAuthService['refreshingSignalAbortController']).toBeNull();
+      expect(nonLiveAuthService['refreshingSignals'].size).toBe(0);
+    });
+
+    it('should not send __lh_jwt in live mode even if cookie exists', async () => {
+      const localhostJWT = jwt.sign(ONE_MINUTE_PAYLOAD, 'test_secret');
+      const mockRefreshResponse = {
+        sessionToken: jwt.sign(ONE_MINUTE_PAYLOAD, 'test_secret'),
+      };
+
+      // Set the localhost JWT cookie (should be ignored in live mode)
+      Cookies.set(LOCALHOST_JWT_COOKIE_NAME, localhostJWT);
+
+      const refreshSpy = vi
+        .spyOn(authService['localClient'].auth, 'refresh')
+        .mockResolvedValue(mockRefreshResponse);
+
+      const result = await authService['refreshSession']();
+
+      expect(refreshSpy).toHaveBeenCalledTimes(1);
+      // In live mode, __lh_jwt should not be sent even if cookie exists
+      expect(refreshSpy).toHaveBeenCalledWith(
+        {},
+        {
+          signal: expect.any(AbortSignal),
+        },
+      );
+      expect(result).toEqual(mockRefreshResponse);
     });
 
     it('should deduplicate concurrent refresh requests', async () => {

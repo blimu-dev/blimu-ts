@@ -1,4 +1,4 @@
-import { CoreClient, ClientOption, FetchError } from './client';
+import { CoreClient, FetchError, type ClientOption } from './client';
 import { BulkResourcesService } from './services/bulk_resources';
 import { BulkRolesService } from './services/bulk_roles';
 import { EntitlementsService } from './services/entitlements';

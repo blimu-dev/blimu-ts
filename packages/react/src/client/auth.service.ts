@@ -343,25 +343,28 @@ export class AuthSessionService {
       this.refreshingSignals.clear();
     });
 
-    // Get localhost_jwt from cookie to send as query parameter
-    const localhostJWT = Cookies.get(LOCALHOST_JWT_COOKIE_NAME);
+    // Get localhost_jwt from cookie to send as query parameter (only for non-live environments)
+    const localhostJWT = !this.isLive ? Cookies.get(LOCALHOST_JWT_COOKIE_NAME) : undefined;
+
+    // Build query parameters - only include __lh_jwt for non-live environments when cookie exists
+    const queryParams: { __lh_jwt?: string } = {};
+    if (localhostJWT) {
+      queryParams.__lh_jwt = localhostJWT;
+    }
 
     // Use local client to avoid infinite recursion. Regular client calls getSessionToken() which calls refreshSession().
     // There are hacks to avoid infinite recursion, but they are not reliable.
-    // The localhost_jwt is sent as a query parameter
+    // The localhost_jwt is sent as a query parameter only in non-live environments
     // Note: Type assertion needed because the generated SDK type doesn't include 'query' in RequestInit,
     // but the underlying CoreClient.request() method does support it
     this.refreshPromise = this.localClient.auth
-      .refresh(
-        { __lh_jwt: localhostJWT },
-        {
-          signal: this.refreshingSignalAbortController.signal,
-        },
-      )
+      .refresh(queryParams, {
+        signal: this.refreshingSignalAbortController.signal,
+      })
       .then((response) => {
         // Update cookie with new session token from response body
         // Server also sets it via Set-Cookie header on auth domain, but we set it manually on customer domain
-        if (response.sessionToken) {
+        if (!this.isLive) {
           this.setCookie(SESSION_COOKIE_NAME, response.sessionToken, {
             maxAge: 30 * 24 * 60 * 60, // 30 days
           });
