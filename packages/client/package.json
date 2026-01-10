@@ -1,6 +1,6 @@
 {
   "name": "@blimu/client",
-  "version": "0.6.3",
+  "version": "0.7.0",
   "description": "TypeScript SDK for Blimu API (auto-generated)",
   "repository": {
     "type": "git",

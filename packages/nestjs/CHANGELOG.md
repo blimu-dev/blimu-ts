@@ -1,5 +1,16 @@
 # @blimu/nestjs
 
+## 1.0.0
+
+### Minor Changes
+
+- Fix jwt localhost and cookies setting
+
+### Patch Changes
+
+- Updated dependencies
+  - @blimu/backend@0.7.0
+
 ## 0.6.3
 
 ### Patch Changes

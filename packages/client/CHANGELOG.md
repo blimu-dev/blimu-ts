@@ -1,5 +1,11 @@
 # @blimu/client
 
+## 0.7.0
+
+### Minor Changes
+
+- Fix jwt localhost and cookies setting
+
 ## 0.6.3
 
 ### Patch Changes

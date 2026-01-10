@@ -1,6 +1,6 @@
 {
   "name": "@blimu/react",
-  "version": "0.6.3",
+  "version": "0.7.0",
   "description": "React components and hooks for Blimu authentication and authorization",
   "type": "module",
   "repository": {
