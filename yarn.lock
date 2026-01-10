@@ -301,7 +301,7 @@ __metadata:
     rxjs: "npm:^7.8.2"
     typescript: "npm:^5.9.3"
   peerDependencies:
-    "@blimu/backend": ">=0.6.3"
+    "@blimu/backend": ">=0.7.0"
     "@nestjs/common": ">=10.0.0"
     "@nestjs/core": ">=10.0.0"
     reflect-metadata: ">=0.1.13"
