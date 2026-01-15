@@ -18,7 +18,7 @@
     "packages/*/dist/**"
   ],
   "scripts": {
-    "build": "yarn workspaces foreach -A run build",
+    "build": "yarn workspaces foreach -At run build",
     "build:backend": "yarn workspace @blimu/backend build",
     "build:client": "yarn workspace @blimu/client build",
     "build:nestjs": "yarn workspace @blimu/nestjs build",

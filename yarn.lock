@@ -270,12 +270,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@blimu/backend@workspace:packages/backend":
+"@blimu/backend@workspace:*, @blimu/backend@workspace:packages/backend":
   version: 0.0.0-use.local
   resolution: "@blimu/backend@workspace:packages/backend"
   dependencies:
     "@blimu/fetch": "npm:^0.2.0"
-    "@blimu/types": "npm:^0.1.0"
+    "@blimu/types": "npm:^1.1.0"
     "@types/jsonwebtoken": "npm:^9"
     jsonwebtoken: "npm:^9.0.3"
     tsup: "npm:^8.5.1"
@@ -287,6 +287,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@blimu/client@workspace:packages/client"
   dependencies:
+    "@blimu/types": "npm:^1.1.0"
     tsup: "npm:^8.5.1"
     zod: "npm:^4.3.5"
   languageName: unknown
@@ -303,6 +304,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@blimu/nestjs@workspace:packages/nestjs"
   dependencies:
+    "@blimu/backend": "workspace:*"
+    "@blimu/types": "workspace:*"
     "@nestjs/common": "npm:^11.1.11"
     "@nestjs/core": "npm:^11.1.11"
     "@types/node": "npm:^25.0.3"
@@ -310,7 +313,7 @@ __metadata:
     rxjs: "npm:^7.8.2"
     typescript: "npm:^5.9.3"
   peerDependencies:
-    "@blimu/backend": ">=0.7.0"
+    "@blimu/backend": ">=1.1.0"
     "@nestjs/common": ">=10.0.0"
     "@nestjs/core": ">=10.0.0"
     reflect-metadata: ">=0.1.13"
@@ -371,7 +374,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@blimu/types@npm:^0.1.0, @blimu/types@workspace:packages/types":
+"@blimu/types@npm:^1.1.0, @blimu/types@workspace:*, @blimu/types@workspace:packages/types":
   version: 0.0.0-use.local
   resolution: "@blimu/types@workspace:packages/types"
   dependencies:
