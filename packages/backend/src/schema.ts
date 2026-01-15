@@ -1,22 +1,33 @@
 // Generated types from OpenAPI components.schemas
 
+import type {
+  ResourceType,
+  EntitlementType,
+  PlanType,
+  LimitType,
+  UsageLimitType,
+} from '@blimu/types';
+
 export type Enum<T> = T[keyof T];
+
 export interface BalanceResponse {
   balance: number;
 }
+
 export interface CheckLimitResponse {
   allowed: boolean;
   current: number;
   remaining?: number;
   requested: number;
 }
+
 export interface EntitlementCheckBody {
   amount?: number;
-  /** Entitlement identifier */
   entitlement: EntitlementType;
   resourceId: string;
   userId: string;
 }
+
 export interface EntitlementCheckResult {
   allowed: boolean;
   limit?: {
@@ -41,10 +52,7 @@ export interface EntitlementCheckResult {
     userRoles?: Array<string>;
   } | null;
 }
-/**
- * Entitlement identifier
- */
-export type EntitlementType = string;
+
 export interface EntitlementsListResult {
   results: Array<{
     entitlements: Array<{
@@ -61,39 +69,32 @@ export interface EntitlementsListResult {
     resourceType: ResourceType;
   }>;
 }
-/**
- * Limit type identifier
- */
-export type LimitType = string;
+
 export interface PlanAssignBody {
-  /** Plan type identifier */
   planKey: PlanType;
 }
+
 export interface PlanDeleteResponse {
   success: boolean;
 }
+
 export interface PlanResponse {
   createdAt: string;
   environmentId: string;
-  /** Plan type identifier */
   planKey: PlanType;
   resourceId: string;
-  /** Resource type identifier */
   resourceType: ResourceType;
   updatedAt: string;
 }
-/**
- * Plan type identifier
- */
-export type PlanType = string;
+
 export interface Resource {
   createdAt: string;
   id: string;
   name: string | null;
   parents?: Array<{ id: string; type: ResourceType }>;
-  /** Resource type identifier */
   type: ResourceType;
 }
+
 export interface ResourceBulkCreateBody {
   resources: Array<{
     id?: string;
@@ -102,6 +103,7 @@ export interface ResourceBulkCreateBody {
     roles?: Array<{ role: string; userId: string }>;
   }>;
 }
+
 export interface ResourceBulkResult {
   created: Array<{ environmentId: string; id: string; type: ResourceType }>;
   errors: Array<{
@@ -117,12 +119,14 @@ export interface ResourceBulkResult {
   success: boolean;
   summary: { failed: number; successful: number; total: number };
 }
+
 export interface ResourceCreateBody {
   id?: string;
   name?: string;
   parents?: Array<{ id: string; type: ResourceType }>;
   roles?: Array<{ role: string; userId: string }>;
 }
+
 export interface ResourceList {
   items: Array<{
     createdAt: string;
@@ -135,6 +139,7 @@ export interface ResourceList {
   page: number;
   total: number;
 }
+
 export interface ResourceMemberList {
   items: Array<{
     inherited: boolean;
@@ -157,27 +162,31 @@ export interface ResourceMemberList {
   page: number;
   total: number;
 }
-/**
- * Resource type identifier
- */
-export type ResourceType = string;
+
 export interface ResourceUpdateBody {
   name?: string;
   /** Creates relationships with other resources. Parent resources must already exist. */
   parents?: Array<{ id: string; type: ResourceType }>;
 }
+
 export interface Role {
   createdAt: string;
   environmentId: string;
   resourceId: string;
-  /** Resource type identifier */
   resourceType: ResourceType;
   role: string;
   userId: string;
 }
+
 export interface RoleBulkCreateBody {
-  roles: Array<{ resourceId: string; resourceType: ResourceType; role: string; userId: string }>;
+  roles: Array<{
+    resourceId: string;
+    resourceType: ResourceType;
+    role: string;
+    userId: string;
+  }>;
 }
+
 export interface RoleBulkResult {
   created: Array<{
     createdAt: string;
@@ -190,17 +199,23 @@ export interface RoleBulkResult {
   errors: Array<{
     error: string;
     index: number;
-    role: { resourceId: string; resourceType: ResourceType; role: string; userId: string };
+    role: {
+      resourceId: string;
+      resourceType: ResourceType;
+      role: string;
+      userId: string;
+    };
   }>;
   success: boolean;
   summary: { failed: number; successful: number; total: number };
 }
+
 export interface RoleCreateBody {
   resourceId: string;
-  /** Resource type identifier */
   resourceType: ResourceType;
   role: string;
 }
+
 export interface RoleList {
   limit: number;
   page: number;
@@ -214,6 +229,7 @@ export interface RoleList {
   }>;
   total: number;
 }
+
 export interface TransactionHistoryResponse {
   items: Array<{
     amount: number;
@@ -226,49 +242,42 @@ export interface TransactionHistoryResponse {
     tags: Record<string, unknown> | null;
   }>;
 }
+
 export interface UsageCheckBody {
   amount: number;
-  /** Usage-based limit type identifier */
   limitType: UsageLimitType;
   period: 'monthly' | 'yearly' | 'lifetime';
   resourceId: string;
-  /** Resource type identifier */
   resourceType: ResourceType;
 }
+
 export interface UsageConsumeBody {
   amount: number;
-  /** Usage-based limit type identifier */
   limitType: UsageLimitType;
   resourceId: string;
-  /** Resource type identifier */
   resourceType: ResourceType;
   tags?: Record<string, unknown>;
 }
+
 export interface UsageCreditBody {
   amount: number;
-  /** Usage-based limit type identifier */
   limitType: UsageLimitType;
   resourceId: string;
-  /** Resource type identifier */
   resourceType: ResourceType;
   tags?: Record<string, unknown>;
 }
-/**
- * Usage-based limit type identifier
- */
-export type UsageLimitType = string;
+
 export interface UsageWalletResponse {
   amount: number;
   createdAt: string;
   environmentId: string;
   id: string;
-  /** Usage-based limit type identifier */
   limitType: UsageLimitType;
   resourceId: string;
-  /** Resource type identifier */
   resourceType: ResourceType;
   tags: Record<string, unknown> | null;
 }
+
 export interface User {
   avatarUrl: string | null;
   createdAt: string;
@@ -281,14 +290,17 @@ export interface User {
   lookupKey: string | null;
   updatedAt: string;
 }
+
 export interface UserCreateBody {
   avatarUrl?: string;
   email: string;
   firstName?: string | null;
   lastName?: string | null;
   lookupKey: string;
+  newUser?: boolean | null;
   password?: string | null;
 }
+
 export interface UserList {
   items: Array<{
     avatarUrl: string | null;
@@ -306,6 +318,7 @@ export interface UserList {
   page: number;
   total: number;
 }
+
 export type UserResourceList = Array<{
   inherited: boolean;
   resource: {
@@ -316,6 +329,7 @@ export type UserResourceList = Array<{
   };
   role: string;
 }>;
+
 export interface UserUpdateBody {
   avatarUrl?: string | null;
   email?: string;
@@ -326,29 +340,26 @@ export interface UserUpdateBody {
 }
 
 // Operation query parameter interfaces
+
 /**
- * Query params for Entitlements.ListForResource
- *
- * Returns entitlements for a specific resource and user. Only evaluates roles and plans (excludes limits). Provides detailed information about why entitlements are allowed or denied, including current roles, allowed roles, current plan, and allowed plans. Results are cached per resource for performance.
- */
+ * Query params for Entitlements.ListForResource*
+ * Returns entitlements for a specific resource and user. Only evaluates roles and plans (excludes limits). Provides detailed information about why entitlements are allowed or denied, including current roles, allowed roles, current plan, and allowed plans. Results are cached per resource for performance.*/
 export interface EntitlementsListForResourceQuery {
   /** The unique identifier of the user */
   userId: string;
 }
+
 /**
- * Query params for Entitlements.ListForTenant
- *
- * Returns entitlements for a tenant resource and all its descendant resources. This endpoint scopes queries to a single tenant, preventing cross-tenant data access. Only evaluates roles and plans (excludes limits). Results are cached per resource for performance. The tenant resource type is automatically determined from the environment definition (resource marked as `is_tenant: true`).
- */
+ * Query params for Entitlements.ListForTenant*
+ * Returns entitlements for a tenant resource and all its descendant resources. This endpoint scopes queries to a single tenant, preventing cross-tenant data access. Only evaluates roles and plans (excludes limits). Results are cached per resource for performance. The tenant resource type is automatically determined from the environment definition (resource marked as `is_tenant: true`).*/
 export interface EntitlementsListForTenantQuery {
   /** The unique identifier of the user */
   userId: string;
 }
+
 /**
- * Query params for Resource Members.List
- *
- * Retrieves a paginated list of users who have roles (direct or inherited) on the specified resource. Supports search functionality to filter users by email or name.
- */
+ * Query params for Resource Members.List*
+ * Retrieves a paginated list of users who have roles (direct or inherited) on the specified resource. Supports search functionality to filter users by email or name.*/
 export interface ResourceMembersListQuery {
   /** Number of items per page (minimum: 1, maximum: 100) */
   limit?: number;
@@ -357,11 +368,10 @@ export interface ResourceMembersListQuery {
   /** Search query to filter members by email or name */
   search?: string;
 }
+
 /**
- * Query params for Resources.List
- *
- * Retrieves a paginated list of resources of the specified type. Supports search and filtering. Resources are returned with their parent relationships and metadata.
- */
+ * Query params for Resources.List*
+ * Retrieves a paginated list of resources of the specified type. Supports search and filtering. Resources are returned with their parent relationships and metadata.*/
 export interface ResourcesListQuery {
   /** Number of items per page (minimum: 1, maximum: 100) */
   limit?: number;
@@ -370,11 +380,10 @@ export interface ResourcesListQuery {
   /** Search query to filter resources by name */
   search?: string;
 }
+
 /**
- * Query params for Roles.List
- *
- * Retrieves a paginated list of roles assigned to a user. Supports filtering by resource type, resource ID, and role name. Returns both directly assigned roles and inherited roles.
- */
+ * Query params for Roles.List*
+ * Retrieves a paginated list of roles assigned to a user. Supports filtering by resource type, resource ID, and role name. Returns both directly assigned roles and inherited roles.*/
 export interface RolesListQuery {
   /** Number of items per page (minimum: 1, maximum: 100) */
   limit?: number;
@@ -387,20 +396,18 @@ export interface RolesListQuery {
   /** Filter by role name */
   role?: string;
 }
+
 /**
- * Query params for Usage.GetBalance
- *
- * Retrieves the current balance of a usage wallet for a specific resource and limit type within a given time period. The balance reflects all credits and consumption transactions.
- */
+ * Query params for Usage.GetBalance*
+ * Retrieves the current balance of a usage wallet for a specific resource and limit type within a given time period. The balance reflects all credits and consumption transactions.*/
 export interface UsageGetBalanceQuery {
   /** Time period for the balance calculation */
   period: 'monthly' | 'yearly' | 'lifetime';
 }
+
 /**
- * Query params for Usage.GetTransactionHistory
- *
- * Retrieves the transaction history for a usage wallet, including all credits and consumption records. Supports filtering by time period and date range.
- */
+ * Query params for Usage.GetTransactionHistory*
+ * Retrieves the transaction history for a usage wallet, including all credits and consumption records. Supports filtering by time period and date range.*/
 export interface UsageGetTransactionHistoryQuery {
   /** End date for filtering transactions (ISO 8601 format) */
   endDate?: string;
@@ -409,11 +416,10 @@ export interface UsageGetTransactionHistoryQuery {
   /** Start date for filtering transactions (ISO 8601 format) */
   startDate?: string;
 }
+
 /**
- * Query params for Users.List
- *
- * Retrieves a paginated list of users in your environment. Supports search functionality to filter users by email, name, or lookup key.
- */
+ * Query params for Users.List*
+ * Retrieves a paginated list of users in your environment. Supports search functionality to filter users by email, name, or lookup key.*/
 export interface UsersListQuery {
   /** Number of items per page (minimum: 1, maximum: 100) */
   limit?: number;

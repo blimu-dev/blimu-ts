@@ -1,19 +1,34 @@
 {
   "name": "blimu",
   "version": "0.7.0",
-  "description": "Blimu - Authorization as a Service",
-  "main": "index.js",
-  "types": "index.d.ts",
-  "bin": "./bin/blimu",
+  "description": "Blimu - Authorization as a Service CLI",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": "./dist/main.js",
   "files": [
-    "index.js",
-    "index.d.ts",
+    "dist",
     "README.md",
-    "bin/**",
-    "scripts/**"
+    "bin/**"
   ],
   "scripts": {
-    "postinstall": "node scripts/postinstall.js"
+    "build": "tsup",
+    "dev": "tsx watch src/main.ts",
+    "type-check": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "prepublishOnly": "yarn build"
+  },
+  "dependencies": {
+    "@clack/prompts": "^0.11.0",
+    "commander": "^12.1.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^25.0.8",
+    "tsup": "^8.5.1",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.16"
   },
   "repository": {
     "type": "git",
@@ -25,9 +40,10 @@
     "authorization",
     "rbac",
     "access-control",
-    "permissions"
+    "permissions",
+    "cli"
   ],
   "engines": {
-    "node": ">=18"
+    "node": ">=18.0.0"
   }
 }

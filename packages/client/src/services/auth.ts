@@ -5,9 +5,8 @@ export class AuthService {
   constructor(private core: CoreClient) {}
 
   /**
-   * POST /v1/auth/logout
-   * @summary Logout and invalidate session
-   */
+   * POST /v1/auth/logout*
+   * @summary Logout and invalidate session*/
   logout(init?: Omit<RequestInit, 'method' | 'body'>): Promise<unknown> {
     return this.core.request({
       method: 'POST',
@@ -15,7 +14,6 @@ export class AuthService {
       ...(init || {}),
     });
   }
-
   /**
    * @summary Get query keys for logout
    * @returns ['v1/auth/logout']
@@ -25,12 +23,11 @@ export class AuthService {
   }
 
   /**
-   * POST /v1/auth/refresh
-   * @summary Refresh session token
-   */
+   * POST /v1/auth/refresh*
+   * @summary Refresh session token*/
   refresh(
     query?: Schema.AuthRefreshQuery,
-    init?: Omit<RequestInit, 'method' | 'body'>,
+    init?: Omit<RequestInit, 'method' | 'body'>
   ): Promise<Schema.RefreshResponse> {
     return this.core.request({
       method: 'POST',
@@ -39,7 +36,6 @@ export class AuthService {
       ...(init || {}),
     });
   }
-
   /**
    * @summary Get query keys for refresh
    * @returns ['v1/auth/refresh', query]
@@ -49,17 +45,17 @@ export class AuthService {
   }
 
   /**
-   * GET /v1/auth/session
-   * @summary Get current session
-   */
-  getSession(init?: Omit<RequestInit, 'method' | 'body'>): Promise<Schema.SessionResponse> {
+   * GET /v1/auth/session*
+   * @summary Get current session*/
+  getSession(
+    init?: Omit<RequestInit, 'method' | 'body'>
+  ): Promise<Schema.SessionResponse> {
     return this.core.request({
       method: 'GET',
       path: `/v1/auth/session`,
       ...(init || {}),
     });
   }
-
   /**
    * @summary Get query keys for getSession
    * @returns ['v1/auth/session']

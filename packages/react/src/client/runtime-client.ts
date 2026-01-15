@@ -42,7 +42,7 @@ export class BlimuRuntimeClientWrapper {
 
     this.client = new Blimu({
       baseURL: authApiUrl,
-      accessToken: () => this.session.getSessionToken(),
+      bearer: () => this.session.getSessionToken(),
       headers: { 'x-blimu-publishable-key': config.publishableKey },
     });
 

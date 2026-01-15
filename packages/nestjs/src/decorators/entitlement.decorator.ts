@@ -4,7 +4,7 @@ import {
   SetEntitlementMetadata,
   EntitlementInfo,
 } from '../guards/entitlement.guard';
-import { Schema } from '@blimu/backend';
+import type { EntitlementType } from '@blimu/types';
 
 /**
  * Decorator to check if the authenticated user has a specific entitlement on a resource.
@@ -95,7 +95,7 @@ import { Schema } from '@blimu/backend';
  * ```
  */
 export const Entitlement = <TRequest = any>(
-  entitlementKey: Schema.EntitlementType,
+  entitlementKey: EntitlementType,
   getEntitlementInfo: (request: TRequest) => EntitlementInfo | Promise<EntitlementInfo>,
 ) => {
   return applyDecorators(

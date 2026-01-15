@@ -398,21 +398,61 @@ describe('AuthService', () => {
       vi.useFakeTimers();
 
       let requestAborted = false;
+      let requestSignal: AbortSignal | null = null;
+      let abortPromiseResolver: (() => void) | null = null;
+      const abortPromise = new Promise<void>((resolve) => {
+        abortPromiseResolver = resolve;
+      });
 
       server.use(
         http.post('http://localhost:3020/v1/auth/refresh', async ({ request }) => {
+          requestSignal = request.signal;
+
           // Listen for abort on the request signal
-          await new Promise((resolve) => {
-            setTimeout(resolve, 5000);
+          return new Promise((resolve, reject) => {
+            // Check if already aborted
+            if (request.signal.aborted) {
+              requestAborted = true;
+              abortPromiseResolver?.();
+              reject(new Error('Request aborted'));
+              return;
+            }
+
+            // Listen for abort event
+            const abortHandler = () => {
+              requestAborted = true;
+              abortPromiseResolver?.();
+              reject(new Error('Request aborted'));
+            };
+
+            request.signal.addEventListener('abort', abortHandler, { once: true });
+
+            // Use a delay to allow abort to happen, but also check periodically
+            const checkInterval = setInterval(() => {
+              if (request.signal.aborted) {
+                clearInterval(checkInterval);
+                request.signal.removeEventListener('abort', abortHandler);
+                requestAborted = true;
+                abortPromiseResolver?.();
+                reject(new Error('Request aborted'));
+              }
+            }, 10);
+
             setTimeout(() => {
+              clearInterval(checkInterval);
+              request.signal.removeEventListener('abort', abortHandler);
               if (request.signal.aborted) {
                 requestAborted = true;
+                abortPromiseResolver?.();
+                reject(new Error('Request aborted'));
+              } else {
+                resolve(
+                  HttpResponse.json({
+                    sessionToken: jwt.sign(ONE_MINUTE_PAYLOAD, 'test_secret'),
+                  }),
+                );
               }
-            }, 0);
-          });
-
-          return HttpResponse.json({
-            sessionToken: jwt.sign(ONE_MINUTE_PAYLOAD, 'test_secret'),
+            }, 1000);
           });
         }),
       );
@@ -424,9 +464,21 @@ describe('AuthService', () => {
 
       await vi.waitFor(() => expect(refreshSpy).toHaveBeenCalled());
 
+      // Call unsubscribe which should abort the request
       unsubscribe?.();
 
-      await vi.waitFor(() => expect(requestAborted).toBe(true));
+      // Advance timers to allow abort to propagate
+      vi.advanceTimersByTime(100);
+      await vi.runAllTimersAsync();
+
+      // Wait for abort to be detected
+      await Promise.race([
+        abortPromise,
+        vi.waitFor(() => {
+          expect(requestSignal?.aborted || requestAborted).toBe(true);
+        }),
+      ]);
+
       // Tokens should not be cleared if the request is aborted
       expect(Cookies.get(SESSION_COOKIE_NAME)).toBe(sessionJWT);
     });

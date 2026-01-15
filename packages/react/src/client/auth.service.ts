@@ -201,6 +201,8 @@ export class AuthSessionService {
 
     const localhostJWTCookie = Cookies.get(LOCALHOST_JWT_COOKIE_NAME);
 
+    console.log('localhostJWTCookie', localhostJWTCookie);
+
     if (localhostJWTCookie && !Cookies.get(SESSION_COOKIE_NAME)) {
       const result = await this.refreshSession({ signal }).catch(this.handleRequestError);
       if ('error' in result) return result;

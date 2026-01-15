@@ -13,6 +13,8 @@ node_modules
 dist
 packages/*/bin/
 packages/*/dist
+*.tsbuildinfo
+tsconfig.tsbuildinfo
 .yarn/cache
 .yarn/install-state.gz
 .yarn/sdks

@@ -1,0 +1,3191 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/v1/auth/refresh": {
+      "post": {
+        "operationId": "AuthController_refresh",
+        "parameters": [
+          {
+            "name": "x-blimu-publishable-key",
+            "in": "header",
+            "description": "Publishable key for client-side authentication",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "__lh_jwt",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RefreshResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid refresh token"
+          }
+        },
+        "summary": "Refresh session token",
+        "tags": ["Auth"],
+        "x-codeSamples": [
+          {
+            "lang": "TypeScript",
+            "label": "TypeScript SDK",
+            "source": "const result = await clientAPI.auth.refresh({\n  __lh_jwt: \"__lh_jwt\"\n});"
+          },
+          {
+            "lang": "Go",
+            "label": "Go SDK",
+            "source": "result, err := clientAPI.AuthService.Refresh(ctx, &clientAPI.AuthRefreshQuery{\n  __lh_jwt: \"__lh_jwt\",\n})\nif err != nil {\n  // handle error\n}"
+          },
+          {
+            "lang": "Python",
+            "label": "Python SDK",
+            "source": "result = clientAPI.auth.refresh(,\n  _lh_jwt=\"__lh_jwt\")"
+          }
+        ]
+      }
+    },
+    "/v1/auth/session": {
+      "get": {
+        "operationId": "AuthController_getSession",
+        "parameters": [
+          {
+            "name": "x-blimu-publishable-key",
+            "in": "header",
+            "description": "Publishable key for client-side authentication",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionResponse"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get current session",
+        "tags": ["Auth"],
+        "x-codeSamples": [
+          {
+            "lang": "TypeScript",
+            "label": "TypeScript SDK",
+            "source": "const result = await clientAPI.auth.getSession();"
+          },
+          {
+            "lang": "Go",
+            "label": "Go SDK",
+            "source": "result, err := clientAPI.AuthService.GetSession(ctx)\nif err != nil {\n  // handle error\n}"
+          },
+          {
+            "lang": "Python",
+            "label": "Python SDK",
+            "source": "result = clientAPI.auth.getSession()"
+          }
+        ]
+      }
+    },
+    "/v1/auth/logout": {
+      "post": {
+        "operationId": "AuthController_logout",
+        "parameters": [
+          {
+            "name": "x-blimu-publishable-key",
+            "in": "header",
+            "description": "Publishable key for client-side authentication",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Logged out successfully"
+          }
+        },
+        "summary": "Logout and invalidate session",
+        "tags": ["Auth"],
+        "x-codeSamples": [
+          {
+            "lang": "TypeScript",
+            "label": "TypeScript SDK",
+            "source": "const result = await clientAPI.auth.logout();"
+          },
+          {
+            "lang": "Go",
+            "label": "Go SDK",
+            "source": "result, err := clientAPI.AuthService.Logout(ctx)\nif err != nil {\n  // handle error\n}"
+          },
+          {
+            "lang": "Python",
+            "label": "Python SDK",
+            "source": "result = clientAPI.auth.logout()"
+          }
+        ]
+      }
+    },
+    "/v1/client/entitlements/list-for-tenant/{tenantResourceId}": {
+      "get": {
+        "description": "Returns entitlements for a tenant resource and all its descendant resources for the authenticated user. This endpoint scopes queries to a single tenant, preventing cross-tenant data access. Only evaluates roles and plans (excludes limits). Results are cached per resource for performance. The tenant resource type is automatically determined from the environment definition (resource marked as `is_tenant: true`).",
+        "operationId": "EntitlementClientController_listForTenant",
+        "parameters": [
+          {
+            "name": "x-blimu-publishable-key",
+            "in": "header",
+            "description": "Publishable key for client-side authentication",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "tenantResourceId",
+            "required": true,
+            "in": "path",
+            "description": "The unique identifier of the tenant resource",
+            "schema": {
+              "minLength": 1,
+              "example": "org_123",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of entitlements for the tenant resource and all its sub-resources. Each resource includes all entitlements filtered by resource type, with detailed role and plan information.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntitlementsListResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Invalid input or validation error"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing authentication"
+          },
+          "404": {
+            "description": "Not Found - Tenant resource does not exist or no tenant resource type found in definition"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          },
+          {
+            "__bli_session": []
+          }
+        ],
+        "summary": "List entitlements for a tenant and all its sub-resources",
+        "tags": ["Entitlements"],
+        "x-codeSamples": [
+          {
+            "lang": "TypeScript",
+            "label": "TypeScript SDK",
+            "source": "const result = await clientAPI.entitlements.listForTenant('org_123');"
+          },
+          {
+            "lang": "Go",
+            "label": "Go SDK",
+            "source": "result, err := clientAPI.EntitlementsService.ListForTenant(ctx, \"org_123\")\nif err != nil {\n  // handle error\n}"
+          },
+          {
+            "lang": "Python",
+            "label": "Python SDK",
+            "source": "result = clientAPI.entitlements.listForTenant(\"org_123\")"
+          }
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "Client API",
+    "description": "The Client API documentation",
+    "version": "1.0",
+    "contact": {}
+  },
+  "tags": [],
+  "servers": [],
+  "components": {
+    "securitySchemes": {
+      "bearer": {
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "type": "http"
+      }
+    },
+    "schemas": {
+      "InitiateSignin": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+          }
+        },
+        "required": ["email"]
+      },
+      "InitiateSigninResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": ["code_sent", "password_required"]
+          },
+          "authMethod": {
+            "type": "string",
+            "enum": ["code", "password", "both"]
+          },
+          "email": {
+            "type": "string"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+          }
+        },
+        "required": ["status", "authMethod"],
+        "additionalProperties": false
+      },
+      "ResourceType": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Resource type identifier",
+        "example": "organization"
+      },
+      "AuthorizeCode": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+          },
+          "code": {
+            "type": "string",
+            "minLength": 6,
+            "maxLength": 6,
+            "pattern": "^\\d+$"
+          },
+          "resourceType": {
+            "$ref": "#/components/schemas/ResourceType",
+            "description": "The type of resource"
+          }
+        },
+        "required": ["email", "code", "resourceType"],
+        "id": "AuthorizeCode"
+      },
+      "VerifySigninCodeResponse": {
+        "type": "object",
+        "properties": {
+          "localhostJwt": {
+            "type": "string"
+          },
+          "user": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "email": {
+                "type": "string"
+              },
+              "firstName": {
+                "type": "string",
+                "nullable": true
+              },
+              "lastName": {
+                "type": "string",
+                "nullable": true
+              },
+              "emailVerified": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "id",
+              "email",
+              "firstName",
+              "lastName",
+              "emailVerified"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": ["user"],
+        "additionalProperties": false
+      },
+      "PasswordSignin": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+          },
+          "password": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": ["email", "password"]
+      },
+      "PasswordSigninResponse": {
+        "type": "object",
+        "properties": {
+          "localhostJwt": {
+            "type": "string"
+          },
+          "user": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "email": {
+                "type": "string"
+              },
+              "firstName": {
+                "type": "string",
+                "nullable": true
+              },
+              "lastName": {
+                "type": "string",
+                "nullable": true
+              },
+              "emailVerified": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "id",
+              "email",
+              "firstName",
+              "lastName",
+              "emailVerified"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": ["user"],
+        "additionalProperties": false
+      },
+      "InitiateSignup": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+          },
+          "firstName": {
+            "type": "string",
+            "minLength": 1
+          },
+          "lastName": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": ["email", "firstName", "lastName"]
+      },
+      "InitiateSignupResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": ["code_sent"]
+          },
+          "email": {
+            "type": "string"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+          }
+        },
+        "required": ["status", "email", "expiresAt"],
+        "additionalProperties": false
+      },
+      "VerifySignupCode": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+          },
+          "code": {
+            "type": "string",
+            "minLength": 6,
+            "maxLength": 6,
+            "pattern": "^\\d+$"
+          }
+        },
+        "required": ["email", "code"]
+      },
+      "VerifySignupCodeResponse": {
+        "type": "object",
+        "properties": {
+          "localhostJwt": {
+            "type": "string"
+          },
+          "user": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "email": {
+                "type": "string"
+              },
+              "firstName": {
+                "type": "string",
+                "nullable": true
+              },
+              "lastName": {
+                "type": "string",
+                "nullable": true
+              },
+              "emailVerified": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "id",
+              "email",
+              "firstName",
+              "lastName",
+              "emailVerified"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": ["user"],
+        "additionalProperties": false
+      },
+      "RefreshResponse": {
+        "type": "object",
+        "properties": {
+          "sessionToken": {
+            "type": "string"
+          }
+        },
+        "required": ["sessionToken"],
+        "additionalProperties": false
+      },
+      "SessionResponse": {
+        "type": "object",
+        "properties": {
+          "user": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "email": {
+                "type": "string"
+              },
+              "firstName": {
+                "type": "string",
+                "nullable": true
+              },
+              "lastName": {
+                "type": "string",
+                "nullable": true
+              },
+              "emailVerified": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "id",
+              "email",
+              "firstName",
+              "lastName",
+              "emailVerified"
+            ],
+            "additionalProperties": false,
+            "nullable": true
+          },
+          "isAuthenticated": {
+            "type": "boolean"
+          }
+        },
+        "required": ["user", "isAuthenticated"],
+        "additionalProperties": false
+      },
+      "ResendCode": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+          },
+          "type": {
+            "type": "string",
+            "enum": ["signup", "signin"]
+          }
+        },
+        "required": ["email", "type"]
+      },
+      "ResendCodeResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": ["code_sent"]
+          },
+          "email": {
+            "type": "string"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+          },
+          "canResendAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+          }
+        },
+        "required": ["status", "email", "expiresAt"],
+        "additionalProperties": false
+      },
+      "JWK": {
+        "type": "object",
+        "properties": {
+          "keys": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "kty": {
+                  "type": "string"
+                },
+                "use": {
+                  "type": "string"
+                },
+                "kid": {
+                  "type": "string"
+                },
+                "alg": {
+                  "type": "string"
+                },
+                "n": {
+                  "type": "string"
+                },
+                "e": {
+                  "type": "string"
+                }
+              },
+              "required": ["kty", "use", "kid", "alg", "n", "e"],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": ["keys"],
+        "additionalProperties": false
+      },
+      "EnvironmentByAuthDomain": {
+        "type": "object",
+        "properties": {
+          "environmentId": {
+            "type": "string"
+          },
+          "branding": {
+            "type": "object",
+            "properties": {
+              "environmentId": {
+                "type": "string"
+              },
+              "brandName": {
+                "type": "string"
+              },
+              "logoUrl": {
+                "type": "string",
+                "nullable": true
+              },
+              "faviconUrl": {
+                "type": "string"
+              },
+              "primaryColor": {
+                "type": "string"
+              },
+              "secondaryColor": {
+                "type": "string"
+              },
+              "fontFamily": {
+                "type": "string"
+              },
+              "loginTitle": {
+                "type": "string"
+              },
+              "loginSubtitle": {
+                "type": "string",
+                "nullable": true
+              },
+              "registerTitle": {
+                "type": "string"
+              },
+              "registerSubtitle": {
+                "type": "string",
+                "nullable": true
+              },
+              "footerText": {
+                "type": "string",
+                "nullable": true
+              },
+              "layoutType": {
+                "type": "string"
+              },
+              "backgroundImageUrl": {
+                "type": "string",
+                "nullable": true
+              },
+              "backgroundGradient": {
+                "type": "string",
+                "nullable": true
+              },
+              "showForgotPassword": {
+                "type": "boolean"
+              },
+              "showSignup": {
+                "type": "boolean"
+              },
+              "socialProviders": {
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {
+                  "type": "object",
+                  "properties": {
+                    "enabled": {
+                      "type": "boolean"
+                    },
+                    "customText": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["enabled"],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": [
+              "environmentId",
+              "brandName",
+              "logoUrl",
+              "faviconUrl",
+              "primaryColor",
+              "secondaryColor",
+              "fontFamily",
+              "loginTitle",
+              "loginSubtitle",
+              "registerTitle",
+              "registerSubtitle",
+              "footerText",
+              "layoutType",
+              "backgroundImageUrl",
+              "backgroundGradient",
+              "showForgotPassword",
+              "showSignup",
+              "socialProviders"
+            ],
+            "additionalProperties": false
+          },
+          "authConfig": {
+            "type": "object",
+            "properties": {
+              "authMethod": {
+                "type": "string",
+                "enum": ["code", "password", "both"]
+              },
+              "codeExpirationMinutes": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 9007199254740991
+              },
+              "maxCodeAttempts": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 9007199254740991
+              },
+              "requireEmailVerification": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "authMethod",
+              "codeExpirationMinutes",
+              "maxCodeAttempts",
+              "requireEmailVerification"
+            ],
+            "additionalProperties": false
+          },
+          "authApiUrl": {
+            "type": "string"
+          },
+          "publishableKey": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "environmentId",
+          "branding",
+          "authConfig",
+          "authApiUrl",
+          "publishableKey"
+        ],
+        "additionalProperties": false
+      },
+      "CreateEnvironmentRequest": {
+        "type": "object",
+        "properties": {
+          "workspaceId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "lookupKey": {
+            "type": "string"
+          },
+          "variant": {
+            "default": "TEST",
+            "type": "string",
+            "enum": ["TEST", "LIVE"]
+          },
+          "domain": {
+            "type": "string",
+            "pattern": "^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)*\\.[a-z]{2,}$"
+          },
+          "cloneFromEnvironmentId": {
+            "type": "string"
+          }
+        },
+        "required": ["workspaceId", "name"]
+      },
+      "CreateEnvironmentResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "workspaceId": {
+            "type": "string"
+          },
+          "lookupKey": {
+            "type": "string",
+            "nullable": true
+          },
+          "name": {
+            "type": "string"
+          },
+          "variant": {
+            "type": "string",
+            "enum": ["TEST", "LIVE"]
+          },
+          "domain": {
+            "type": "string"
+          },
+          "publishableKey": {
+            "type": "string"
+          },
+          "domainStatus": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "VALIDATING",
+              "VERIFIED",
+              "FAILED",
+              "TIMED_OUT",
+              "UNHEALTHY"
+            ]
+          },
+          "sslStatus": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "PROVISIONING",
+              "ACTIVE",
+              "RENEWING",
+              "FAILED",
+              "EXPIRED"
+            ]
+          },
+          "isAccessible": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "workspaceId",
+          "lookupKey",
+          "name",
+          "variant",
+          "domain",
+          "publishableKey",
+          "createdAt",
+          "updatedAt"
+        ],
+        "additionalProperties": false
+      },
+      "ResourceList": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "type": {
+                  "$ref": "#/components/schemas/ResourceType",
+                  "description": "The type of resource"
+                },
+                "name": {
+                  "type": "string",
+                  "nullable": true
+                },
+                "parents": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "type": {
+                        "$ref": "#/components/schemas/ResourceType",
+                        "description": "The type of resource"
+                      }
+                    },
+                    "required": ["id", "type"],
+                    "additionalProperties": false
+                  }
+                },
+                "createdAt": {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+                }
+              },
+              "required": ["id", "type", "name", "createdAt"],
+              "additionalProperties": false
+            }
+          },
+          "total": {
+            "type": "number"
+          },
+          "page": {
+            "type": "number"
+          },
+          "limit": {
+            "type": "number"
+          }
+        },
+        "required": ["items", "total", "page", "limit"],
+        "additionalProperties": false
+      },
+      "ResourceCreateBody": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "parents": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "type": {
+                  "$ref": "#/components/schemas/ResourceType",
+                  "description": "The type of resource"
+                }
+              },
+              "required": ["id", "type"]
+            }
+          },
+          "roles": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "userId": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "role": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "required": ["userId", "role"]
+            }
+          }
+        }
+      },
+      "Resource": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/ResourceType",
+            "description": "The type of resource"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "parents": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "type": {
+                  "$ref": "#/components/schemas/ResourceType",
+                  "description": "The type of resource"
+                }
+              },
+              "required": ["id", "type"],
+              "additionalProperties": false
+            }
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+          }
+        },
+        "required": ["id", "type", "name", "createdAt"],
+        "additionalProperties": false
+      },
+      "ResourceUpdateBody": {
+        "type": "object",
+        "properties": {
+          "parents": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "type": {
+                  "$ref": "#/components/schemas/ResourceType",
+                  "description": "The type of resource"
+                }
+              },
+              "required": ["id", "type"]
+            },
+            "description": "Creates relationships with other resources. Parent resources must already exist."
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "ResourceBulkCreateBody": {
+        "type": "object",
+        "properties": {
+          "resources": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "parents": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "type": {
+                        "$ref": "#/components/schemas/ResourceType",
+                        "description": "The type of resource"
+                      }
+                    },
+                    "required": ["id", "type"]
+                  }
+                },
+                "roles": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "userId": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "role": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    },
+                    "required": ["userId", "role"]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "required": ["resources"]
+      },
+      "ResourceBulkResult": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "created": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "type": {
+                  "$ref": "#/components/schemas/ResourceType",
+                  "description": "The type of resource"
+                },
+                "environmentId": {
+                  "type": "string"
+                }
+              },
+              "required": ["id", "type", "environmentId"],
+              "additionalProperties": false
+            }
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "index": {
+                  "type": "number"
+                },
+                "resource": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "parents": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "type": {
+                            "$ref": "#/components/schemas/ResourceType",
+                            "description": "The type of resource"
+                          }
+                        },
+                        "required": ["id", "type"],
+                        "additionalProperties": false
+                      }
+                    },
+                    "roles": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "userId": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "role": {
+                            "type": "string",
+                            "minLength": 1
+                          }
+                        },
+                        "required": ["userId", "role"],
+                        "additionalProperties": false
+                      }
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                "error": {
+                  "type": "string"
+                }
+              },
+              "required": ["index", "resource", "error"],
+              "additionalProperties": false
+            }
+          },
+          "summary": {
+            "type": "object",
+            "properties": {
+              "total": {
+                "type": "number"
+              },
+              "successful": {
+                "type": "number"
+              },
+              "failed": {
+                "type": "number"
+              }
+            },
+            "required": ["total", "successful", "failed"],
+            "additionalProperties": false
+          }
+        },
+        "required": ["success", "created", "errors", "summary"],
+        "additionalProperties": false
+      },
+      "DefinitionValidateBody": {
+        "type": "object",
+        "properties": {
+          "resources": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "is_tenant": {
+                  "type": "boolean"
+                },
+                "roles": {
+                  "minItems": 1,
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "parents": {
+                  "type": "object",
+                  "propertyNames": {
+                    "type": "string"
+                  },
+                  "additionalProperties": {
+                    "type": "object",
+                    "properties": {
+                      "required": {
+                        "type": "boolean"
+                      }
+                    },
+                    "required": ["required"]
+                  }
+                },
+                "roles_inheritance": {
+                  "type": "object",
+                  "propertyNames": {
+                    "type": "string"
+                  },
+                  "additionalProperties": {
+                    "minItems": 1,
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "pattern": "^([a-z0-9_-]+->)*[a-z0-9_-]+$"
+                    }
+                  }
+                }
+              },
+              "required": ["roles"]
+            }
+          },
+          "entitlements": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "roles": {
+                  "minItems": 1,
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "plans": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "limit": {
+                  "type": "string"
+                }
+              },
+              "required": ["roles"]
+            }
+          },
+          "features": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "summary": {
+                  "type": "string"
+                },
+                "entitlements": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "required": ["name"]
+            }
+          },
+          "plans": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "summary": {
+                  "type": "string"
+                },
+                "resource_limits": {
+                  "type": "object",
+                  "propertyNames": {
+                    "type": "string"
+                  },
+                  "additionalProperties": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "usage_based_limits": {
+                  "type": "object",
+                  "propertyNames": {
+                    "type": "string"
+                  },
+                  "additionalProperties": {
+                    "type": "object",
+                    "properties": {
+                      "value": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9007199254740991
+                      },
+                      "period": {
+                        "type": "string",
+                        "enum": ["monthly", "yearly", "lifetime"]
+                      }
+                    },
+                    "required": ["value", "period"]
+                  }
+                },
+                "billing": {
+                  "type": "object",
+                  "properties": {
+                    "slug": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "prices": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "amount": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 9007199254740991
+                          },
+                          "currency": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "interval": {
+                            "type": "string",
+                            "enum": ["month", "year"]
+                          }
+                        },
+                        "required": ["amount", "currency", "interval"]
+                      }
+                    },
+                    "features": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "feature_slug": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "feature_name": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "feature_type": {
+                            "type": "string",
+                            "enum": ["boolean", "usage", "seat"]
+                          },
+                          "item_type": {
+                            "type": "string",
+                            "enum": [
+                              "included",
+                              "addon",
+                              "usage",
+                              "credit",
+                              "seat"
+                            ]
+                          },
+                          "included_usage": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 9007199254740991
+                          },
+                          "limit_type": {
+                            "type": "string"
+                          },
+                          "included_quantity": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 9007199254740991
+                          }
+                        },
+                        "required": [
+                          "feature_slug",
+                          "feature_name",
+                          "feature_type",
+                          "item_type"
+                        ]
+                      }
+                    }
+                  },
+                  "required": ["slug"]
+                }
+              },
+              "required": ["name"]
+            }
+          },
+          "version": {
+            "default": "1.0",
+            "type": "string"
+          }
+        },
+        "required": ["resources"]
+      },
+      "DefinitionValidateResponse": {
+        "type": "object",
+        "properties": {
+          "valid": {
+            "type": "boolean"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "resource": {
+                  "type": "string"
+                },
+                "field": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              },
+              "required": ["resource", "field", "message"],
+              "additionalProperties": false
+            }
+          },
+          "spec": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {}
+          }
+        },
+        "required": ["valid", "errors"],
+        "additionalProperties": false
+      },
+      "DefinitionGenerateSDKBody": {
+        "type": "object",
+        "properties": {
+          "resources": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "is_tenant": {
+                  "type": "boolean"
+                },
+                "roles": {
+                  "minItems": 1,
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "parents": {
+                  "type": "object",
+                  "propertyNames": {
+                    "type": "string"
+                  },
+                  "additionalProperties": {
+                    "type": "object",
+                    "properties": {
+                      "required": {
+                        "type": "boolean"
+                      }
+                    },
+                    "required": ["required"]
+                  }
+                },
+                "roles_inheritance": {
+                  "type": "object",
+                  "propertyNames": {
+                    "type": "string"
+                  },
+                  "additionalProperties": {
+                    "minItems": 1,
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "pattern": "^([a-z0-9_-]+->)*[a-z0-9_-]+$"
+                    }
+                  }
+                }
+              },
+              "required": ["roles"]
+            }
+          },
+          "entitlements": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "roles": {
+                  "minItems": 1,
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "plans": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "limit": {
+                  "type": "string"
+                }
+              },
+              "required": ["roles"]
+            }
+          },
+          "features": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "summary": {
+                  "type": "string"
+                },
+                "entitlements": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "required": ["name"]
+            }
+          },
+          "plans": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "summary": {
+                  "type": "string"
+                },
+                "resource_limits": {
+                  "type": "object",
+                  "propertyNames": {
+                    "type": "string"
+                  },
+                  "additionalProperties": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "usage_based_limits": {
+                  "type": "object",
+                  "propertyNames": {
+                    "type": "string"
+                  },
+                  "additionalProperties": {
+                    "type": "object",
+                    "properties": {
+                      "value": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9007199254740991
+                      },
+                      "period": {
+                        "type": "string",
+                        "enum": ["monthly", "yearly", "lifetime"]
+                      }
+                    },
+                    "required": ["value", "period"]
+                  }
+                },
+                "billing": {
+                  "type": "object",
+                  "properties": {
+                    "slug": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "prices": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "amount": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 9007199254740991
+                          },
+                          "currency": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "interval": {
+                            "type": "string",
+                            "enum": ["month", "year"]
+                          }
+                        },
+                        "required": ["amount", "currency", "interval"]
+                      }
+                    },
+                    "features": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "feature_slug": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "feature_name": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "feature_type": {
+                            "type": "string",
+                            "enum": ["boolean", "usage", "seat"]
+                          },
+                          "item_type": {
+                            "type": "string",
+                            "enum": [
+                              "included",
+                              "addon",
+                              "usage",
+                              "credit",
+                              "seat"
+                            ]
+                          },
+                          "included_usage": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 9007199254740991
+                          },
+                          "limit_type": {
+                            "type": "string"
+                          },
+                          "included_quantity": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 9007199254740991
+                          }
+                        },
+                        "required": [
+                          "feature_slug",
+                          "feature_name",
+                          "feature_type",
+                          "item_type"
+                        ]
+                      }
+                    }
+                  },
+                  "required": ["slug"]
+                }
+              },
+              "required": ["name"]
+            }
+          },
+          "version": {
+            "default": "1.0",
+            "type": "string"
+          },
+          "sdk_options": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string"
+              },
+              "package_name": {
+                "type": "string"
+              },
+              "client_name": {
+                "type": "string"
+              },
+              "module_type": {
+                "default": "backend",
+                "type": "string",
+                "enum": ["backend", "client"]
+              }
+            },
+            "required": ["type", "package_name", "client_name"]
+          }
+        },
+        "required": ["resources", "sdk_options"]
+      },
+      "DefinitionGenerateSDKResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "spec": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {}
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "resource": {
+                  "type": "string"
+                },
+                "field": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              },
+              "required": ["resource", "field", "message"],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": ["success", "spec"],
+        "additionalProperties": false
+      },
+      "Definition": {
+        "type": "object",
+        "properties": {
+          "plans": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string",
+              "minLength": 1
+            },
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "summary": {
+                  "type": "string"
+                },
+                "resource_limits": {
+                  "type": "object",
+                  "propertyNames": {
+                    "type": "string"
+                  },
+                  "additionalProperties": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "usage_based_limits": {
+                  "type": "object",
+                  "propertyNames": {
+                    "type": "string"
+                  },
+                  "additionalProperties": {
+                    "type": "object",
+                    "properties": {
+                      "value": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9007199254740991
+                      },
+                      "period": {
+                        "type": "string",
+                        "enum": ["monthly", "yearly", "lifetime"]
+                      }
+                    },
+                    "required": ["value", "period"]
+                  }
+                },
+                "billing": {
+                  "type": "object",
+                  "properties": {
+                    "slug": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "prices": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "amount": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 9007199254740991
+                          },
+                          "currency": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "interval": {
+                            "type": "string",
+                            "enum": ["month", "year"]
+                          }
+                        },
+                        "required": ["amount", "currency", "interval"]
+                      }
+                    },
+                    "features": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "feature_slug": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "feature_name": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "feature_type": {
+                            "type": "string",
+                            "enum": ["boolean", "usage", "seat"]
+                          },
+                          "item_type": {
+                            "type": "string",
+                            "enum": [
+                              "included",
+                              "addon",
+                              "usage",
+                              "credit",
+                              "seat"
+                            ]
+                          },
+                          "included_usage": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 9007199254740991
+                          },
+                          "limit_type": {
+                            "type": "string"
+                          },
+                          "included_quantity": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 9007199254740991
+                          }
+                        },
+                        "required": [
+                          "feature_slug",
+                          "feature_name",
+                          "feature_type",
+                          "item_type"
+                        ]
+                      }
+                    }
+                  },
+                  "required": ["slug"]
+                }
+              },
+              "required": ["name"]
+            }
+          },
+          "resources": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string",
+              "minLength": 1
+            },
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "is_tenant": {
+                  "type": "boolean"
+                },
+                "roles": {
+                  "minItems": 1,
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "parents": {
+                  "type": "object",
+                  "propertyNames": {
+                    "type": "string"
+                  },
+                  "additionalProperties": {
+                    "type": "object",
+                    "properties": {
+                      "required": {
+                        "type": "boolean"
+                      }
+                    },
+                    "required": ["required"]
+                  }
+                },
+                "roles_inheritance": {
+                  "type": "object",
+                  "propertyNames": {
+                    "type": "string"
+                  },
+                  "additionalProperties": {
+                    "minItems": 1,
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "pattern": "^([a-z0-9_-]+->)*[a-z0-9_-]+$"
+                    }
+                  }
+                }
+              },
+              "required": ["roles"]
+            }
+          },
+          "entitlements": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string",
+              "minLength": 1
+            },
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "roles": {
+                  "minItems": 1,
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "plans": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "limit": {
+                  "type": "string"
+                }
+              },
+              "required": ["roles"]
+            }
+          },
+          "features": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string",
+              "minLength": 1
+            },
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "summary": {
+                  "type": "string"
+                },
+                "entitlements": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "required": ["name"]
+            }
+          }
+        },
+        "required": ["plans", "resources", "entitlements", "features"]
+      },
+      "DefinitionCustomTypesResponse": {
+        "type": "object",
+        "properties": {
+          "openapi": {
+            "type": "string"
+          },
+          "info": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string"
+              },
+              "version": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "required": ["title", "version"],
+            "additionalProperties": false
+          },
+          "components": {
+            "type": "object",
+            "properties": {
+              "schemas": {
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {}
+              }
+            },
+            "required": ["schemas"],
+            "additionalProperties": false
+          }
+        },
+        "required": ["openapi", "info", "components"],
+        "additionalProperties": false
+      },
+      "OpenAPISpecResponse": {
+        "type": "object",
+        "propertyNames": {
+          "type": "string"
+        },
+        "additionalProperties": {}
+      },
+      "JsonSchemaResponse": {
+        "type": "object",
+        "propertyNames": {
+          "type": "string"
+        },
+        "additionalProperties": {}
+      },
+      "RoleCreateBody": {
+        "type": "object",
+        "properties": {
+          "role": {
+            "type": "string",
+            "minLength": 1
+          },
+          "resourceType": {
+            "$ref": "#/components/schemas/ResourceType",
+            "description": "The type of resource"
+          },
+          "resourceId": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": ["role", "resourceType", "resourceId"]
+      },
+      "Role": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          },
+          "resourceType": {
+            "$ref": "#/components/schemas/ResourceType",
+            "description": "The type of resource"
+          },
+          "resourceId": {
+            "type": "string"
+          },
+          "environmentId": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "userId",
+          "role",
+          "resourceType",
+          "resourceId",
+          "environmentId",
+          "createdAt"
+        ],
+        "additionalProperties": false
+      },
+      "RoleList": {
+        "type": "object",
+        "properties": {
+          "roles": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "userId": {
+                  "type": "string"
+                },
+                "role": {
+                  "type": "string"
+                },
+                "resourceType": {
+                  "$ref": "#/components/schemas/ResourceType",
+                  "description": "The type of resource"
+                },
+                "resourceId": {
+                  "type": "string"
+                },
+                "environmentId": {
+                  "type": "string"
+                },
+                "createdAt": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "userId",
+                "role",
+                "resourceType",
+                "resourceId",
+                "environmentId",
+                "createdAt"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "total": {
+            "type": "number"
+          },
+          "page": {
+            "type": "number"
+          },
+          "limit": {
+            "type": "number"
+          }
+        },
+        "required": ["roles", "total", "page", "limit"],
+        "additionalProperties": false
+      },
+      "RoleBulkCreateBody": {
+        "type": "object",
+        "properties": {
+          "roles": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "userId": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "role": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "resourceType": {
+                  "$ref": "#/components/schemas/ResourceType",
+                  "description": "The type of resource"
+                },
+                "resourceId": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "required": ["userId", "role", "resourceType", "resourceId"]
+            }
+          }
+        },
+        "required": ["roles"]
+      },
+      "RoleBulkResult": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "created": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "userId": {
+                  "type": "string"
+                },
+                "role": {
+                  "type": "string"
+                },
+                "resourceType": {
+                  "$ref": "#/components/schemas/ResourceType",
+                  "description": "The type of resource"
+                },
+                "resourceId": {
+                  "type": "string"
+                },
+                "environmentId": {
+                  "type": "string"
+                },
+                "createdAt": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "userId",
+                "role",
+                "resourceType",
+                "resourceId",
+                "environmentId",
+                "createdAt"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "index": {
+                  "type": "number"
+                },
+                "role": {
+                  "type": "object",
+                  "properties": {
+                    "userId": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "role": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "resourceType": {
+                      "$ref": "#/components/schemas/ResourceType",
+                      "description": "The type of resource"
+                    },
+                    "resourceId": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  },
+                  "required": ["userId", "role", "resourceType", "resourceId"],
+                  "additionalProperties": false
+                },
+                "error": {
+                  "type": "string"
+                }
+              },
+              "required": ["index", "role", "error"],
+              "additionalProperties": false
+            }
+          },
+          "summary": {
+            "type": "object",
+            "properties": {
+              "total": {
+                "type": "number"
+              },
+              "successful": {
+                "type": "number"
+              },
+              "failed": {
+                "type": "number"
+              }
+            },
+            "required": ["total", "successful", "failed"],
+            "additionalProperties": false
+          }
+        },
+        "required": ["success", "created", "errors", "summary"],
+        "additionalProperties": false
+      },
+      "UserList": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "lookupKey": {
+                  "type": "string",
+                  "nullable": true
+                },
+                "emailVerified": {
+                  "type": "boolean"
+                },
+                "email": {
+                  "type": "string",
+                  "format": "email",
+                  "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+                },
+                "firstName": {
+                  "type": "string",
+                  "nullable": true
+                },
+                "lastName": {
+                  "type": "string",
+                  "nullable": true
+                },
+                "avatarUrl": {
+                  "type": "string",
+                  "nullable": true
+                },
+                "createdAt": {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+                },
+                "updatedAt": {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+                },
+                "lastLoginAt": {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$",
+                  "nullable": true
+                }
+              },
+              "required": [
+                "id",
+                "lookupKey",
+                "emailVerified",
+                "email",
+                "firstName",
+                "lastName",
+                "avatarUrl",
+                "createdAt",
+                "updatedAt",
+                "lastLoginAt"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "total": {
+            "type": "number"
+          },
+          "page": {
+            "type": "number"
+          },
+          "limit": {
+            "type": "number"
+          }
+        },
+        "required": ["items", "total", "page", "limit"],
+        "additionalProperties": false
+      },
+      "UserCreateBody": {
+        "type": "object",
+        "properties": {
+          "newUser": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "lookupKey": {
+            "type": "string",
+            "minLength": 1
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+          },
+          "firstName": {
+            "type": "string",
+            "nullable": true
+          },
+          "lastName": {
+            "type": "string",
+            "nullable": true
+          },
+          "avatarUrl": {
+            "type": "string",
+            "format": "uri"
+          },
+          "password": {
+            "type": "string",
+            "minLength": 6,
+            "nullable": true
+          }
+        },
+        "required": ["lookupKey", "email"]
+      },
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "lookupKey": {
+            "type": "string",
+            "nullable": true
+          },
+          "emailVerified": {
+            "type": "boolean"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+          },
+          "firstName": {
+            "type": "string",
+            "nullable": true
+          },
+          "lastName": {
+            "type": "string",
+            "nullable": true
+          },
+          "avatarUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+          },
+          "lastLoginAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "lookupKey",
+          "emailVerified",
+          "email",
+          "firstName",
+          "lastName",
+          "avatarUrl",
+          "createdAt",
+          "updatedAt",
+          "lastLoginAt"
+        ],
+        "additionalProperties": false
+      },
+      "UserUpdateBody": {
+        "type": "object",
+        "properties": {
+          "lookupKey": {
+            "type": "string",
+            "minLength": 1
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+          },
+          "firstName": {
+            "type": "string",
+            "nullable": true
+          },
+          "lastName": {
+            "type": "string",
+            "nullable": true
+          },
+          "avatarUrl": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true
+          },
+          "password": {
+            "type": "string",
+            "minLength": 6
+          }
+        }
+      },
+      "UserResourceList": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "resource": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "type": {
+                  "$ref": "#/components/schemas/ResourceType",
+                  "description": "The type of resource"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "parents": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "type": {
+                        "$ref": "#/components/schemas/ResourceType",
+                        "description": "The type of resource"
+                      }
+                    },
+                    "required": ["id", "type"],
+                    "additionalProperties": false
+                  }
+                }
+              },
+              "required": ["id", "type", "name", "parents"],
+              "additionalProperties": {}
+            },
+            "role": {
+              "type": "string"
+            },
+            "inherited": {
+              "type": "boolean"
+            }
+          },
+          "required": ["resource", "role", "inherited"],
+          "additionalProperties": false
+        }
+      },
+      "EntitlementCheckBody": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "entitlement": {
+            "$ref": "#/components/schemas/EntitlementType",
+            "description": "The entitlement to check"
+          },
+          "resourceId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "amount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": ["userId", "entitlement", "resourceId"]
+      },
+      "EntitlementCheckResult": {
+        "type": "object",
+        "properties": {
+          "allowed": {
+            "type": "boolean"
+          },
+          "roles": {
+            "type": "object",
+            "properties": {
+              "allowed": {
+                "type": "boolean"
+              },
+              "reason": {
+                "type": "string"
+              },
+              "userRoles": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "allowedRoles": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "required": ["allowed"],
+            "additionalProperties": false,
+            "nullable": true
+          },
+          "limit": {
+            "type": "object",
+            "properties": {
+              "allowed": {
+                "type": "boolean"
+              },
+              "reason": {
+                "type": "string"
+              },
+              "current": {
+                "type": "number"
+              },
+              "limit": {
+                "type": "number"
+              },
+              "remaining": {
+                "type": "number"
+              },
+              "scope": {
+                "type": "string"
+              },
+              "plan": {
+                "type": "string",
+                "nullable": true
+              }
+            },
+            "required": ["allowed"],
+            "additionalProperties": false,
+            "nullable": true
+          },
+          "plans": {
+            "type": "object",
+            "properties": {
+              "allowed": {
+                "type": "boolean"
+              },
+              "reason": {
+                "type": "string"
+              },
+              "plan": {
+                "type": "string",
+                "nullable": true
+              },
+              "allowedPlans": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "required": ["allowed"],
+            "additionalProperties": false,
+            "nullable": true
+          }
+        },
+        "required": ["allowed"],
+        "additionalProperties": false
+      },
+      "EntitlementsListResult": {
+        "type": "object",
+        "properties": {
+          "results": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "resourceType": {
+                  "$ref": "#/components/schemas/ResourceType",
+                  "description": "The type of resource"
+                },
+                "resourceId": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "entitlements": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "entitlement": {
+                        "$ref": "#/components/schemas/EntitlementType",
+                        "description": "The entitlement to check"
+                      },
+                      "allowed": {
+                        "type": "boolean"
+                      },
+                      "allowedByRole": {
+                        "type": "boolean"
+                      },
+                      "allowedByPlan": {
+                        "type": "boolean"
+                      },
+                      "currentRole": {
+                        "type": "string"
+                      },
+                      "allowedRoles": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "currentPlan": {
+                        "type": "string"
+                      },
+                      "allowedPlans": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "required": [
+                      "entitlement",
+                      "allowed",
+                      "allowedByRole",
+                      "allowedByPlan",
+                      "allowedRoles"
+                    ],
+                    "additionalProperties": false
+                  }
+                }
+              },
+              "required": ["resourceType", "resourceId", "entitlements"],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": ["results"],
+        "additionalProperties": false
+      },
+      "PlanAssignBody": {
+        "type": "object",
+        "properties": {
+          "planKey": {
+            "$ref": "#/components/schemas/PlanType",
+            "description": "The plan key"
+          }
+        },
+        "required": ["planKey"]
+      },
+      "PlanResponse": {
+        "type": "object",
+        "properties": {
+          "environmentId": {
+            "type": "string"
+          },
+          "resourceType": {
+            "$ref": "#/components/schemas/ResourceType",
+            "description": "The type of resource"
+          },
+          "resourceId": {
+            "type": "string"
+          },
+          "planKey": {
+            "$ref": "#/components/schemas/PlanType",
+            "description": "The plan key"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+          }
+        },
+        "required": [
+          "environmentId",
+          "resourceType",
+          "resourceId",
+          "planKey",
+          "createdAt",
+          "updatedAt"
+        ],
+        "additionalProperties": false
+      },
+      "PlanDeleteResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          }
+        },
+        "required": ["success"],
+        "additionalProperties": false
+      },
+      "UsageCreditBody": {
+        "type": "object",
+        "properties": {
+          "resourceType": {
+            "$ref": "#/components/schemas/ResourceType",
+            "description": "The type of resource"
+          },
+          "resourceId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "limitType": {
+            "$ref": "#/components/schemas/UsageLimitType",
+            "description": "The type of usage-based limit"
+          },
+          "amount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "tags": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {}
+          }
+        },
+        "required": ["resourceType", "resourceId", "limitType", "amount"]
+      },
+      "UsageWalletResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "environmentId": {
+            "type": "string"
+          },
+          "resourceType": {
+            "$ref": "#/components/schemas/ResourceType",
+            "description": "The type of resource"
+          },
+          "resourceId": {
+            "type": "string"
+          },
+          "limitType": {
+            "$ref": "#/components/schemas/UsageLimitType",
+            "description": "The type of usage-based limit"
+          },
+          "amount": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "tags": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {},
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+          }
+        },
+        "required": [
+          "id",
+          "environmentId",
+          "resourceType",
+          "resourceId",
+          "limitType",
+          "amount",
+          "tags",
+          "createdAt"
+        ],
+        "additionalProperties": false
+      },
+      "UsageConsumeBody": {
+        "type": "object",
+        "properties": {
+          "resourceType": {
+            "$ref": "#/components/schemas/ResourceType",
+            "description": "The type of resource"
+          },
+          "resourceId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "limitType": {
+            "$ref": "#/components/schemas/UsageLimitType",
+            "description": "The type of usage-based limit"
+          },
+          "amount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "tags": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {}
+          }
+        },
+        "required": ["resourceType", "resourceId", "limitType", "amount"]
+      },
+      "BalanceResponse": {
+        "type": "object",
+        "properties": {
+          "balance": {
+            "type": "number"
+          }
+        },
+        "required": ["balance"],
+        "additionalProperties": false
+      },
+      "TransactionHistoryResponse": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "environmentId": {
+                  "type": "string"
+                },
+                "resourceType": {
+                  "$ref": "#/components/schemas/ResourceType",
+                  "description": "The type of resource"
+                },
+                "resourceId": {
+                  "type": "string"
+                },
+                "limitType": {
+                  "$ref": "#/components/schemas/LimitType",
+                  "description": "The type of limit"
+                },
+                "amount": {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                },
+                "tags": {
+                  "type": "object",
+                  "propertyNames": {
+                    "type": "string"
+                  },
+                  "additionalProperties": {},
+                  "nullable": true
+                },
+                "createdAt": {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+                }
+              },
+              "required": [
+                "id",
+                "environmentId",
+                "resourceType",
+                "resourceId",
+                "limitType",
+                "amount",
+                "tags",
+                "createdAt"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": ["items"],
+        "additionalProperties": false
+      },
+      "UsageCheckBody": {
+        "type": "object",
+        "properties": {
+          "resourceType": {
+            "$ref": "#/components/schemas/ResourceType",
+            "description": "The type of resource"
+          },
+          "resourceId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "limitType": {
+            "$ref": "#/components/schemas/UsageLimitType",
+            "description": "The type of usage-based limit"
+          },
+          "amount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "period": {
+            "type": "string",
+            "enum": ["monthly", "yearly", "lifetime"]
+          }
+        },
+        "required": [
+          "resourceType",
+          "resourceId",
+          "limitType",
+          "amount",
+          "period"
+        ]
+      },
+      "CheckLimitResponse": {
+        "type": "object",
+        "properties": {
+          "allowed": {
+            "type": "boolean"
+          },
+          "current": {
+            "type": "number"
+          },
+          "requested": {
+            "type": "number"
+          },
+          "remaining": {
+            "type": "number"
+          }
+        },
+        "required": ["allowed", "current", "requested"],
+        "additionalProperties": false
+      },
+      "ResourceMemberList": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "userId": {
+                  "type": "string"
+                },
+                "role": {
+                  "type": "string"
+                },
+                "inherited": {
+                  "type": "boolean"
+                },
+                "user": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "lookupKey": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "emailVerified": {
+                      "type": "boolean"
+                    },
+                    "email": {
+                      "type": "string",
+                      "format": "email",
+                      "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+                    },
+                    "firstName": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "lastName": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "avatarUrl": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "createdAt": {
+                      "type": "string",
+                      "format": "date-time",
+                      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+                    },
+                    "updatedAt": {
+                      "type": "string",
+                      "format": "date-time",
+                      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+                    },
+                    "lastLoginAt": {
+                      "type": "string",
+                      "format": "date-time",
+                      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$",
+                      "nullable": true
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "lookupKey",
+                    "emailVerified",
+                    "email",
+                    "firstName",
+                    "lastName",
+                    "avatarUrl",
+                    "createdAt",
+                    "updatedAt",
+                    "lastLoginAt"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": ["userId", "role", "inherited", "user"],
+              "additionalProperties": false
+            }
+          },
+          "total": {
+            "type": "number"
+          },
+          "page": {
+            "type": "number"
+          },
+          "limit": {
+            "type": "number"
+          }
+        },
+        "required": ["items", "total", "page", "limit"],
+        "additionalProperties": false
+      },
+      "EntitlementType": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Entitlement identifier",
+        "example": "organization:create_workspace"
+      },
+      "LimitType": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Limit type identifier",
+        "example": "projects_per_workspace"
+      },
+      "UsageLimitType": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Usage-based limit type identifier",
+        "example": "api_calls_per_month"
+      },
+      "ResourceLimitType": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Resource-based limit type identifier",
+        "example": "projects_per_workspace"
+      },
+      "PlanType": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Plan type identifier",
+        "example": "free"
+      }
+    }
+  },
+  "security": [
+    {
+      "BearerAuth": []
+    }
+  ],
+  "_metadata": {
+    "generatedAt": "2026-01-14T00:51:32.947Z",
+    "generator": "@blimu/codegen",
+    "generatorVersion": "1.0.0"
+  }
+}

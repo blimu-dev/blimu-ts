@@ -7,7 +7,8 @@ import {
   Inject,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { Blimu, Schema } from '@blimu/backend';
+import { Blimu } from '@blimu/backend';
+import type { EntitlementType } from '@blimu/types';
 import type { BlimuConfig } from '../config/blimu.config';
 import { BLIMU_CONFIG } from '../config/blimu.config';
 import { BlimuForbiddenException } from '../exceptions/blimu-forbidden.exception';
@@ -27,7 +28,7 @@ export interface EntitlementInfo {
  * Metadata interface for entitlement checks
  */
 export interface EntitlementMetadata<TRequest = any> {
-  entitlementKey: Schema.EntitlementType;
+  entitlementKey: EntitlementType;
   getEntitlementInfo: (request: TRequest) => EntitlementInfo | Promise<EntitlementInfo>;
 }
 

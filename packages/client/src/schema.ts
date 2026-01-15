@@ -1,10 +1,9 @@
 // Generated types from OpenAPI components.schemas
 
+import type { ResourceType, EntitlementType } from '@blimu/types';
+
 export type Enum<T> = T[keyof T];
-/**
- * Entitlement identifier
- */
-export type EntitlementType = string;
+
 export interface EntitlementsListResult {
   results: Array<{
     entitlements: Array<{
@@ -21,13 +20,11 @@ export interface EntitlementsListResult {
     resourceType: ResourceType;
   }>;
 }
+
 export interface RefreshResponse {
   sessionToken: string;
 }
-/**
- * Resource type identifier
- */
-export type ResourceType = string;
+
 export interface SessionResponse {
   isAuthenticated: boolean;
   user: {
@@ -40,9 +37,9 @@ export interface SessionResponse {
 }
 
 // Operation query parameter interfaces
+
 /**
- * Query params for Auth.Refresh
- */
+ * Query params for Auth.Refresh*/
 export interface AuthRefreshQuery {
   __lh_jwt?: string;
 }

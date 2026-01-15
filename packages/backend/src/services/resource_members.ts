@@ -1,20 +1,19 @@
 import { CoreClient } from '../client';
 import * as Schema from '../schema';
+import type { ResourceType } from '@blimu/types';
 
 export class ResourceMembersService {
   constructor(private core: CoreClient) {}
 
   /**
-   * GET /v1/resources/{resourceType}/{resourceId}/members
-   * @summary List members for a resource
-   *
-   * @description Retrieves a paginated list of users who have roles (direct or inherited) on the specified resource. Supports search functionality to filter users by email or name.
-   */
+   * GET /v1/resources/{resourceType}/{resourceId}/members*
+   * @summary List members for a resource*
+   * @description Retrieves a paginated list of users who have roles (direct or inherited) on the specified resource. Supports search functionality to filter users by email or name.*/
   list(
-    resourceType: Schema.ResourceType,
+    resourceType: ResourceType,
     resourceId: string,
     query?: Schema.ResourceMembersListQuery,
-    init?: Omit<RequestInit, 'method' | 'body'>,
+    init?: Omit<RequestInit, 'method' | 'body'>
   ): Promise<Schema.ResourceMemberList> {
     return this.core.request({
       method: 'GET',

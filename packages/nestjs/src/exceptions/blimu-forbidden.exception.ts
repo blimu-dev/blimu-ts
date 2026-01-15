@@ -1,6 +1,6 @@
 import { ForbiddenException } from '@nestjs/common';
 import type { Schema } from '@blimu/backend';
-
+import type { EntitlementType } from '@blimu/types';
 /**
  * Custom exception for Blimu entitlement check failures
  *
@@ -17,7 +17,7 @@ export class BlimuForbiddenException extends ForbiddenException {
   /**
    * The entitlement key that was checked
    */
-  public readonly entitlementKey: Schema.EntitlementType;
+  public readonly entitlementKey: EntitlementType;
 
   /**
    * The resource ID that was checked
@@ -31,7 +31,7 @@ export class BlimuForbiddenException extends ForbiddenException {
 
   constructor(
     entitlementResult: Schema.EntitlementCheckResult,
-    entitlementKey: Schema.EntitlementType,
+    entitlementKey: EntitlementType,
     resourceId: string,
     userId: string,
   ) {
@@ -57,7 +57,7 @@ export class BlimuForbiddenException extends ForbiddenException {
    */
   private static buildMessage(
     result: Schema.EntitlementCheckResult,
-    entitlementKey: Schema.EntitlementType,
+    entitlementKey: EntitlementType,
   ): string {
     const reasons: string[] = [];
 

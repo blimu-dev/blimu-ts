@@ -30,9 +30,6 @@
     "reflect-metadata": ">=0.1.13",
     "rxjs": ">=7.0.0"
   },
-  "dependencies": {
-    "@blimu/backend": "workspace:*"
-  },
   "devDependencies": {
     "@nestjs/common": "^11.1.11",
     "@nestjs/core": "^11.1.11",

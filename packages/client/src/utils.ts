@@ -1,12 +1,22 @@
-export type PaginableQuery = { limit?: number; offset?: number } & Record<string, unknown>;
+import { parseSSEStream, parseNDJSONStream } from '@blimu/fetch';
+
+export type PaginableQuery = { limit?: number; offset?: number } & Record<
+  string,
+  unknown
+>;
 
 export async function* paginate<T>(
   fetchPage: (
     query?: any,
-    init?: Omit<RequestInit, 'method' | 'body'>,
-  ) => Promise<{ data?: T[]; hasMore?: boolean; limit?: number; offset?: number }>,
+    init?: Omit<RequestInit, 'method' | 'body'>
+  ) => Promise<{
+    data?: T[];
+    hasMore?: boolean;
+    limit?: number;
+    offset?: number;
+  }>,
   initialQuery: PaginableQuery = {},
-  pageSize = 100,
+  pageSize = 100
 ): AsyncGenerator<T, void, unknown> {
   let offset = Number(initialQuery.offset ?? 0);
   const limit = Number(initialQuery.limit ?? pageSize);
@@ -26,12 +36,21 @@ export async function* paginate<T>(
 export async function listAll<T>(
   fetchPage: (
     query?: any,
-    init?: Omit<RequestInit, 'method' | 'body'>,
-  ) => Promise<{ data?: T[]; hasMore?: boolean; limit?: number; offset?: number }>,
+    init?: Omit<RequestInit, 'method' | 'body'>
+  ) => Promise<{
+    data?: T[];
+    hasMore?: boolean;
+    limit?: number;
+    offset?: number;
+  }>,
   query: PaginableQuery = {},
-  pageSize = 100,
+  pageSize = 100
 ): Promise<T[]> {
   const out: T[] = [];
-  for await (const item of paginate<T>(fetchPage, query, pageSize)) out.push(item);
+  for await (const item of paginate<T>(fetchPage, query, pageSize))
+    out.push(item);
   return out;
 }
+
+// Re-export streaming parsers from @blimu/fetch
+export { parseSSEStream, parseNDJSONStream };

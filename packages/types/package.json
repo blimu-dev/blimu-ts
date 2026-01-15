@@ -1,0 +1,39 @@
+{
+  "name": "@blimu/types",
+  "version": "0.1.0",
+  "description": "TypeScript type definitions for Blimu simple types",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsup",
+    "type-check": "tsc --noEmit"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/blimu-dev/blimu-ts"
+  },
+  "author": "viniciusdacal",
+  "license": "MIT",
+  "keywords": [
+    "typescript",
+    "types",
+    "blimu"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "devDependencies": {
+    "tsup": "^8.5.1",
+    "typescript": "^5.0.0"
+  }
+}

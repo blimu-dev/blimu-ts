@@ -1,0 +1,5714 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/v1/resources/{resourceType}": {
+      "get": {
+        "description": "Retrieves a paginated list of resources of the specified type. Supports search and filtering. Resources are returned with their parent relationships and metadata.",
+        "operationId": "ResourceController_list",
+        "parameters": [
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "description": "API key for authentication",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "resourceType",
+            "required": true,
+            "in": "path",
+            "description": "The type of resource (e.g., \"organization\", \"workspace\", \"project\")",
+            "schema": {
+              "$ref": "#/components/schemas/ResourceType"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "Search query to filter resources by name",
+            "schema": {
+              "example": "engineering",
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "Page number for pagination",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Number of items per page (minimum: 1, maximum: 100)",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "example": 20,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Resources retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResourceList"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key"
+          }
+        },
+        "security": [
+          {
+            "X-API-KEY": []
+          }
+        ],
+        "summary": "List resources",
+        "tags": [
+          "Resources"
+        ],
+        "x-codeSamples": [
+          {
+            "lang": "TypeScript",
+            "label": "TypeScript SDK",
+            "source": "const result = await backendAPI.resources.list('workspace', {\n  search: \"engineering\",\n  page: 1,\n  limit: 20\n});"
+          },
+          {
+            "lang": "Go",
+            "label": "Go SDK",
+            "source": "result, err := backendAPI.ResourcesService.List(ctx, \"workspace\", &backendAPI.ResourcesListQuery{\n  Search: \"engineering\",\n  Page: 1,\n  Limit: 20,\n})\nif err != nil {\n  // handle error\n}"
+          },
+          {
+            "lang": "Python",
+            "label": "Python SDK",
+            "source": "result = backendAPI.resources.list(\"workspace\",\n  search=\"engineering\",\n  page=1,\n  limit=20)"
+          }
+        ]
+      },
+      "post": {
+        "description": "Creates a new resource of the specified type. Resources can have parent relationships to form hierarchies. You can optionally assign initial roles to users when creating the resource. Parent resources must already exist.",
+        "operationId": "ResourceController_create",
+        "parameters": [
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "description": "API key for authentication",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "resourceType",
+            "required": true,
+            "in": "path",
+            "description": "The type of resource to create (e.g., \"organization\", \"workspace\", \"project\")",
+            "schema": {
+              "$ref": "#/components/schemas/ResourceType"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResourceCreateBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Resource created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Resource"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Invalid input or validation error"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key"
+          },
+          "404": {
+            "description": "Not Found - Parent resource does not exist"
+          },
+          "409": {
+            "description": "Conflict - Resource with this ID already exists"
+          }
+        },
+        "security": [
+          {
+            "X-API-KEY": []
+          }
+        ],
+        "summary": "Create a resource",
+        "tags": [
+          "Resources"
+        ],
+        "x-codeSamples": [
+          {
+            "lang": "TypeScript",
+            "label": "TypeScript SDK",
+            "source": "const result = await backendAPI.resources.create('workspace', {\n  id: \"id_123\",\n  name: \"name\",\n  parents: [],\n  roles: []\n});"
+          },
+          {
+            "lang": "Go",
+            "label": "Go SDK",
+            "source": "result, err := backendAPI.ResourcesService.Create(ctx, \"workspace\", &backendAPI.ResourceCreateBodyDto{\n  Id: \"id_123\",\n  Name: \"name\",\n  Parents: [],\n  Roles: [],\n})\nif err != nil {\n  // handle error\n}"
+          },
+          {
+            "lang": "Python",
+            "label": "Python SDK",
+            "source": "result = backendAPI.resources.create(\"workspace\",\n  id=\"id_123\",\n  name=\"name\",\n  parents=[],\n  roles=[])"
+          }
+        ]
+      }
+    },
+    "/v1/resources/{resourceType}/{resourceId}": {
+      "get": {
+        "description": "Retrieves a single resource by its type and ID. Returns the resource with its parent relationships and metadata.",
+        "operationId": "ResourceController_read",
+        "parameters": [
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "description": "API key for authentication",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "resourceType",
+            "required": true,
+            "in": "path",
+            "description": "The type of resource (e.g., \"organization\", \"workspace\", \"project\")",
+            "schema": {
+              "$ref": "#/components/schemas/ResourceType"
+            }
+          },
+          {
+            "name": "resourceId",
+            "required": true,
+            "in": "path",
+            "description": "The unique identifier of the resource",
+            "schema": {
+              "minLength": 1,
+              "example": "ws_456",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Resource retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Resource"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key"
+          },
+          "404": {
+            "description": "Not Found - Resource does not exist"
+          }
+        },
+        "security": [
+          {
+            "X-API-KEY": []
+          }
+        ],
+        "summary": "Read a resource",
+        "tags": [
+          "Resources"
+        ],
+        "x-codeSamples": [
+          {
+            "lang": "TypeScript",
+            "label": "TypeScript SDK",
+            "source": "const result = await backendAPI.resources.read('workspace', 'ws_456');"
+          },
+          {
+            "lang": "Go",
+            "label": "Go SDK",
+            "source": "result, err := backendAPI.ResourcesService.Read(ctx, \"workspace\", \"ws_456\")\nif err != nil {\n  // handle error\n}"
+          },
+          {
+            "lang": "Python",
+            "label": "Python SDK",
+            "source": "result = backendAPI.resources.read(\"workspace\", \"ws_456\")"
+          }
+        ]
+      },
+      "put": {
+        "description": "Updates an existing resource. You can update the resource name and modify parent relationships. Parent resources must already exist.",
+        "operationId": "ResourceController_update",
+        "parameters": [
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "description": "API key for authentication",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "resourceType",
+            "required": true,
+            "in": "path",
+            "description": "The type of resource (e.g., \"organization\", \"workspace\", \"project\")",
+            "schema": {
+              "$ref": "#/components/schemas/ResourceType"
+            }
+          },
+          {
+            "name": "resourceId",
+            "required": true,
+            "in": "path",
+            "description": "The unique identifier of the resource",
+            "schema": {
+              "minLength": 1,
+              "example": "ws_456",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResourceUpdateBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Resource updated successfully"
+          },
+          "400": {
+            "description": "Bad Request - Invalid input or validation error"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key"
+          },
+          "404": {
+            "description": "Not Found - Resource does not exist"
+          }
+        },
+        "security": [
+          {
+            "X-API-KEY": []
+          }
+        ],
+        "summary": "Update a resource",
+        "tags": [
+          "Resources"
+        ],
+        "x-codeSamples": [
+          {
+            "lang": "TypeScript",
+            "label": "TypeScript SDK",
+            "source": "const result = await backendAPI.resources.update('workspace', 'ws_456', {\n  parents: [],\n  name: \"name\"\n});"
+          },
+          {
+            "lang": "Go",
+            "label": "Go SDK",
+            "source": "result, err := backendAPI.ResourcesService.Update(ctx, \"workspace\", \"ws_456\", &backendAPI.ResourceUpdateBodyDto{\n  Parents: [],\n  Name: \"name\",\n})\nif err != nil {\n  // handle error\n}"
+          },
+          {
+            "lang": "Python",
+            "label": "Python SDK",
+            "source": "result = backendAPI.resources.update(\"workspace\", \"ws_456\",\n  parents=[],\n  name=\"name\")"
+          }
+        ]
+      },
+      "delete": {
+        "description": "Deletes a resource by its type and ID. This operation is permanent and cannot be undone. Deleting a resource may affect child resources that depend on it.",
+        "operationId": "ResourceController_delete",
+        "parameters": [
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "description": "API key for authentication",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "resourceType",
+            "required": true,
+            "in": "path",
+            "description": "The type of resource (e.g., \"organization\", \"workspace\", \"project\")",
+            "schema": {
+              "$ref": "#/components/schemas/ResourceType"
+            }
+          },
+          {
+            "name": "resourceId",
+            "required": true,
+            "in": "path",
+            "description": "The unique identifier of the resource",
+            "schema": {
+              "minLength": 1,
+              "example": "ws_456",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Resource deleted successfully"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key"
+          },
+          "404": {
+            "description": "Not Found - Resource does not exist"
+          }
+        },
+        "security": [
+          {
+            "X-API-KEY": []
+          }
+        ],
+        "summary": "Delete a resource",
+        "tags": [
+          "Resources"
+        ],
+        "x-codeSamples": [
+          {
+            "lang": "TypeScript",
+            "label": "TypeScript SDK",
+            "source": "const result = await backendAPI.resources.delete('workspace', 'ws_456');"
+          },
+          {
+            "lang": "Go",
+            "label": "Go SDK",
+            "source": "result, err := backendAPI.ResourcesService.Delete(ctx, \"workspace\", \"ws_456\")\nif err != nil {\n  // handle error\n}"
+          },
+          {
+            "lang": "Python",
+            "label": "Python SDK",
+            "source": "result = backendAPI.resources.delete(\"workspace\", \"ws_456\")"
+          }
+        ]
+      }
+    },
+    "/v1/resources/{resourceType}/bulk": {
+      "post": {
+        "description": "Creates multiple resources of the specified type in a single request. This operation supports partial success - some resources may be created while others fail. The response includes details about successful creations and any errors encountered. Resources can have parent relationships and initial role assignments.",
+        "operationId": "ResourceBulkController_create",
+        "parameters": [
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "description": "API key for authentication",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "resourceType",
+            "required": true,
+            "in": "path",
+            "description": "The type of resources to create (e.g., \"organization\", \"workspace\", \"project\")",
+            "schema": {
+              "$ref": "#/components/schemas/ResourceType"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResourceBulkCreateBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Bulk operation completed. Check the response for success and error details.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResourceBulkResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Invalid input or validation error"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key"
+          }
+        },
+        "security": [
+          {
+            "X-API-KEY": []
+          }
+        ],
+        "summary": "Bulk create resources",
+        "tags": [
+          "BulkResources"
+        ],
+        "x-codeSamples": [
+          {
+            "lang": "TypeScript",
+            "label": "TypeScript SDK",
+            "source": "const result = await backendAPI.bulkResources.create('workspace', {\n  resources: []\n});"
+          },
+          {
+            "lang": "Go",
+            "label": "Go SDK",
+            "source": "result, err := backendAPI.BulkResourcesService.Create(ctx, \"workspace\", &backendAPI.ResourceBulkCreateBodyDto{\n  Resources: [],\n})\nif err != nil {\n  // handle error\n}"
+          },
+          {
+            "lang": "Python",
+            "label": "Python SDK",
+            "source": "result = backendAPI.bulkResources.create(\"workspace\",\n  resources=[])"
+          }
+        ]
+      }
+    },
+    "/v1/users/{userId}/roles": {
+      "post": {
+        "description": "Assigns a role to a user on a specific resource. The role must be defined in your resource definitions for the specified resource type. Roles can be inherited from parent resources based on your resource configuration.",
+        "operationId": "RoleController_create",
+        "parameters": [
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "description": "API key for authentication",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "userId",
+            "required": true,
+            "in": "path",
+            "description": "The unique identifier or lookup key of the user",
+            "schema": {
+              "minLength": 1,
+              "example": "user_123",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RoleCreateBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Role assigned successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Role"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Invalid input, validation error, or invalid role"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key"
+          },
+          "404": {
+            "description": "Not Found - User or resource does not exist"
+          }
+        },
+        "security": [
+          {
+            "X-API-KEY": []
+          }
+        ],
+        "summary": "Create a role (assign role to user on resource)",
+        "tags": [
+          "Roles"
+        ],
+        "x-codeSamples": [
+          {
+            "lang": "TypeScript",
+            "label": "TypeScript SDK",
+            "source": "const result = await backendAPI.roles.create('user_123', {\n  role: \"role\",\n  resourceType: \"resourceType\",\n  resourceId: \"resourceId_123\"\n});"
+          },
+          {
+            "lang": "Go",
+            "label": "Go SDK",
+            "source": "result, err := backendAPI.RolesService.Create(ctx, \"user_123\", &backendAPI.RoleCreateBodyDto{\n  Role: \"role\",\n  ResourceType: \"resourceType\",\n  ResourceId: \"resourceId_123\",\n})\nif err != nil {\n  // handle error\n}"
+          },
+          {
+            "lang": "Python",
+            "label": "Python SDK",
+            "source": "result = backendAPI.roles.create(\"user_123\",\n  role=\"role\",\n  resource_type=\"resourceType\",\n  resource_id=\"resourceId_123\")"
+          }
+        ]
+      },
+      "get": {
+        "description": "Retrieves a paginated list of roles assigned to a user. Supports filtering by resource type, resource ID, and role name. Returns both directly assigned roles and inherited roles.",
+        "operationId": "RoleController_list",
+        "parameters": [
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "description": "API key for authentication",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "userId",
+            "required": true,
+            "in": "path",
+            "description": "The unique identifier or lookup key of the user",
+            "schema": {
+              "minLength": 1,
+              "example": "user_123",
+              "type": "string"
+            }
+          },
+          {
+            "name": "resourceType",
+            "required": false,
+            "in": "query",
+            "description": "Filter roles by resource type",
+            "schema": {
+              "$ref": "#/components/schemas/ResourceType"
+            }
+          },
+          {
+            "name": "resourceId",
+            "required": false,
+            "in": "query",
+            "description": "Filter roles by specific resource ID",
+            "schema": {
+              "example": "ws_456",
+              "type": "string"
+            }
+          },
+          {
+            "name": "role",
+            "required": false,
+            "in": "query",
+            "description": "Filter by role name",
+            "schema": {
+              "example": "admin",
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "Page number for pagination",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Number of items per page (minimum: 1, maximum: 100)",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "example": 20,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User roles retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoleList"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key"
+          },
+          "404": {
+            "description": "Not Found - User does not exist"
+          }
+        },
+        "security": [
+          {
+            "X-API-KEY": []
+          }
+        ],
+        "summary": "List user roles",
+        "tags": [
+          "Roles"
+        ],
+        "x-codeSamples": [
+          {
+            "lang": "TypeScript",
+            "label": "TypeScript SDK",
+            "source": "const result = await backendAPI.roles.list('user_123', {\n  resourceType: \"workspace\",\n  resourceId: \"ws_456\",\n  role: \"admin\",\n  page: 1,\n  limit: 20\n});"
+          },
+          {
+            "lang": "Go",
+            "label": "Go SDK",
+            "source": "result, err := backendAPI.RolesService.List(ctx, \"user_123\", &backendAPI.RolesListQuery{\n  ResourceType: \"workspace\",\n  ResourceId: \"ws_456\",\n  Role: \"admin\",\n  Page: 1,\n  Limit: 20,\n})\nif err != nil {\n  // handle error\n}"
+          },
+          {
+            "lang": "Python",
+            "label": "Python SDK",
+            "source": "result = backendAPI.roles.list(\"user_123\",\n  resource_type=\"workspace\",\n  resource_id=\"ws_456\",\n  role=\"admin\",\n  page=1,\n  limit=20)"
+          }
+        ]
+      }
+    },
+    "/v1/users/{userId}/roles/{resourceType}/{resourceId}": {
+      "delete": {
+        "description": "Removes a role assignment from a user on a specific resource. This only removes the direct role assignment and does not affect inherited roles from parent resources.",
+        "operationId": "RoleController_delete",
+        "parameters": [
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "description": "API key for authentication",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "userId",
+            "required": true,
+            "in": "path",
+            "description": "The unique identifier or lookup key of the user",
+            "schema": {
+              "minLength": 1,
+              "example": "user_123",
+              "type": "string"
+            }
+          },
+          {
+            "name": "resourceType",
+            "required": true,
+            "in": "path",
+            "description": "The type of resource (e.g., \"organization\", \"workspace\", \"project\")",
+            "schema": {
+              "$ref": "#/components/schemas/ResourceType"
+            }
+          },
+          {
+            "name": "resourceId",
+            "required": true,
+            "in": "path",
+            "description": "The unique identifier of the resource",
+            "schema": {
+              "minLength": 1,
+              "example": "ws_456",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Role deleted successfully"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key"
+          },
+          "404": {
+            "description": "Not Found - User, resource, or role assignment does not exist"
+          }
+        },
+        "security": [
+          {
+            "X-API-KEY": []
+          }
+        ],
+        "summary": "Delete a role",
+        "tags": [
+          "Roles"
+        ],
+        "x-codeSamples": [
+          {
+            "lang": "TypeScript",
+            "label": "TypeScript SDK",
+            "source": "const result = await backendAPI.roles.delete('user_123', 'workspace', 'ws_456');"
+          },
+          {
+            "lang": "Go",
+            "label": "Go SDK",
+            "source": "result, err := backendAPI.RolesService.Delete(ctx, \"user_123\", \"workspace\", \"ws_456\")\nif err != nil {\n  // handle error\n}"
+          },
+          {
+            "lang": "Python",
+            "label": "Python SDK",
+            "source": "result = backendAPI.roles.delete(\"user_123\", \"workspace\", \"ws_456\")"
+          }
+        ]
+      }
+    },
+    "/v1/users/roles/bulk": {
+      "post": {
+        "description": "Assigns multiple roles to users on resources in a single request. This operation supports partial success - some role assignments may succeed while others fail. The response includes details about successful assignments and any errors encountered. All roles must be valid according to your resource definitions.",
+        "operationId": "RoleBulkController_create",
+        "parameters": [
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "description": "API key for authentication",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RoleBulkCreateBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Bulk operation completed. Check the response for success and error details.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoleBulkResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Invalid input or validation error"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key"
+          }
+        },
+        "security": [
+          {
+            "X-API-KEY": []
+          }
+        ],
+        "summary": "Bulk create roles",
+        "tags": [
+          "BulkRoles"
+        ],
+        "x-codeSamples": [
+          {
+            "lang": "TypeScript",
+            "label": "TypeScript SDK",
+            "source": "const result = await backendAPI.bulkRoles.create({\n  roles: []\n});"
+          },
+          {
+            "lang": "Go",
+            "label": "Go SDK",
+            "source": "result, err := backendAPI.BulkRolesService.Create(ctx, &backendAPI.RoleBulkCreateBodyDto{\n  Roles: [],\n})\nif err != nil {\n  // handle error\n}"
+          },
+          {
+            "lang": "Python",
+            "label": "Python SDK",
+            "source": "result = backendAPI.bulkRoles.create(,\n  roles=[])"
+          }
+        ]
+      }
+    },
+    "/v1/users": {
+      "get": {
+        "description": "Retrieves a paginated list of users in your environment. Supports search functionality to filter users by email, name, or lookup key.",
+        "operationId": "UserController_list",
+        "parameters": [
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "description": "API key for authentication",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "Search query to filter users by email, name, or lookup key",
+            "schema": {
+              "example": "john@example.com",
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "Page number for pagination",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Number of items per page (minimum: 1, maximum: 100)",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "example": 20,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Users retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserList"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key"
+          }
+        },
+        "security": [
+          {
+            "X-API-KEY": []
+          }
+        ],
+        "summary": "List users",
+        "tags": [
+          "Users"
+        ],
+        "x-codeSamples": [
+          {
+            "lang": "TypeScript",
+            "label": "TypeScript SDK",
+            "source": "const result = await backendAPI.users.list({\n  search: \"john@example.com\",\n  page: 1,\n  limit: 20\n});"
+          },
+          {
+            "lang": "Go",
+            "label": "Go SDK",
+            "source": "result, err := backendAPI.UsersService.List(ctx, &backendAPI.UsersListQuery{\n  Search: \"john@example.com\",\n  Page: 1,\n  Limit: 20,\n})\nif err != nil {\n  // handle error\n}"
+          },
+          {
+            "lang": "Python",
+            "label": "Python SDK",
+            "source": "result = backendAPI.users.list(,\n  search=\"john@example.com\",\n  page=1,\n  limit=20)"
+          }
+        ]
+      },
+      "post": {
+        "description": "Creates a new user in your environment. The lookupKey is a unique identifier that you can use to reference the user in your system. It should be stable and not change over time.",
+        "operationId": "UserController_create",
+        "parameters": [
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "description": "API key for authentication",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserCreateBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Invalid input or validation error"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key"
+          },
+          "409": {
+            "description": "Conflict - User with this email or lookupKey already exists"
+          }
+        },
+        "security": [
+          {
+            "X-API-KEY": []
+          }
+        ],
+        "summary": "Create a user",
+        "tags": [
+          "Users"
+        ],
+        "x-codeSamples": [
+          {
+            "lang": "TypeScript",
+            "label": "TypeScript SDK",
+            "source": "const result = await backendAPI.users.create({\n  newUser: \"newUser\",\n  lookupKey: \"lookupKey\",\n  email: \"email\",\n  firstName: \"firstName\",\n  lastName: \"lastName\",\n  avatarUrl: \"avatarUrl\",\n  password: \"password\"\n});"
+          },
+          {
+            "lang": "Go",
+            "label": "Go SDK",
+            "source": "result, err := backendAPI.UsersService.Create(ctx, &backendAPI.UserCreateBodyDto{\n  NewUser: \"newUser\",\n  LookupKey: \"lookupKey\",\n  Email: \"email\",\n  FirstName: \"firstName\",\n  LastName: \"lastName\",\n  AvatarUrl: \"avatarUrl\",\n  Password: \"password\",\n})\nif err != nil {\n  // handle error\n}"
+          },
+          {
+            "lang": "Python",
+            "label": "Python SDK",
+            "source": "result = backendAPI.users.create(,\n  new_user=\"newUser\",\n  lookup_key=\"lookupKey\",\n  email=\"email\",\n  first_name=\"firstName\",\n  last_name=\"lastName\",\n  avatar_url=\"avatarUrl\",\n  password=\"password\")"
+          }
+        ]
+      }
+    },
+    "/v1/users/{userId}": {
+      "get": {
+        "description": "Retrieves a single user by their ID or lookup key. Returns user information including email, name, and metadata.",
+        "operationId": "UserController_read",
+        "parameters": [
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "description": "API key for authentication",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "userId",
+            "required": true,
+            "in": "path",
+            "description": "The unique identifier or lookup key of the user",
+            "schema": {
+              "minLength": 1,
+              "example": "user_123",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key"
+          },
+          "404": {
+            "description": "Not Found - User does not exist"
+          }
+        },
+        "security": [
+          {
+            "X-API-KEY": []
+          }
+        ],
+        "summary": "Get a user by ID",
+        "tags": [
+          "Users"
+        ],
+        "x-codeSamples": [
+          {
+            "lang": "TypeScript",
+            "label": "TypeScript SDK",
+            "source": "const result = await backendAPI.users.read('user_123');"
+          },
+          {
+            "lang": "Go",
+            "label": "Go SDK",
+            "source": "result, err := backendAPI.UsersService.Read(ctx, \"user_123\")\nif err != nil {\n  // handle error\n}"
+          },
+          {
+            "lang": "Python",
+            "label": "Python SDK",
+            "source": "result = backendAPI.users.read(\"user_123\")"
+          }
+        ]
+      },
+      "put": {
+        "description": "Updates an existing user. You can modify email, name, and other user properties. The lookupKey can be updated but should remain stable.",
+        "operationId": "UserController_update",
+        "parameters": [
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "description": "API key for authentication",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "userId",
+            "required": true,
+            "in": "path",
+            "description": "The unique identifier or lookup key of the user",
+            "schema": {
+              "minLength": 1,
+              "example": "user_123",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserUpdateBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Invalid input or validation error"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key"
+          },
+          "404": {
+            "description": "Not Found - User does not exist"
+          }
+        },
+        "security": [
+          {
+            "X-API-KEY": []
+          }
+        ],
+        "summary": "Update a user",
+        "tags": [
+          "Users"
+        ],
+        "x-codeSamples": [
+          {
+            "lang": "TypeScript",
+            "label": "TypeScript SDK",
+            "source": "const result = await backendAPI.users.update('user_123', {\n  lookupKey: \"lookupKey\",\n  email: \"email\",\n  firstName: \"firstName\",\n  lastName: \"lastName\",\n  avatarUrl: \"avatarUrl\",\n  password: \"password\"\n});"
+          },
+          {
+            "lang": "Go",
+            "label": "Go SDK",
+            "source": "result, err := backendAPI.UsersService.Update(ctx, \"user_123\", &backendAPI.UserUpdateBodyDto{\n  LookupKey: \"lookupKey\",\n  Email: \"email\",\n  FirstName: \"firstName\",\n  LastName: \"lastName\",\n  AvatarUrl: \"avatarUrl\",\n  Password: \"password\",\n})\nif err != nil {\n  // handle error\n}"
+          },
+          {
+            "lang": "Python",
+            "label": "Python SDK",
+            "source": "result = backendAPI.users.update(\"user_123\",\n  lookup_key=\"lookupKey\",\n  email=\"email\",\n  first_name=\"firstName\",\n  last_name=\"lastName\",\n  avatar_url=\"avatarUrl\",\n  password=\"password\")"
+          }
+        ]
+      },
+      "delete": {
+        "description": "Deletes a user by their ID or lookup key. This operation is permanent and cannot be undone. Deleting a user will also remove all role assignments for that user.",
+        "operationId": "UserController_delete",
+        "parameters": [
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "description": "API key for authentication",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "userId",
+            "required": true,
+            "in": "path",
+            "description": "The unique identifier or lookup key of the user",
+            "schema": {
+              "minLength": 1,
+              "example": "user_123",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User deleted successfully"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key"
+          },
+          "404": {
+            "description": "Not Found - User does not exist"
+          }
+        },
+        "security": [
+          {
+            "X-API-KEY": []
+          }
+        ],
+        "summary": "Delete a user",
+        "tags": [
+          "Users"
+        ],
+        "x-codeSamples": [
+          {
+            "lang": "TypeScript",
+            "label": "TypeScript SDK",
+            "source": "const result = await backendAPI.users.delete('user_123');"
+          },
+          {
+            "lang": "Go",
+            "label": "Go SDK",
+            "source": "result, err := backendAPI.UsersService.Delete(ctx, \"user_123\")\nif err != nil {\n  // handle error\n}"
+          },
+          {
+            "lang": "Python",
+            "label": "Python SDK",
+            "source": "result = backendAPI.users.delete(\"user_123\")"
+          }
+        ]
+      }
+    },
+    "/v1/users/{userId}/effective-user-resources-roles": {
+      "get": {
+        "description": "Retrieves all resources and roles for a user, including inherited roles from parent resources. The response indicates whether each role is directly assigned or inherited through resource hierarchies.",
+        "operationId": "UserController_listEffectiveUserResourcesRoles",
+        "parameters": [
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "description": "API key for authentication",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "userId",
+            "required": true,
+            "in": "path",
+            "description": "The unique identifier or lookup key of the user",
+            "schema": {
+              "minLength": 1,
+              "example": "user_123",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User resources and roles retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResourceList"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key"
+          },
+          "404": {
+            "description": "Not Found - User does not exist"
+          }
+        },
+        "security": [
+          {
+            "X-API-KEY": []
+          }
+        ],
+        "summary": "List effective user resources roles",
+        "tags": [
+          "Users"
+        ],
+        "x-codeSamples": [
+          {
+            "lang": "TypeScript",
+            "label": "TypeScript SDK",
+            "source": "const result = await backendAPI.users.listEffectiveUserResourcesRoles('user_123');"
+          },
+          {
+            "lang": "Go",
+            "label": "Go SDK",
+            "source": "result, err := backendAPI.UsersService.ListEffectiveUserResourcesRoles(ctx, \"user_123\")\nif err != nil {\n  // handle error\n}"
+          },
+          {
+            "lang": "Python",
+            "label": "Python SDK",
+            "source": "result = backendAPI.users.listEffectiveUserResourcesRoles(\"user_123\")"
+          }
+        ]
+      }
+    },
+    "/v1/entitlements/check": {
+      "post": {
+        "description": "Checks whether a user has permission to perform a specific action (entitlement) on a resource. This endpoint evaluates role-based access, plan gating, and usage limits. The response includes detailed information about why access was granted or denied, including which roles were checked, plan requirements, and usage limit status.",
+        "operationId": "EntitlementsController_checkEntitlement",
+        "parameters": [
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "description": "API key for authentication",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EntitlementCheckBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Entitlement check completed. The response indicates whether access is allowed and provides detailed reasoning.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntitlementCheckResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Invalid input or validation error"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key"
+          },
+          "404": {
+            "description": "Not Found - User or resource does not exist"
+          }
+        },
+        "security": [
+          {
+            "X-API-KEY": []
+          }
+        ],
+        "summary": "Check if a user has a specific entitlement on a resource",
+        "tags": [
+          "Entitlements"
+        ],
+        "x-codeSamples": [
+          {
+            "lang": "TypeScript",
+            "label": "TypeScript SDK",
+            "source": "const result = await backendAPI.entitlements.checkEntitlement({\n  userId: \"userId_123\",\n  entitlement: \"entitlement\",\n  resourceId: \"resourceId_123\",\n  amount: 100\n});"
+          },
+          {
+            "lang": "Go",
+            "label": "Go SDK",
+            "source": "result, err := backendAPI.EntitlementsService.CheckEntitlement(ctx, &backendAPI.EntitlementCheckBodyDto{\n  UserId: \"userId_123\",\n  Entitlement: \"entitlement\",\n  ResourceId: \"resourceId_123\",\n  Amount: 100,\n})\nif err != nil {\n  // handle error\n}"
+          },
+          {
+            "lang": "Python",
+            "label": "Python SDK",
+            "source": "result = backendAPI.entitlements.checkEntitlement(,\n  user_id=\"userId_123\",\n  entitlement=\"entitlement\",\n  resource_id=\"resourceId_123\",\n  amount=100)"
+          }
+        ]
+      }
+    },
+    "/v1/entitlements/list-for-resource/{resourceType}/{resourceId}": {
+      "get": {
+        "description": "Returns entitlements for a specific resource and user. Only evaluates roles and plans (excludes limits). Provides detailed information about why entitlements are allowed or denied, including current roles, allowed roles, current plan, and allowed plans. Results are cached per resource for performance.",
+        "operationId": "EntitlementsController_listForResource",
+        "parameters": [
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "description": "API key for authentication",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "resourceType",
+            "required": true,
+            "in": "path",
+            "description": "The type of resource (e.g., \"workspace\", \"project\")",
+            "schema": {
+              "$ref": "#/components/schemas/ResourceType"
+            }
+          },
+          {
+            "name": "resourceId",
+            "required": true,
+            "in": "path",
+            "description": "The unique identifier of the resource",
+            "schema": {
+              "minLength": 1,
+              "example": "ws_456",
+              "type": "string"
+            }
+          },
+          {
+            "name": "userId",
+            "required": true,
+            "in": "query",
+            "description": "The unique identifier of the user",
+            "schema": {
+              "minLength": 1,
+              "example": "user_123",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of entitlements for the requested resource. Includes all entitlements filtered by resource type, with detailed role and plan information.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntitlementsListResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Invalid input or validation error"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key"
+          },
+          "404": {
+            "description": "Not Found - User or resource does not exist"
+          }
+        },
+        "security": [
+          {
+            "X-API-KEY": []
+          }
+        ],
+        "summary": "List entitlements for a specific resource",
+        "tags": [
+          "Entitlements"
+        ],
+        "x-codeSamples": [
+          {
+            "lang": "TypeScript",
+            "label": "TypeScript SDK",
+            "source": "const result = await backendAPI.entitlements.listForResource('workspace', 'ws_456', {\n  userId: \"user_123\"\n});"
+          },
+          {
+            "lang": "Go",
+            "label": "Go SDK",
+            "source": "result, err := backendAPI.EntitlementsService.ListForResource(ctx, \"workspace\", \"ws_456\", &backendAPI.EntitlementsListForResourceQuery{\n  UserId: \"user_123\",\n})\nif err != nil {\n  // handle error\n}"
+          },
+          {
+            "lang": "Python",
+            "label": "Python SDK",
+            "source": "result = backendAPI.entitlements.listForResource(\"workspace\", \"ws_456\",\n  user_id=\"user_123\")"
+          }
+        ]
+      }
+    },
+    "/v1/entitlements/list-for-tenant/{tenantResourceId}": {
+      "get": {
+        "description": "Returns entitlements for a tenant resource and all its descendant resources. This endpoint scopes queries to a single tenant, preventing cross-tenant data access. Only evaluates roles and plans (excludes limits). Results are cached per resource for performance. The tenant resource type is automatically determined from the environment definition (resource marked as `is_tenant: true`).",
+        "operationId": "EntitlementsController_listForTenant",
+        "parameters": [
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "description": "API key for authentication",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "tenantResourceId",
+            "required": true,
+            "in": "path",
+            "description": "The unique identifier of the tenant resource",
+            "schema": {
+              "minLength": 1,
+              "example": "org_123",
+              "type": "string"
+            }
+          },
+          {
+            "name": "userId",
+            "required": true,
+            "in": "query",
+            "description": "The unique identifier of the user",
+            "schema": {
+              "minLength": 1,
+              "example": "user_456",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of entitlements for the tenant resource and all its sub-resources. Each resource includes all entitlements filtered by resource type, with detailed role and plan information.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntitlementsListResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Invalid input or validation error"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key"
+          },
+          "404": {
+            "description": "Not Found - Tenant resource does not exist or no tenant resource type found in definition"
+          }
+        },
+        "security": [
+          {
+            "X-API-KEY": []
+          }
+        ],
+        "summary": "List entitlements for a tenant and all its sub-resources",
+        "tags": [
+          "Entitlements"
+        ],
+        "x-codeSamples": [
+          {
+            "lang": "TypeScript",
+            "label": "TypeScript SDK",
+            "source": "const result = await backendAPI.entitlements.listForTenant('org_123', {\n  userId: \"user_456\"\n});"
+          },
+          {
+            "lang": "Go",
+            "label": "Go SDK",
+            "source": "result, err := backendAPI.EntitlementsService.ListForTenant(ctx, \"org_123\", &backendAPI.EntitlementsListForTenantQuery{\n  UserId: \"user_456\",\n})\nif err != nil {\n  // handle error\n}"
+          },
+          {
+            "lang": "Python",
+            "label": "Python SDK",
+            "source": "result = backendAPI.entitlements.listForTenant(\"org_123\",\n  user_id=\"user_456\")"
+          }
+        ]
+      }
+    },
+    "/v1/resources/{resourceType}/{resourceId}/plan": {
+      "post": {
+        "description": "Assigns a billing plan to a tenant resource. Plans control feature access and usage limits based on your plan definitions. The resource must be marked as a tenant in your resource definitions.",
+        "operationId": "PlanController_assign",
+        "parameters": [
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "description": "API key for authentication",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "resourceType",
+            "required": true,
+            "in": "path",
+            "description": "The type of tenant resource (must be marked as is_tenant in your definitions)",
+            "schema": {
+              "$ref": "#/components/schemas/ResourceType"
+            }
+          },
+          {
+            "name": "resourceId",
+            "required": true,
+            "in": "path",
+            "description": "The unique identifier of the tenant resource",
+            "schema": {
+              "minLength": 1,
+              "example": "org_123",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlanAssignBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Plan assigned successfully"
+          },
+          "400": {
+            "description": "Bad Request - Invalid input, validation error, or invalid plan"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key"
+          },
+          "404": {
+            "description": "Not Found - Resource does not exist or is not a tenant"
+          }
+        },
+        "security": [
+          {
+            "X-API-KEY": []
+          }
+        ],
+        "summary": "Assign a plan to a tenant resource",
+        "tags": [
+          "Plans"
+        ],
+        "x-codeSamples": [
+          {
+            "lang": "TypeScript",
+            "label": "TypeScript SDK",
+            "source": "const result = await backendAPI.plans.assign('organization', 'org_123', {\n  planKey: \"planKey\"\n});"
+          },
+          {
+            "lang": "Go",
+            "label": "Go SDK",
+            "source": "result, err := backendAPI.PlansService.Assign(ctx, \"organization\", \"org_123\", &backendAPI.PlanAssignBodyDto{\n  PlanKey: \"planKey\",\n})\nif err != nil {\n  // handle error\n}"
+          },
+          {
+            "lang": "Python",
+            "label": "Python SDK",
+            "source": "result = backendAPI.plans.assign(\"organization\", \"org_123\",\n  plan_key=\"planKey\")"
+          }
+        ]
+      },
+      "get": {
+        "description": "Retrieves the billing plan currently assigned to a tenant resource, if any.",
+        "operationId": "PlanController_read",
+        "parameters": [
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "description": "API key for authentication",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "resourceType",
+            "required": true,
+            "in": "path",
+            "description": "The type of tenant resource",
+            "schema": {
+              "$ref": "#/components/schemas/ResourceType"
+            }
+          },
+          {
+            "name": "resourceId",
+            "required": true,
+            "in": "path",
+            "description": "The unique identifier of the tenant resource",
+            "schema": {
+              "minLength": 1,
+              "example": "org_123",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Plan retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlanResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key"
+          },
+          "404": {
+            "description": "Not Found - Resource does not exist or no plan is assigned"
+          }
+        },
+        "security": [
+          {
+            "X-API-KEY": []
+          }
+        ],
+        "summary": "Get the plan assigned to a tenant resource",
+        "tags": [
+          "Plans"
+        ],
+        "x-codeSamples": [
+          {
+            "lang": "TypeScript",
+            "label": "TypeScript SDK",
+            "source": "const result = await backendAPI.plans.read('organization', 'org_123');"
+          },
+          {
+            "lang": "Go",
+            "label": "Go SDK",
+            "source": "result, err := backendAPI.PlansService.Read(ctx, \"organization\", \"org_123\")\nif err != nil {\n  // handle error\n}"
+          },
+          {
+            "lang": "Python",
+            "label": "Python SDK",
+            "source": "result = backendAPI.plans.read(\"organization\", \"org_123\")"
+          }
+        ]
+      },
+      "delete": {
+        "description": "Removes the billing plan assignment from a tenant resource. After removal, the resource will have no plan and will be subject to default limits.",
+        "operationId": "PlanController_delete",
+        "parameters": [
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "description": "API key for authentication",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "resourceType",
+            "required": true,
+            "in": "path",
+            "description": "The type of tenant resource",
+            "schema": {
+              "$ref": "#/components/schemas/ResourceType"
+            }
+          },
+          {
+            "name": "resourceId",
+            "required": true,
+            "in": "path",
+            "description": "The unique identifier of the tenant resource",
+            "schema": {
+              "minLength": 1,
+              "example": "org_123",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Plan assignment removed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlanDeleteResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key"
+          },
+          "404": {
+            "description": "Not Found - Resource does not exist or no plan is assigned"
+          }
+        },
+        "security": [
+          {
+            "X-API-KEY": []
+          }
+        ],
+        "summary": "Remove plan assignment from a tenant resource",
+        "tags": [
+          "Plans"
+        ],
+        "x-codeSamples": [
+          {
+            "lang": "TypeScript",
+            "label": "TypeScript SDK",
+            "source": "const result = await backendAPI.plans.delete('organization', 'org_123');"
+          },
+          {
+            "lang": "Go",
+            "label": "Go SDK",
+            "source": "result, err := backendAPI.PlansService.Delete(ctx, \"organization\", \"org_123\")\nif err != nil {\n  // handle error\n}"
+          },
+          {
+            "lang": "Python",
+            "label": "Python SDK",
+            "source": "result = backendAPI.plans.delete(\"organization\", \"org_123\")"
+          }
+        ]
+      }
+    },
+    "/v1/usage/credit": {
+      "post": {
+        "description": "Adds credits to a usage wallet for a specific resource and limit type. This increases the available balance for usage-based limits. Credits can be tagged for tracking purposes.",
+        "operationId": "UsageController_credit",
+        "parameters": [
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "description": "API key for authentication",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UsageCreditBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Credits added successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UsageWalletResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Invalid input or validation error"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key"
+          },
+          "404": {
+            "description": "Not Found - Resource does not exist"
+          }
+        },
+        "security": [
+          {
+            "X-API-KEY": []
+          }
+        ],
+        "summary": "Add credits to wallet (inserts positive amount)",
+        "tags": [
+          "Usage"
+        ],
+        "x-codeSamples": [
+          {
+            "lang": "TypeScript",
+            "label": "TypeScript SDK",
+            "source": "const result = await backendAPI.usage.credit({\n  resourceType: \"resourceType\",\n  resourceId: \"resourceId_123\",\n  limitType: \"limitType\",\n  amount: 100,\n  tags: {}\n});"
+          },
+          {
+            "lang": "Go",
+            "label": "Go SDK",
+            "source": "result, err := backendAPI.UsageService.Credit(ctx, &backendAPI.UsageCreditBodyDto{\n  ResourceType: \"resourceType\",\n  ResourceId: \"resourceId_123\",\n  LimitType: \"limitType\",\n  Amount: 100,\n  Tags: {},\n})\nif err != nil {\n  // handle error\n}"
+          },
+          {
+            "lang": "Python",
+            "label": "Python SDK",
+            "source": "result = backendAPI.usage.credit(,\n  resource_type=\"resourceType\",\n  resource_id=\"resourceId_123\",\n  limit_type=\"limitType\",\n  amount=100,\n  tags={})"
+          }
+        ]
+      }
+    },
+    "/v1/usage/consume": {
+      "post": {
+        "description": "Records consumption from a usage wallet for a specific resource and limit type. This decreases the available balance. Consumption can be tagged for tracking purposes.",
+        "operationId": "UsageController_consume",
+        "parameters": [
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "description": "API key for authentication",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UsageConsumeBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Consumption recorded successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UsageWalletResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Invalid input or validation error"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key"
+          },
+          "404": {
+            "description": "Not Found - Resource does not exist"
+          }
+        },
+        "security": [
+          {
+            "X-API-KEY": []
+          }
+        ],
+        "summary": "Record consumption (inserts negative amount)",
+        "tags": [
+          "Usage"
+        ],
+        "x-codeSamples": [
+          {
+            "lang": "TypeScript",
+            "label": "TypeScript SDK",
+            "source": "const result = await backendAPI.usage.consume({\n  resourceType: \"resourceType\",\n  resourceId: \"resourceId_123\",\n  limitType: \"limitType\",\n  amount: 100,\n  tags: {}\n});"
+          },
+          {
+            "lang": "Go",
+            "label": "Go SDK",
+            "source": "result, err := backendAPI.UsageService.Consume(ctx, &backendAPI.UsageConsumeBodyDto{\n  ResourceType: \"resourceType\",\n  ResourceId: \"resourceId_123\",\n  LimitType: \"limitType\",\n  Amount: 100,\n  Tags: {},\n})\nif err != nil {\n  // handle error\n}"
+          },
+          {
+            "lang": "Python",
+            "label": "Python SDK",
+            "source": "result = backendAPI.usage.consume(,\n  resource_type=\"resourceType\",\n  resource_id=\"resourceId_123\",\n  limit_type=\"limitType\",\n  amount=100,\n  tags={})"
+          }
+        ]
+      }
+    },
+    "/v1/usage/balance/{resourceType}/{resourceId}/{limitType}": {
+      "get": {
+        "description": "Retrieves the current balance of a usage wallet for a specific resource and limit type within a given time period. The balance reflects all credits and consumption transactions.",
+        "operationId": "UsageController_getBalance",
+        "parameters": [
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "description": "API key for authentication",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "resourceType",
+            "required": true,
+            "in": "path",
+            "description": "The type of resource",
+            "schema": {
+              "$ref": "#/components/schemas/ResourceType"
+            }
+          },
+          {
+            "name": "resourceId",
+            "required": true,
+            "in": "path",
+            "description": "The unique identifier of the resource",
+            "schema": {
+              "example": "org_123",
+              "type": "string"
+            }
+          },
+          {
+            "name": "limitType",
+            "required": true,
+            "in": "path",
+            "description": "The type of usage limit",
+            "schema": {
+              "$ref": "#/components/schemas/UsageLimitType"
+            }
+          },
+          {
+            "name": "period",
+            "required": true,
+            "in": "query",
+            "description": "Time period for the balance calculation",
+            "schema": {
+              "enum": [
+                "monthly",
+                "yearly",
+                "lifetime"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Balance retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BalanceResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Invalid input or validation error"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key"
+          },
+          "404": {
+            "description": "Not Found - Resource does not exist"
+          }
+        },
+        "security": [
+          {
+            "X-API-KEY": []
+          }
+        ],
+        "summary": "Get wallet balance",
+        "tags": [
+          "Usage"
+        ],
+        "x-codeSamples": [
+          {
+            "lang": "TypeScript",
+            "label": "TypeScript SDK",
+            "source": "const result = await backendAPI.usage.getBalance('organization', 'org_123', 'api_calls', {\n  period: \"monthly\"\n});"
+          },
+          {
+            "lang": "Go",
+            "label": "Go SDK",
+            "source": "result, err := backendAPI.UsageService.GetBalance(ctx, \"organization\", \"org_123\", \"api_calls\", &backendAPI.UsageGetBalanceQuery{\n  Period: \"monthly\",\n})\nif err != nil {\n  // handle error\n}"
+          },
+          {
+            "lang": "Python",
+            "label": "Python SDK",
+            "source": "result = backendAPI.usage.getBalance(\"organization\", \"org_123\", \"api_calls\",\n  period=\"monthly\")"
+          }
+        ]
+      }
+    },
+    "/v1/usage/transactions/{resourceType}/{resourceId}/{limitType}": {
+      "get": {
+        "description": "Retrieves the transaction history for a usage wallet, including all credits and consumption records. Supports filtering by time period and date range.",
+        "operationId": "UsageController_getTransactionHistory",
+        "parameters": [
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "description": "API key for authentication",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "resourceType",
+            "required": true,
+            "in": "path",
+            "description": "The type of resource",
+            "schema": {
+              "$ref": "#/components/schemas/ResourceType"
+            }
+          },
+          {
+            "name": "resourceId",
+            "required": true,
+            "in": "path",
+            "description": "The unique identifier of the resource",
+            "schema": {
+              "example": "org_123",
+              "type": "string"
+            }
+          },
+          {
+            "name": "limitType",
+            "required": true,
+            "in": "path",
+            "description": "The type of usage limit",
+            "schema": {
+              "$ref": "#/components/schemas/UsageLimitType"
+            }
+          },
+          {
+            "name": "period",
+            "required": false,
+            "in": "query",
+            "description": "Time period for filtering transactions",
+            "schema": {
+              "enum": [
+                "monthly",
+                "yearly",
+                "lifetime"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "startDate",
+            "required": false,
+            "in": "query",
+            "description": "Start date for filtering transactions (ISO 8601 format)",
+            "schema": {
+              "example": "2024-01-01T00:00:00Z",
+              "type": "string"
+            }
+          },
+          {
+            "name": "endDate",
+            "required": false,
+            "in": "query",
+            "description": "End date for filtering transactions (ISO 8601 format)",
+            "schema": {
+              "example": "2024-12-31T23:59:59Z",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Transaction history retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransactionHistoryResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Invalid input or validation error"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key"
+          },
+          "404": {
+            "description": "Not Found - Resource does not exist"
+          }
+        },
+        "security": [
+          {
+            "X-API-KEY": []
+          }
+        ],
+        "summary": "Get transaction history",
+        "tags": [
+          "Usage"
+        ],
+        "x-codeSamples": [
+          {
+            "lang": "TypeScript",
+            "label": "TypeScript SDK",
+            "source": "const result = await backendAPI.usage.getTransactionHistory('organization', 'org_123', 'api_calls', {\n  period: \"monthly\",\n  startDate: \"2024-01-01T00:00:00Z\",\n  endDate: \"2024-12-31T23:59:59Z\"\n});"
+          },
+          {
+            "lang": "Go",
+            "label": "Go SDK",
+            "source": "result, err := backendAPI.UsageService.GetTransactionHistory(ctx, \"organization\", \"org_123\", \"api_calls\", &backendAPI.UsageGetTransactionHistoryQuery{\n  Period: \"monthly\",\n  StartDate: \"2024-01-01T00:00:00Z\",\n  EndDate: \"2024-12-31T23:59:59Z\",\n})\nif err != nil {\n  // handle error\n}"
+          },
+          {
+            "lang": "Python",
+            "label": "Python SDK",
+            "source": "result = backendAPI.usage.getTransactionHistory(\"organization\", \"org_123\", \"api_calls\",\n  period=\"monthly\",\n  start_date=\"2024-01-01T00:00:00Z\",\n  end_date=\"2024-12-31T23:59:59Z\")"
+          }
+        ]
+      }
+    },
+    "/v1/usage/check": {
+      "post": {
+        "description": "Checks whether a specific amount of consumption is allowed for a resource and limit type within a given time period. Returns the current balance, requested amount, and remaining balance after the consumption.",
+        "operationId": "UsageController_checkLimit",
+        "parameters": [
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "description": "API key for authentication",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UsageCheckBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Limit check completed. The response indicates whether consumption is allowed and provides balance information.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CheckLimitResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Invalid input or validation error"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key"
+          },
+          "404": {
+            "description": "Not Found - Resource does not exist"
+          }
+        },
+        "security": [
+          {
+            "X-API-KEY": []
+          }
+        ],
+        "summary": "Check if consumption is allowed",
+        "tags": [
+          "Usage"
+        ],
+        "x-codeSamples": [
+          {
+            "lang": "TypeScript",
+            "label": "TypeScript SDK",
+            "source": "const result = await backendAPI.usage.checkLimit({\n  resourceType: \"resourceType\",\n  resourceId: \"resourceId_123\",\n  limitType: \"limitType\",\n  amount: 100,\n  period: \"monthly\"\n});"
+          },
+          {
+            "lang": "Go",
+            "label": "Go SDK",
+            "source": "result, err := backendAPI.UsageService.CheckLimit(ctx, &backendAPI.UsageCheckBodyDto{\n  ResourceType: \"resourceType\",\n  ResourceId: \"resourceId_123\",\n  LimitType: \"limitType\",\n  Amount: 100,\n  Period: \"monthly\",\n})\nif err != nil {\n  // handle error\n}"
+          },
+          {
+            "lang": "Python",
+            "label": "Python SDK",
+            "source": "result = backendAPI.usage.checkLimit(,\n  resource_type=\"resourceType\",\n  resource_id=\"resourceId_123\",\n  limit_type=\"limitType\",\n  amount=100,\n  period=\"monthly\")"
+          }
+        ]
+      }
+    },
+    "/v1/resources/{resourceType}/{resourceId}/members": {
+      "get": {
+        "description": "Retrieves a paginated list of users who have roles (direct or inherited) on the specified resource. Supports search functionality to filter users by email or name.",
+        "operationId": "ResourceMemberController_list",
+        "parameters": [
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "description": "API key for authentication",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "resourceType",
+            "required": true,
+            "in": "path",
+            "description": "The type of resource (e.g., \"organization\", \"workspace\", \"project\")",
+            "schema": {
+              "$ref": "#/components/schemas/ResourceType"
+            }
+          },
+          {
+            "name": "resourceId",
+            "required": true,
+            "in": "path",
+            "description": "The unique identifier of the resource",
+            "schema": {
+              "minLength": 1,
+              "example": "ws_456",
+              "type": "string"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "Search query to filter members by email or name",
+            "schema": {
+              "example": "john@example.com",
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "Page number for pagination",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Number of items per page (minimum: 1, maximum: 100)",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "example": 20,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Resource members retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResourceMemberList"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key"
+          },
+          "404": {
+            "description": "Not Found - Resource does not exist"
+          }
+        },
+        "security": [
+          {
+            "X-API-KEY": []
+          }
+        ],
+        "summary": "List members for a resource",
+        "tags": [
+          "Resource Members"
+        ],
+        "x-codeSamples": [
+          {
+            "lang": "TypeScript",
+            "label": "TypeScript SDK",
+            "source": "const result = await backendAPI.resourceMembers.list('workspace', 'ws_456', {\n  search: \"john@example.com\",\n  page: 1,\n  limit: 20\n});"
+          },
+          {
+            "lang": "Go",
+            "label": "Go SDK",
+            "source": "result, err := backendAPI.ResourceMembersService.List(ctx, \"workspace\", \"ws_456\", &backendAPI.ResourceMembersListQuery{\n  Search: \"john@example.com\",\n  Page: 1,\n  Limit: 20,\n})\nif err != nil {\n  // handle error\n}"
+          },
+          {
+            "lang": "Python",
+            "label": "Python SDK",
+            "source": "result = backendAPI.resourceMembers.list(\"workspace\", \"ws_456\",\n  search=\"john@example.com\",\n  page=1,\n  limit=20)"
+          }
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "Backend API",
+    "description": "The Backend API documentation",
+    "version": "1.0",
+    "contact": {}
+  },
+  "tags": [],
+  "servers": [],
+  "components": {
+    "securitySchemes": {
+      "ApiKey": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-API-KEY"
+      }
+    },
+    "schemas": {
+      "InitiateSignin": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+          }
+        },
+        "required": [
+          "email"
+        ]
+      },
+      "InitiateSigninResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "code_sent",
+              "password_required"
+            ]
+          },
+          "authMethod": {
+            "type": "string",
+            "enum": [
+              "code",
+              "password",
+              "both"
+            ]
+          },
+          "email": {
+            "type": "string"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+          }
+        },
+        "required": [
+          "status",
+          "authMethod"
+        ],
+        "additionalProperties": false
+      },
+      "ResourceType": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Resource type identifier",
+        "example": "organization"
+      },
+      "AuthorizeCode": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+          },
+          "code": {
+            "type": "string",
+            "minLength": 6,
+            "maxLength": 6,
+            "pattern": "^\\d+$"
+          },
+          "resourceType": {
+            "$ref": "#/components/schemas/ResourceType",
+            "description": "The type of resource"
+          }
+        },
+        "required": [
+          "email",
+          "code",
+          "resourceType"
+        ],
+        "id": "AuthorizeCode"
+      },
+      "VerifySigninCodeResponse": {
+        "type": "object",
+        "properties": {
+          "localhostJwt": {
+            "type": "string"
+          },
+          "user": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "email": {
+                "type": "string"
+              },
+              "firstName": {
+                "type": "string",
+                "nullable": true
+              },
+              "lastName": {
+                "type": "string",
+                "nullable": true
+              },
+              "emailVerified": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "id",
+              "email",
+              "firstName",
+              "lastName",
+              "emailVerified"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "user"
+        ],
+        "additionalProperties": false
+      },
+      "PasswordSignin": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+          },
+          "password": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "email",
+          "password"
+        ]
+      },
+      "PasswordSigninResponse": {
+        "type": "object",
+        "properties": {
+          "localhostJwt": {
+            "type": "string"
+          },
+          "user": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "email": {
+                "type": "string"
+              },
+              "firstName": {
+                "type": "string",
+                "nullable": true
+              },
+              "lastName": {
+                "type": "string",
+                "nullable": true
+              },
+              "emailVerified": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "id",
+              "email",
+              "firstName",
+              "lastName",
+              "emailVerified"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "user"
+        ],
+        "additionalProperties": false
+      },
+      "InitiateSignup": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+          },
+          "firstName": {
+            "type": "string",
+            "minLength": 1
+          },
+          "lastName": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "email",
+          "firstName",
+          "lastName"
+        ]
+      },
+      "InitiateSignupResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "code_sent"
+            ]
+          },
+          "email": {
+            "type": "string"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+          }
+        },
+        "required": [
+          "status",
+          "email",
+          "expiresAt"
+        ],
+        "additionalProperties": false
+      },
+      "VerifySignupCode": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+          },
+          "code": {
+            "type": "string",
+            "minLength": 6,
+            "maxLength": 6,
+            "pattern": "^\\d+$"
+          }
+        },
+        "required": [
+          "email",
+          "code"
+        ]
+      },
+      "VerifySignupCodeResponse": {
+        "type": "object",
+        "properties": {
+          "localhostJwt": {
+            "type": "string"
+          },
+          "user": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "email": {
+                "type": "string"
+              },
+              "firstName": {
+                "type": "string",
+                "nullable": true
+              },
+              "lastName": {
+                "type": "string",
+                "nullable": true
+              },
+              "emailVerified": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "id",
+              "email",
+              "firstName",
+              "lastName",
+              "emailVerified"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "user"
+        ],
+        "additionalProperties": false
+      },
+      "RefreshResponse": {
+        "type": "object",
+        "properties": {
+          "sessionToken": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "sessionToken"
+        ],
+        "additionalProperties": false
+      },
+      "SessionResponse": {
+        "type": "object",
+        "properties": {
+          "user": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "email": {
+                "type": "string"
+              },
+              "firstName": {
+                "type": "string",
+                "nullable": true
+              },
+              "lastName": {
+                "type": "string",
+                "nullable": true
+              },
+              "emailVerified": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "id",
+              "email",
+              "firstName",
+              "lastName",
+              "emailVerified"
+            ],
+            "additionalProperties": false,
+            "nullable": true
+          },
+          "isAuthenticated": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "user",
+          "isAuthenticated"
+        ],
+        "additionalProperties": false
+      },
+      "ResendCode": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "signup",
+              "signin"
+            ]
+          }
+        },
+        "required": [
+          "email",
+          "type"
+        ]
+      },
+      "ResendCodeResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "code_sent"
+            ]
+          },
+          "email": {
+            "type": "string"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+          },
+          "canResendAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+          }
+        },
+        "required": [
+          "status",
+          "email",
+          "expiresAt"
+        ],
+        "additionalProperties": false
+      },
+      "JWK": {
+        "type": "object",
+        "properties": {
+          "keys": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "kty": {
+                  "type": "string"
+                },
+                "use": {
+                  "type": "string"
+                },
+                "kid": {
+                  "type": "string"
+                },
+                "alg": {
+                  "type": "string"
+                },
+                "n": {
+                  "type": "string"
+                },
+                "e": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "kty",
+                "use",
+                "kid",
+                "alg",
+                "n",
+                "e"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "keys"
+        ],
+        "additionalProperties": false
+      },
+      "EnvironmentByAuthDomain": {
+        "type": "object",
+        "properties": {
+          "environmentId": {
+            "type": "string"
+          },
+          "branding": {
+            "type": "object",
+            "properties": {
+              "environmentId": {
+                "type": "string"
+              },
+              "brandName": {
+                "type": "string"
+              },
+              "logoUrl": {
+                "type": "string",
+                "nullable": true
+              },
+              "faviconUrl": {
+                "type": "string"
+              },
+              "primaryColor": {
+                "type": "string"
+              },
+              "secondaryColor": {
+                "type": "string"
+              },
+              "fontFamily": {
+                "type": "string"
+              },
+              "loginTitle": {
+                "type": "string"
+              },
+              "loginSubtitle": {
+                "type": "string",
+                "nullable": true
+              },
+              "registerTitle": {
+                "type": "string"
+              },
+              "registerSubtitle": {
+                "type": "string",
+                "nullable": true
+              },
+              "footerText": {
+                "type": "string",
+                "nullable": true
+              },
+              "layoutType": {
+                "type": "string"
+              },
+              "backgroundImageUrl": {
+                "type": "string",
+                "nullable": true
+              },
+              "backgroundGradient": {
+                "type": "string",
+                "nullable": true
+              },
+              "showForgotPassword": {
+                "type": "boolean"
+              },
+              "showSignup": {
+                "type": "boolean"
+              },
+              "socialProviders": {
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {
+                  "type": "object",
+                  "properties": {
+                    "enabled": {
+                      "type": "boolean"
+                    },
+                    "customText": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "enabled"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": [
+              "environmentId",
+              "brandName",
+              "logoUrl",
+              "faviconUrl",
+              "primaryColor",
+              "secondaryColor",
+              "fontFamily",
+              "loginTitle",
+              "loginSubtitle",
+              "registerTitle",
+              "registerSubtitle",
+              "footerText",
+              "layoutType",
+              "backgroundImageUrl",
+              "backgroundGradient",
+              "showForgotPassword",
+              "showSignup",
+              "socialProviders"
+            ],
+            "additionalProperties": false
+          },
+          "authConfig": {
+            "type": "object",
+            "properties": {
+              "authMethod": {
+                "type": "string",
+                "enum": [
+                  "code",
+                  "password",
+                  "both"
+                ]
+              },
+              "codeExpirationMinutes": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 9007199254740991
+              },
+              "maxCodeAttempts": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 9007199254740991
+              },
+              "requireEmailVerification": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "authMethod",
+              "codeExpirationMinutes",
+              "maxCodeAttempts",
+              "requireEmailVerification"
+            ],
+            "additionalProperties": false
+          },
+          "authApiUrl": {
+            "type": "string"
+          },
+          "publishableKey": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "environmentId",
+          "branding",
+          "authConfig",
+          "authApiUrl",
+          "publishableKey"
+        ],
+        "additionalProperties": false
+      },
+      "CreateEnvironmentRequest": {
+        "type": "object",
+        "properties": {
+          "workspaceId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "lookupKey": {
+            "type": "string"
+          },
+          "variant": {
+            "default": "TEST",
+            "type": "string",
+            "enum": [
+              "TEST",
+              "LIVE"
+            ]
+          },
+          "domain": {
+            "type": "string",
+            "pattern": "^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)*\\.[a-z]{2,}$"
+          },
+          "cloneFromEnvironmentId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "workspaceId",
+          "name"
+        ]
+      },
+      "CreateEnvironmentResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "workspaceId": {
+            "type": "string"
+          },
+          "lookupKey": {
+            "type": "string",
+            "nullable": true
+          },
+          "name": {
+            "type": "string"
+          },
+          "variant": {
+            "type": "string",
+            "enum": [
+              "TEST",
+              "LIVE"
+            ]
+          },
+          "domain": {
+            "type": "string"
+          },
+          "publishableKey": {
+            "type": "string"
+          },
+          "domainStatus": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "VALIDATING",
+              "VERIFIED",
+              "FAILED",
+              "TIMED_OUT",
+              "UNHEALTHY"
+            ]
+          },
+          "sslStatus": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "PROVISIONING",
+              "ACTIVE",
+              "RENEWING",
+              "FAILED",
+              "EXPIRED"
+            ]
+          },
+          "isAccessible": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "workspaceId",
+          "lookupKey",
+          "name",
+          "variant",
+          "domain",
+          "publishableKey",
+          "createdAt",
+          "updatedAt"
+        ],
+        "additionalProperties": false
+      },
+      "ResourceList": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "type": {
+                  "$ref": "#/components/schemas/ResourceType",
+                  "description": "The type of resource"
+                },
+                "name": {
+                  "type": "string",
+                  "nullable": true
+                },
+                "parents": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "type": {
+                        "$ref": "#/components/schemas/ResourceType",
+                        "description": "The type of resource"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "type"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "createdAt": {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+                }
+              },
+              "required": [
+                "id",
+                "type",
+                "name",
+                "createdAt"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "total": {
+            "type": "number"
+          },
+          "page": {
+            "type": "number"
+          },
+          "limit": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "items",
+          "total",
+          "page",
+          "limit"
+        ],
+        "additionalProperties": false
+      },
+      "ResourceCreateBody": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "parents": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "type": {
+                  "$ref": "#/components/schemas/ResourceType",
+                  "description": "The type of resource"
+                }
+              },
+              "required": [
+                "id",
+                "type"
+              ]
+            }
+          },
+          "roles": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "userId": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "role": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "required": [
+                "userId",
+                "role"
+              ]
+            }
+          }
+        }
+      },
+      "Resource": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/ResourceType",
+            "description": "The type of resource"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "parents": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "type": {
+                  "$ref": "#/components/schemas/ResourceType",
+                  "description": "The type of resource"
+                }
+              },
+              "required": [
+                "id",
+                "type"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "name",
+          "createdAt"
+        ],
+        "additionalProperties": false
+      },
+      "ResourceUpdateBody": {
+        "type": "object",
+        "properties": {
+          "parents": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "type": {
+                  "$ref": "#/components/schemas/ResourceType",
+                  "description": "The type of resource"
+                }
+              },
+              "required": [
+                "id",
+                "type"
+              ]
+            },
+            "description": "Creates relationships with other resources. Parent resources must already exist."
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "ResourceBulkCreateBody": {
+        "type": "object",
+        "properties": {
+          "resources": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "parents": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "type": {
+                        "$ref": "#/components/schemas/ResourceType",
+                        "description": "The type of resource"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "type"
+                    ]
+                  }
+                },
+                "roles": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "userId": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "role": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    },
+                    "required": [
+                      "userId",
+                      "role"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "required": [
+          "resources"
+        ]
+      },
+      "ResourceBulkResult": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "created": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "type": {
+                  "$ref": "#/components/schemas/ResourceType",
+                  "description": "The type of resource"
+                },
+                "environmentId": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "type",
+                "environmentId"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "index": {
+                  "type": "number"
+                },
+                "resource": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "parents": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "type": {
+                            "$ref": "#/components/schemas/ResourceType",
+                            "description": "The type of resource"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "type"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "roles": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "userId": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "role": {
+                            "type": "string",
+                            "minLength": 1
+                          }
+                        },
+                        "required": [
+                          "userId",
+                          "role"
+                        ],
+                        "additionalProperties": false
+                      }
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                "error": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "index",
+                "resource",
+                "error"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "summary": {
+            "type": "object",
+            "properties": {
+              "total": {
+                "type": "number"
+              },
+              "successful": {
+                "type": "number"
+              },
+              "failed": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "total",
+              "successful",
+              "failed"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "success",
+          "created",
+          "errors",
+          "summary"
+        ],
+        "additionalProperties": false
+      },
+      "DefinitionValidateBody": {
+        "type": "object",
+        "properties": {
+          "resources": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "is_tenant": {
+                  "type": "boolean"
+                },
+                "roles": {
+                  "minItems": 1,
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "parents": {
+                  "type": "object",
+                  "propertyNames": {
+                    "type": "string"
+                  },
+                  "additionalProperties": {
+                    "type": "object",
+                    "properties": {
+                      "required": {
+                        "type": "boolean"
+                      }
+                    },
+                    "required": [
+                      "required"
+                    ]
+                  }
+                },
+                "roles_inheritance": {
+                  "type": "object",
+                  "propertyNames": {
+                    "type": "string"
+                  },
+                  "additionalProperties": {
+                    "minItems": 1,
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "pattern": "^([a-z0-9_-]+->)*[a-z0-9_-]+$"
+                    }
+                  }
+                }
+              },
+              "required": [
+                "roles"
+              ]
+            }
+          },
+          "entitlements": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "roles": {
+                  "minItems": 1,
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "plans": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "limit": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "roles"
+              ]
+            }
+          },
+          "features": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "summary": {
+                  "type": "string"
+                },
+                "entitlements": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "required": [
+                "name"
+              ]
+            }
+          },
+          "plans": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "summary": {
+                  "type": "string"
+                },
+                "resource_limits": {
+                  "type": "object",
+                  "propertyNames": {
+                    "type": "string"
+                  },
+                  "additionalProperties": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "usage_based_limits": {
+                  "type": "object",
+                  "propertyNames": {
+                    "type": "string"
+                  },
+                  "additionalProperties": {
+                    "type": "object",
+                    "properties": {
+                      "value": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9007199254740991
+                      },
+                      "period": {
+                        "type": "string",
+                        "enum": [
+                          "monthly",
+                          "yearly",
+                          "lifetime"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "value",
+                      "period"
+                    ]
+                  }
+                },
+                "billing": {
+                  "type": "object",
+                  "properties": {
+                    "slug": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "prices": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "amount": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 9007199254740991
+                          },
+                          "currency": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "interval": {
+                            "type": "string",
+                            "enum": [
+                              "month",
+                              "year"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "amount",
+                          "currency",
+                          "interval"
+                        ]
+                      }
+                    },
+                    "features": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "feature_slug": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "feature_name": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "feature_type": {
+                            "type": "string",
+                            "enum": [
+                              "boolean",
+                              "usage",
+                              "seat"
+                            ]
+                          },
+                          "item_type": {
+                            "type": "string",
+                            "enum": [
+                              "included",
+                              "addon",
+                              "usage",
+                              "credit",
+                              "seat"
+                            ]
+                          },
+                          "included_usage": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 9007199254740991
+                          },
+                          "limit_type": {
+                            "type": "string"
+                          },
+                          "included_quantity": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 9007199254740991
+                          }
+                        },
+                        "required": [
+                          "feature_slug",
+                          "feature_name",
+                          "feature_type",
+                          "item_type"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "slug"
+                  ]
+                }
+              },
+              "required": [
+                "name"
+              ]
+            }
+          },
+          "version": {
+            "default": "1.0",
+            "type": "string"
+          }
+        },
+        "required": [
+          "resources"
+        ]
+      },
+      "DefinitionValidateResponse": {
+        "type": "object",
+        "properties": {
+          "valid": {
+            "type": "boolean"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "resource": {
+                  "type": "string"
+                },
+                "field": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "resource",
+                "field",
+                "message"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "spec": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {}
+          }
+        },
+        "required": [
+          "valid",
+          "errors"
+        ],
+        "additionalProperties": false
+      },
+      "DefinitionGenerateSDKBody": {
+        "type": "object",
+        "properties": {
+          "resources": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "is_tenant": {
+                  "type": "boolean"
+                },
+                "roles": {
+                  "minItems": 1,
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "parents": {
+                  "type": "object",
+                  "propertyNames": {
+                    "type": "string"
+                  },
+                  "additionalProperties": {
+                    "type": "object",
+                    "properties": {
+                      "required": {
+                        "type": "boolean"
+                      }
+                    },
+                    "required": [
+                      "required"
+                    ]
+                  }
+                },
+                "roles_inheritance": {
+                  "type": "object",
+                  "propertyNames": {
+                    "type": "string"
+                  },
+                  "additionalProperties": {
+                    "minItems": 1,
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "pattern": "^([a-z0-9_-]+->)*[a-z0-9_-]+$"
+                    }
+                  }
+                }
+              },
+              "required": [
+                "roles"
+              ]
+            }
+          },
+          "entitlements": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "roles": {
+                  "minItems": 1,
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "plans": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "limit": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "roles"
+              ]
+            }
+          },
+          "features": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "summary": {
+                  "type": "string"
+                },
+                "entitlements": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "required": [
+                "name"
+              ]
+            }
+          },
+          "plans": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "summary": {
+                  "type": "string"
+                },
+                "resource_limits": {
+                  "type": "object",
+                  "propertyNames": {
+                    "type": "string"
+                  },
+                  "additionalProperties": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "usage_based_limits": {
+                  "type": "object",
+                  "propertyNames": {
+                    "type": "string"
+                  },
+                  "additionalProperties": {
+                    "type": "object",
+                    "properties": {
+                      "value": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9007199254740991
+                      },
+                      "period": {
+                        "type": "string",
+                        "enum": [
+                          "monthly",
+                          "yearly",
+                          "lifetime"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "value",
+                      "period"
+                    ]
+                  }
+                },
+                "billing": {
+                  "type": "object",
+                  "properties": {
+                    "slug": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "prices": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "amount": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 9007199254740991
+                          },
+                          "currency": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "interval": {
+                            "type": "string",
+                            "enum": [
+                              "month",
+                              "year"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "amount",
+                          "currency",
+                          "interval"
+                        ]
+                      }
+                    },
+                    "features": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "feature_slug": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "feature_name": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "feature_type": {
+                            "type": "string",
+                            "enum": [
+                              "boolean",
+                              "usage",
+                              "seat"
+                            ]
+                          },
+                          "item_type": {
+                            "type": "string",
+                            "enum": [
+                              "included",
+                              "addon",
+                              "usage",
+                              "credit",
+                              "seat"
+                            ]
+                          },
+                          "included_usage": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 9007199254740991
+                          },
+                          "limit_type": {
+                            "type": "string"
+                          },
+                          "included_quantity": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 9007199254740991
+                          }
+                        },
+                        "required": [
+                          "feature_slug",
+                          "feature_name",
+                          "feature_type",
+                          "item_type"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "slug"
+                  ]
+                }
+              },
+              "required": [
+                "name"
+              ]
+            }
+          },
+          "version": {
+            "default": "1.0",
+            "type": "string"
+          },
+          "sdk_options": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string"
+              },
+              "package_name": {
+                "type": "string"
+              },
+              "client_name": {
+                "type": "string"
+              },
+              "module_type": {
+                "default": "backend",
+                "type": "string",
+                "enum": [
+                  "backend",
+                  "client"
+                ]
+              }
+            },
+            "required": [
+              "type",
+              "package_name",
+              "client_name"
+            ]
+          }
+        },
+        "required": [
+          "resources",
+          "sdk_options"
+        ]
+      },
+      "DefinitionGenerateSDKResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "spec": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {}
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "resource": {
+                  "type": "string"
+                },
+                "field": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "resource",
+                "field",
+                "message"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "success",
+          "spec"
+        ],
+        "additionalProperties": false
+      },
+      "Definition": {
+        "type": "object",
+        "properties": {
+          "plans": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string",
+              "minLength": 1
+            },
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "summary": {
+                  "type": "string"
+                },
+                "resource_limits": {
+                  "type": "object",
+                  "propertyNames": {
+                    "type": "string"
+                  },
+                  "additionalProperties": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "usage_based_limits": {
+                  "type": "object",
+                  "propertyNames": {
+                    "type": "string"
+                  },
+                  "additionalProperties": {
+                    "type": "object",
+                    "properties": {
+                      "value": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9007199254740991
+                      },
+                      "period": {
+                        "type": "string",
+                        "enum": [
+                          "monthly",
+                          "yearly",
+                          "lifetime"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "value",
+                      "period"
+                    ]
+                  }
+                },
+                "billing": {
+                  "type": "object",
+                  "properties": {
+                    "slug": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "prices": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "amount": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 9007199254740991
+                          },
+                          "currency": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "interval": {
+                            "type": "string",
+                            "enum": [
+                              "month",
+                              "year"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "amount",
+                          "currency",
+                          "interval"
+                        ]
+                      }
+                    },
+                    "features": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "feature_slug": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "feature_name": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "feature_type": {
+                            "type": "string",
+                            "enum": [
+                              "boolean",
+                              "usage",
+                              "seat"
+                            ]
+                          },
+                          "item_type": {
+                            "type": "string",
+                            "enum": [
+                              "included",
+                              "addon",
+                              "usage",
+                              "credit",
+                              "seat"
+                            ]
+                          },
+                          "included_usage": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 9007199254740991
+                          },
+                          "limit_type": {
+                            "type": "string"
+                          },
+                          "included_quantity": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 9007199254740991
+                          }
+                        },
+                        "required": [
+                          "feature_slug",
+                          "feature_name",
+                          "feature_type",
+                          "item_type"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "slug"
+                  ]
+                }
+              },
+              "required": [
+                "name"
+              ]
+            }
+          },
+          "resources": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string",
+              "minLength": 1
+            },
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "is_tenant": {
+                  "type": "boolean"
+                },
+                "roles": {
+                  "minItems": 1,
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "parents": {
+                  "type": "object",
+                  "propertyNames": {
+                    "type": "string"
+                  },
+                  "additionalProperties": {
+                    "type": "object",
+                    "properties": {
+                      "required": {
+                        "type": "boolean"
+                      }
+                    },
+                    "required": [
+                      "required"
+                    ]
+                  }
+                },
+                "roles_inheritance": {
+                  "type": "object",
+                  "propertyNames": {
+                    "type": "string"
+                  },
+                  "additionalProperties": {
+                    "minItems": 1,
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "pattern": "^([a-z0-9_-]+->)*[a-z0-9_-]+$"
+                    }
+                  }
+                }
+              },
+              "required": [
+                "roles"
+              ]
+            }
+          },
+          "entitlements": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string",
+              "minLength": 1
+            },
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "roles": {
+                  "minItems": 1,
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "plans": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "limit": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "roles"
+              ]
+            }
+          },
+          "features": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string",
+              "minLength": 1
+            },
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "summary": {
+                  "type": "string"
+                },
+                "entitlements": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "required": [
+                "name"
+              ]
+            }
+          }
+        },
+        "required": [
+          "plans",
+          "resources",
+          "entitlements",
+          "features"
+        ]
+      },
+      "DefinitionCustomTypesResponse": {
+        "type": "object",
+        "properties": {
+          "openapi": {
+            "type": "string"
+          },
+          "info": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string"
+              },
+              "version": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "title",
+              "version"
+            ],
+            "additionalProperties": false
+          },
+          "components": {
+            "type": "object",
+            "properties": {
+              "schemas": {
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {}
+              }
+            },
+            "required": [
+              "schemas"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "openapi",
+          "info",
+          "components"
+        ],
+        "additionalProperties": false
+      },
+      "OpenAPISpecResponse": {
+        "type": "object",
+        "propertyNames": {
+          "type": "string"
+        },
+        "additionalProperties": {}
+      },
+      "JsonSchemaResponse": {
+        "type": "object",
+        "propertyNames": {
+          "type": "string"
+        },
+        "additionalProperties": {}
+      },
+      "RoleCreateBody": {
+        "type": "object",
+        "properties": {
+          "role": {
+            "type": "string",
+            "minLength": 1
+          },
+          "resourceType": {
+            "$ref": "#/components/schemas/ResourceType",
+            "description": "The type of resource"
+          },
+          "resourceId": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "role",
+          "resourceType",
+          "resourceId"
+        ]
+      },
+      "Role": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          },
+          "resourceType": {
+            "$ref": "#/components/schemas/ResourceType",
+            "description": "The type of resource"
+          },
+          "resourceId": {
+            "type": "string"
+          },
+          "environmentId": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "userId",
+          "role",
+          "resourceType",
+          "resourceId",
+          "environmentId",
+          "createdAt"
+        ],
+        "additionalProperties": false
+      },
+      "RoleList": {
+        "type": "object",
+        "properties": {
+          "roles": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "userId": {
+                  "type": "string"
+                },
+                "role": {
+                  "type": "string"
+                },
+                "resourceType": {
+                  "$ref": "#/components/schemas/ResourceType",
+                  "description": "The type of resource"
+                },
+                "resourceId": {
+                  "type": "string"
+                },
+                "environmentId": {
+                  "type": "string"
+                },
+                "createdAt": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "userId",
+                "role",
+                "resourceType",
+                "resourceId",
+                "environmentId",
+                "createdAt"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "total": {
+            "type": "number"
+          },
+          "page": {
+            "type": "number"
+          },
+          "limit": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "roles",
+          "total",
+          "page",
+          "limit"
+        ],
+        "additionalProperties": false
+      },
+      "RoleBulkCreateBody": {
+        "type": "object",
+        "properties": {
+          "roles": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "userId": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "role": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "resourceType": {
+                  "$ref": "#/components/schemas/ResourceType",
+                  "description": "The type of resource"
+                },
+                "resourceId": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "required": [
+                "userId",
+                "role",
+                "resourceType",
+                "resourceId"
+              ]
+            }
+          }
+        },
+        "required": [
+          "roles"
+        ]
+      },
+      "RoleBulkResult": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "created": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "userId": {
+                  "type": "string"
+                },
+                "role": {
+                  "type": "string"
+                },
+                "resourceType": {
+                  "$ref": "#/components/schemas/ResourceType",
+                  "description": "The type of resource"
+                },
+                "resourceId": {
+                  "type": "string"
+                },
+                "environmentId": {
+                  "type": "string"
+                },
+                "createdAt": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "userId",
+                "role",
+                "resourceType",
+                "resourceId",
+                "environmentId",
+                "createdAt"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "index": {
+                  "type": "number"
+                },
+                "role": {
+                  "type": "object",
+                  "properties": {
+                    "userId": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "role": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "resourceType": {
+                      "$ref": "#/components/schemas/ResourceType",
+                      "description": "The type of resource"
+                    },
+                    "resourceId": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  },
+                  "required": [
+                    "userId",
+                    "role",
+                    "resourceType",
+                    "resourceId"
+                  ],
+                  "additionalProperties": false
+                },
+                "error": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "index",
+                "role",
+                "error"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "summary": {
+            "type": "object",
+            "properties": {
+              "total": {
+                "type": "number"
+              },
+              "successful": {
+                "type": "number"
+              },
+              "failed": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "total",
+              "successful",
+              "failed"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "success",
+          "created",
+          "errors",
+          "summary"
+        ],
+        "additionalProperties": false
+      },
+      "UserList": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "lookupKey": {
+                  "type": "string",
+                  "nullable": true
+                },
+                "emailVerified": {
+                  "type": "boolean"
+                },
+                "email": {
+                  "type": "string",
+                  "format": "email",
+                  "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+                },
+                "firstName": {
+                  "type": "string",
+                  "nullable": true
+                },
+                "lastName": {
+                  "type": "string",
+                  "nullable": true
+                },
+                "avatarUrl": {
+                  "type": "string",
+                  "nullable": true
+                },
+                "createdAt": {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+                },
+                "updatedAt": {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+                },
+                "lastLoginAt": {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$",
+                  "nullable": true
+                }
+              },
+              "required": [
+                "id",
+                "lookupKey",
+                "emailVerified",
+                "email",
+                "firstName",
+                "lastName",
+                "avatarUrl",
+                "createdAt",
+                "updatedAt",
+                "lastLoginAt"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "total": {
+            "type": "number"
+          },
+          "page": {
+            "type": "number"
+          },
+          "limit": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "items",
+          "total",
+          "page",
+          "limit"
+        ],
+        "additionalProperties": false
+      },
+      "UserCreateBody": {
+        "type": "object",
+        "properties": {
+          "newUser": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "lookupKey": {
+            "type": "string",
+            "minLength": 1
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+          },
+          "firstName": {
+            "type": "string",
+            "nullable": true
+          },
+          "lastName": {
+            "type": "string",
+            "nullable": true
+          },
+          "avatarUrl": {
+            "type": "string",
+            "format": "uri"
+          },
+          "password": {
+            "type": "string",
+            "minLength": 6,
+            "nullable": true
+          }
+        },
+        "required": [
+          "lookupKey",
+          "email"
+        ]
+      },
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "lookupKey": {
+            "type": "string",
+            "nullable": true
+          },
+          "emailVerified": {
+            "type": "boolean"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+          },
+          "firstName": {
+            "type": "string",
+            "nullable": true
+          },
+          "lastName": {
+            "type": "string",
+            "nullable": true
+          },
+          "avatarUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+          },
+          "lastLoginAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "lookupKey",
+          "emailVerified",
+          "email",
+          "firstName",
+          "lastName",
+          "avatarUrl",
+          "createdAt",
+          "updatedAt",
+          "lastLoginAt"
+        ],
+        "additionalProperties": false
+      },
+      "UserUpdateBody": {
+        "type": "object",
+        "properties": {
+          "lookupKey": {
+            "type": "string",
+            "minLength": 1
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+          },
+          "firstName": {
+            "type": "string",
+            "nullable": true
+          },
+          "lastName": {
+            "type": "string",
+            "nullable": true
+          },
+          "avatarUrl": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true
+          },
+          "password": {
+            "type": "string",
+            "minLength": 6
+          }
+        }
+      },
+      "UserResourceList": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "resource": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "type": {
+                  "$ref": "#/components/schemas/ResourceType",
+                  "description": "The type of resource"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "parents": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "type": {
+                        "$ref": "#/components/schemas/ResourceType",
+                        "description": "The type of resource"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "type"
+                    ],
+                    "additionalProperties": false
+                  }
+                }
+              },
+              "required": [
+                "id",
+                "type",
+                "name",
+                "parents"
+              ],
+              "additionalProperties": {}
+            },
+            "role": {
+              "type": "string"
+            },
+            "inherited": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "resource",
+            "role",
+            "inherited"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "EntitlementCheckBody": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "entitlement": {
+            "$ref": "#/components/schemas/EntitlementType",
+            "description": "The entitlement to check"
+          },
+          "resourceId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "amount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "userId",
+          "entitlement",
+          "resourceId"
+        ]
+      },
+      "EntitlementCheckResult": {
+        "type": "object",
+        "properties": {
+          "allowed": {
+            "type": "boolean"
+          },
+          "roles": {
+            "type": "object",
+            "properties": {
+              "allowed": {
+                "type": "boolean"
+              },
+              "reason": {
+                "type": "string"
+              },
+              "userRoles": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "allowedRoles": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "required": [
+              "allowed"
+            ],
+            "additionalProperties": false,
+            "nullable": true
+          },
+          "limit": {
+            "type": "object",
+            "properties": {
+              "allowed": {
+                "type": "boolean"
+              },
+              "reason": {
+                "type": "string"
+              },
+              "current": {
+                "type": "number"
+              },
+              "limit": {
+                "type": "number"
+              },
+              "remaining": {
+                "type": "number"
+              },
+              "scope": {
+                "type": "string"
+              },
+              "plan": {
+                "type": "string",
+                "nullable": true
+              }
+            },
+            "required": [
+              "allowed"
+            ],
+            "additionalProperties": false,
+            "nullable": true
+          },
+          "plans": {
+            "type": "object",
+            "properties": {
+              "allowed": {
+                "type": "boolean"
+              },
+              "reason": {
+                "type": "string"
+              },
+              "plan": {
+                "type": "string",
+                "nullable": true
+              },
+              "allowedPlans": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "required": [
+              "allowed"
+            ],
+            "additionalProperties": false,
+            "nullable": true
+          }
+        },
+        "required": [
+          "allowed"
+        ],
+        "additionalProperties": false
+      },
+      "EntitlementsListResult": {
+        "type": "object",
+        "properties": {
+          "results": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "resourceType": {
+                  "$ref": "#/components/schemas/ResourceType",
+                  "description": "The type of resource"
+                },
+                "resourceId": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "entitlements": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "entitlement": {
+                        "$ref": "#/components/schemas/EntitlementType",
+                        "description": "The entitlement to check"
+                      },
+                      "allowed": {
+                        "type": "boolean"
+                      },
+                      "allowedByRole": {
+                        "type": "boolean"
+                      },
+                      "allowedByPlan": {
+                        "type": "boolean"
+                      },
+                      "currentRole": {
+                        "type": "string"
+                      },
+                      "allowedRoles": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "currentPlan": {
+                        "type": "string"
+                      },
+                      "allowedPlans": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "required": [
+                      "entitlement",
+                      "allowed",
+                      "allowedByRole",
+                      "allowedByPlan",
+                      "allowedRoles"
+                    ],
+                    "additionalProperties": false
+                  }
+                }
+              },
+              "required": [
+                "resourceType",
+                "resourceId",
+                "entitlements"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "results"
+        ],
+        "additionalProperties": false
+      },
+      "PlanAssignBody": {
+        "type": "object",
+        "properties": {
+          "planKey": {
+            "$ref": "#/components/schemas/PlanType",
+            "description": "The plan key"
+          }
+        },
+        "required": [
+          "planKey"
+        ]
+      },
+      "PlanResponse": {
+        "type": "object",
+        "properties": {
+          "environmentId": {
+            "type": "string"
+          },
+          "resourceType": {
+            "$ref": "#/components/schemas/ResourceType",
+            "description": "The type of resource"
+          },
+          "resourceId": {
+            "type": "string"
+          },
+          "planKey": {
+            "$ref": "#/components/schemas/PlanType",
+            "description": "The plan key"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+          }
+        },
+        "required": [
+          "environmentId",
+          "resourceType",
+          "resourceId",
+          "planKey",
+          "createdAt",
+          "updatedAt"
+        ],
+        "additionalProperties": false
+      },
+      "PlanDeleteResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "success"
+        ],
+        "additionalProperties": false
+      },
+      "UsageCreditBody": {
+        "type": "object",
+        "properties": {
+          "resourceType": {
+            "$ref": "#/components/schemas/ResourceType",
+            "description": "The type of resource"
+          },
+          "resourceId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "limitType": {
+            "$ref": "#/components/schemas/UsageLimitType",
+            "description": "The type of usage-based limit"
+          },
+          "amount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "tags": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {}
+          }
+        },
+        "required": [
+          "resourceType",
+          "resourceId",
+          "limitType",
+          "amount"
+        ]
+      },
+      "UsageWalletResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "environmentId": {
+            "type": "string"
+          },
+          "resourceType": {
+            "$ref": "#/components/schemas/ResourceType",
+            "description": "The type of resource"
+          },
+          "resourceId": {
+            "type": "string"
+          },
+          "limitType": {
+            "$ref": "#/components/schemas/UsageLimitType",
+            "description": "The type of usage-based limit"
+          },
+          "amount": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "tags": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {},
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+          }
+        },
+        "required": [
+          "id",
+          "environmentId",
+          "resourceType",
+          "resourceId",
+          "limitType",
+          "amount",
+          "tags",
+          "createdAt"
+        ],
+        "additionalProperties": false
+      },
+      "UsageConsumeBody": {
+        "type": "object",
+        "properties": {
+          "resourceType": {
+            "$ref": "#/components/schemas/ResourceType",
+            "description": "The type of resource"
+          },
+          "resourceId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "limitType": {
+            "$ref": "#/components/schemas/UsageLimitType",
+            "description": "The type of usage-based limit"
+          },
+          "amount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "tags": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {}
+          }
+        },
+        "required": [
+          "resourceType",
+          "resourceId",
+          "limitType",
+          "amount"
+        ]
+      },
+      "BalanceResponse": {
+        "type": "object",
+        "properties": {
+          "balance": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "balance"
+        ],
+        "additionalProperties": false
+      },
+      "TransactionHistoryResponse": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "environmentId": {
+                  "type": "string"
+                },
+                "resourceType": {
+                  "$ref": "#/components/schemas/ResourceType",
+                  "description": "The type of resource"
+                },
+                "resourceId": {
+                  "type": "string"
+                },
+                "limitType": {
+                  "$ref": "#/components/schemas/LimitType",
+                  "description": "The type of limit"
+                },
+                "amount": {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                },
+                "tags": {
+                  "type": "object",
+                  "propertyNames": {
+                    "type": "string"
+                  },
+                  "additionalProperties": {},
+                  "nullable": true
+                },
+                "createdAt": {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+                }
+              },
+              "required": [
+                "id",
+                "environmentId",
+                "resourceType",
+                "resourceId",
+                "limitType",
+                "amount",
+                "tags",
+                "createdAt"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "additionalProperties": false
+      },
+      "UsageCheckBody": {
+        "type": "object",
+        "properties": {
+          "resourceType": {
+            "$ref": "#/components/schemas/ResourceType",
+            "description": "The type of resource"
+          },
+          "resourceId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "limitType": {
+            "$ref": "#/components/schemas/UsageLimitType",
+            "description": "The type of usage-based limit"
+          },
+          "amount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "period": {
+            "type": "string",
+            "enum": [
+              "monthly",
+              "yearly",
+              "lifetime"
+            ]
+          }
+        },
+        "required": [
+          "resourceType",
+          "resourceId",
+          "limitType",
+          "amount",
+          "period"
+        ]
+      },
+      "CheckLimitResponse": {
+        "type": "object",
+        "properties": {
+          "allowed": {
+            "type": "boolean"
+          },
+          "current": {
+            "type": "number"
+          },
+          "requested": {
+            "type": "number"
+          },
+          "remaining": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "allowed",
+          "current",
+          "requested"
+        ],
+        "additionalProperties": false
+      },
+      "ResourceMemberList": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "userId": {
+                  "type": "string"
+                },
+                "role": {
+                  "type": "string"
+                },
+                "inherited": {
+                  "type": "boolean"
+                },
+                "user": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "lookupKey": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "emailVerified": {
+                      "type": "boolean"
+                    },
+                    "email": {
+                      "type": "string",
+                      "format": "email",
+                      "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+                    },
+                    "firstName": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "lastName": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "avatarUrl": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "createdAt": {
+                      "type": "string",
+                      "format": "date-time",
+                      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+                    },
+                    "updatedAt": {
+                      "type": "string",
+                      "format": "date-time",
+                      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+                    },
+                    "lastLoginAt": {
+                      "type": "string",
+                      "format": "date-time",
+                      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$",
+                      "nullable": true
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "lookupKey",
+                    "emailVerified",
+                    "email",
+                    "firstName",
+                    "lastName",
+                    "avatarUrl",
+                    "createdAt",
+                    "updatedAt",
+                    "lastLoginAt"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "userId",
+                "role",
+                "inherited",
+                "user"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "total": {
+            "type": "number"
+          },
+          "page": {
+            "type": "number"
+          },
+          "limit": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "items",
+          "total",
+          "page",
+          "limit"
+        ],
+        "additionalProperties": false
+      },
+      "EntitlementType": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Entitlement identifier",
+        "example": "organization:create_workspace"
+      },
+      "LimitType": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Limit type identifier",
+        "example": "projects_per_workspace"
+      },
+      "UsageLimitType": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Usage-based limit type identifier",
+        "example": "api_calls_per_month"
+      },
+      "ResourceLimitType": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Resource-based limit type identifier",
+        "example": "projects_per_workspace"
+      },
+      "PlanType": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Plan type identifier",
+        "example": "free"
+      }
+    }
+  },
+  "security": [
+    {
+      "ApiKey": []
+    }
+  ],
+  "_metadata": {
+    "generatedAt": "2026-01-14T00:51:32.970Z",
+    "generator": "@blimu/codegen",
+    "generatorVersion": "1.0.0"
+  }
+}

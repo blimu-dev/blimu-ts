@@ -17,140 +17,141 @@ import { BlimuClient } from '@blimu/backend';
 
 // Create a new client
 const client = new BlimuClient({
-  baseURL: 'https://api.example.com',
+  baseURL: 'https://api.blimu.dev',
   timeoutMs: 10000,
-  retry: { retries: 2, backoffMs: 300, retryOn: [429, 500, 502, 503, 504] },
-  // Environment-based baseURL (optional)
-  env: 'sandbox',
-  envBaseURLs: {
-    sandbox: 'https://api-sandbox.example.com',
-    production: 'https://api.example.com',
+  retry: { retries: 2, strategy: 'exponential', backoffMs: 300, retryOn: [429, 500, 502, 503, 504] },
+  // Auth configuration
+  auth: {
+    strategies: [
+      {
+        type: 'bearer',
+        token: process.env.API_TOKEN,
+      },
+    ],
   },
-  // Auth (generic API Key or Bearer header)
-  accessToken: process.env.API_TOKEN,
-  headerName: 'access_token', // or 'Authorization' (defaults to Authorization: Bearer <token>)
 });
+
 // Example: Bulk create resources
 try {
-  const result = await client.bulkResources.create('resourceType', {
-    // Request body data
-  });
+  const result = await client.bulkResources.create(
+    'resourceType'
+    
+    , {
+      // Request body data
+    }
+  );
   console.log('Result:', result);
 } catch (error) {
-  // ApiError with structured data
+  // FetchError with structured data
+  console.error(error);
+}
+// Example: Bulk create roles
+try {
+  const result = await client.bulkRoles.create(
+    
+    
+    {
+      // Request body data
+    }
+  );
+  console.log('Result:', result);
+} catch (error) {
+  // FetchError with structured data
+  console.error(error);
+}
+// Example: Check if a user has a specific entitlement on a resource
+try {
+  const result = await client.entitlements.checkEntitlement(
+    
+    
+    {
+      // Request body data
+    }
+  );
+  console.log('Result:', result);
+} catch (error) {
+  // FetchError with structured data
+  console.error(error);
+}
+// Example: Remove plan assignment from a tenant resource
+try {
+  const result = await client.plans.delete(
+    'resourceType', 'resourceId'
+    
+    
+  );
+  console.log('Result:', result);
+} catch (error) {
+  // FetchError with structured data
+  console.error(error);
+}
+// Example: List members for a resource
+try {
+  const result = await client.resourceMembers.list(
+    'resourceType', 'resourceId'
+    , {
+    }
+    
+  );
+  console.log('Result:', result);
+} catch (error) {
+  // FetchError with structured data
+  console.error(error);
+}
+// Example: List resources
+try {
+  const result = await client.resources.list(
+    'resourceType'
+    , {
+    }
+    
+  );
+  console.log('Result:', result);
+} catch (error) {
+  // FetchError with structured data
+  console.error(error);
+}
+// Example: List user roles
+try {
+  const result = await client.roles.list(
+    'userId'
+    , {
+    }
+    
+  );
+  console.log('Result:', result);
+} catch (error) {
+  // FetchError with structured data
+  console.error(error);
+}
+// Example: Get wallet balance
+try {
+  const result = await client.usage.getBalance(
+    'resourceType', 'resourceId', 'limitType'
+    , {
+      period: undefined,
+    }
+    
+  );
+  console.log('Result:', result);
+} catch (error) {
+  // FetchError with structured data
+  console.error(error);
+}
+// Example: List users
+try {
+  const result = await client.users.list(
+    
+    {
+    }
+    
+  );
+  console.log('Result:', result);
+} catch (error) {
+  // FetchError with structured data
   console.error(error);
 }
 ```
-
-## Environment & Auth
-
-```typescript
-const client = new BlimuClient({
-  env: 'sandbox',
-  envBaseURLs: {
-    sandbox: 'https://api-sandbox.example.com',
-    production: 'https://api.example.com',
-  },
-  accessToken: async () => process.env.API_TOKEN!,
-  headerName: 'access_token',
-});
-client.setAccessToken('new-token');
-```
-
-## Pagination
-
-```typescript
-import { listAll } from '@blimu/backend';
-
-const allPayments = await listAll((query) => client.payment.listPayments(query), { limit: 100 });
-```
-
-## Interceptors
-
-```typescript
-const client = new BlimuClient({
-  onRequest: ({ url, init }) => console.debug('->', init.method, url),
-  onResponse: ({ response }) => console.debug('<-', response.status),
-  onError: (err) => console.warn('request error', err),
-});
-```
-
-## Authentication
-
-This SDK supports the following authentication methods:
-
-### ApiKey
-
-API Key authentication (header):
-
-```typescript
-const client = new BlimuClient({
-  apiKey: 'your-api-key',
-});
-```
-
-## Subpath imports
-
-```typescript
-import { PaymentService, Schema } from '@blimu/backend';
-```
-
-## Available Services
-
-### BulkResourcesService
-
-- **create**: POST /v1/resources/{resourceType}/bulk - Bulk create resources
-
-### BulkRolesService
-
-- **create**: POST /v1/users/roles/bulk - Bulk create roles
-
-### EntitlementsService
-
-- **checkEntitlement**: POST /v1/entitlements/check - Check if a user has a specific entitlement on a resource
-- **listForResource**: GET /v1/entitlements/list-for-resource/{resourceType}/{resourceId} - List entitlements for a specific resource
-- **listForTenant**: GET /v1/entitlements/list-for-tenant/{tenantResourceId} - List entitlements for a tenant and all its sub-resources
-
-### PlansService
-
-- **delete**: DELETE /v1/resources/{resourceType}/{resourceId}/plan - Remove plan assignment from a tenant resource
-- **read**: GET /v1/resources/{resourceType}/{resourceId}/plan - Get the plan assigned to a tenant resource
-- **assign**: POST /v1/resources/{resourceType}/{resourceId}/plan - Assign a plan to a tenant resource
-
-### ResourceMembersService
-
-- **list**: GET /v1/resources/{resourceType}/{resourceId}/members - List members for a resource
-
-### ResourcesService
-
-- **list**: GET /v1/resources/{resourceType} - List resources
-- **create**: POST /v1/resources/{resourceType} - Create a resource
-- **delete**: DELETE /v1/resources/{resourceType}/{resourceId} - Delete a resource
-- **read**: GET /v1/resources/{resourceType}/{resourceId} - Read a resource
-- **update**: PUT /v1/resources/{resourceType}/{resourceId} - Update a resource
-
-### RolesService
-
-- **list**: GET /v1/users/{userId}/roles - List user roles
-- **create**: POST /v1/users/{userId}/roles - Create a role (assign role to user on resource)
-- **delete**: DELETE /v1/users/{userId}/roles/{resourceType}/{resourceId} - Delete a role
-
-### UsageService
-
-- **getBalance**: GET /v1/usage/balance/{resourceType}/{resourceId}/{limitType} - Get wallet balance
-- **checkLimit**: POST /v1/usage/check - Check if consumption is allowed
-- **consume**: POST /v1/usage/consume - Record consumption (inserts negative amount)
-- **credit**: POST /v1/usage/credit - Add credits to wallet (inserts positive amount)
-- **getTransactionHistory**: GET /v1/usage/transactions/{resourceType}/{resourceId}/{limitType} - Get transaction history
-
-### UsersService
-
-- **list**: GET /v1/users - List users
-- **create**: POST /v1/users - Create a user
-- **delete**: DELETE /v1/users/{userId} - Delete a user
-- **read**: GET /v1/users/{userId} - Get a user by ID
-- **update**: PUT /v1/users/{userId} - Update a user
-- **listEffectiveUserResourcesRoles**: GET /v1/users/{userId}/effective-user-resources-roles - List effective user resources roles
 
 ## TypeScript Support
 
@@ -159,13 +160,9 @@ This SDK is written in TypeScript and provides full type safety:
 ```typescript
 import { BlimuClient, Schema } from '@blimu/backend';
 
-const client = new BlimuClient({
-  /* config */
-});
+const client = new BlimuClient({ /* config */ });
 
 // All methods are fully typed
-const result: ResourceBulkResult = await client.bulkResources.create(/* ... */);
-
 // Schema types are available
 const data: Schema.BalanceResponse = {
   // Fully typed object
@@ -185,7 +182,7 @@ import { fetch } from 'undici';
 import { BlimuClient } from '@blimu/backend';
 
 const client = new BlimuClient({
-  baseURL: 'https://api.example.com',
+  baseURL: 'https://api.blimu.dev',
   fetch,
 });
 ```
@@ -236,14 +233,12 @@ All types are available under the `Schema` namespace:
 import { Schema } from '@blimu/backend';
 
 // Use any model type
-const user: Schema.User = {
-  /* ... */
-};
+const user: Schema.User = { /* ... */ };
 ```
 
 ## Contributing
 
-This SDK is auto-generated. Please do not edit the generated files directly.
+This SDK is auto-generated. Please do not edit the generated files directly. 
 If you find issues, please report them in the main project repository.
 
 ## License

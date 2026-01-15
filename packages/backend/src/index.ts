@@ -8,7 +8,6 @@ import { ResourcesService } from './services/resources';
 import { RolesService } from './services/roles';
 import { UsageService } from './services/usage';
 import { UsersService } from './services/users';
-
 export class Blimu {
   readonly bulkResources: BulkResourcesService;
   readonly bulkRoles: BulkRolesService;
@@ -19,7 +18,6 @@ export class Blimu {
   readonly roles: RolesService;
   readonly usage: UsageService;
   readonly users: UsersService;
-
   constructor(options?: ClientOption) {
     const core = new CoreClient(options);
     this.bulkResources = new BulkResourcesService(core);
@@ -36,13 +34,16 @@ export class Blimu {
 
 export type { ClientOption };
 
-// Export FetchError for error handling
-export { FetchError };
+// Export FetchError and CoreClient for error handling and advanced usage
+export { FetchError, CoreClient };
+// Re-export all error types from @blimu/fetch for instanceof checks
+export * from '@blimu/fetch';
 export const BlimuError = FetchError;
 
 // Re-exports for better ergonomics
 export * from './utils';
 export * as Schema from './schema';
+export * as ZodSchema from './schema.zod';
 export { BulkResourcesService } from './services/bulk_resources';
 export { BulkRolesService } from './services/bulk_roles';
 export { EntitlementsService } from './services/entitlements';
@@ -52,4 +53,3 @@ export { ResourcesService } from './services/resources';
 export { RolesService } from './services/roles';
 export { UsageService } from './services/usage';
 export { UsersService } from './services/users';
-export * from './token-verifier';
