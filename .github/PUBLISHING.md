@@ -1,121 +1,162 @@
 # Publishing Guide
 
-This document describes how to publish new versions of `@blimu/backend`, `@blimu/client`, and `@blimu/nestjs` to npm.
+This document describes how to publish new versions of `@blimu/backend`, `@blimu/client`, `@blimu/nestjs`, `@blimu/react`, `@blimu/types`, and `blimu` CLI to npm.
 
-## Automated Publishing
+## Automated Publishing with Changesets
 
-Publishing is automated via GitHub Actions. When you create a new git tag, the workflow will:
+Publishing is fully automated via GitHub Actions using Changesets. The workflow consists of two main steps:
 
-1. Extract the version from the tag (e.g., `v0.4.5` → `0.4.5`)
-2. Update all package.json files with the new version
-3. Replace `workspace:*` dependency in `@blimu/nestjs` with the actual version
-4. Build all packages
-5. Publish `@blimu/backend` to npm first
-6. Wait for npm propagation
-7. Publish `@blimu/client` to npm
-8. Wait for npm propagation
-9. Publish `@blimu/nestjs` to npm
+### 1. Creating a Changeset
 
-## How to Release
+When you make changes that should be included in the next release:
 
-1. **Create and push a git tag:**
+```bash
+yarn changeset
+```
 
-   ```bash
-   git tag v0.4.5
-   git push origin v0.4.5
-   ```
+This will:
+- Prompt you to select which packages changed
+- Ask for the type of change (patch, minor, or major)
+- Request a description of the changes
 
-2. **Or use workflow_dispatch:**
-   - Go to GitHub Actions
-   - Select "Publish to npm" workflow
-   - Click "Run workflow"
-   - Enter the version tag (e.g., `v0.4.5`)
+The changeset file will be committed to your PR.
+
+### 2. Version and Publish Workflow
+
+When PRs with changesets are merged to `main`:
+
+1. **Version PR Creation** (automated):
+   - The `version.yml` workflow creates a PR titled "chore: version packages"
+   - This PR updates package versions and CHANGELOGs based on all merged changesets
+   - Major version bumps are prevented during pre-1.0 development
+
+2. **Publishing** (automated):
+   - When the version PR is merged, the `publish.yml` workflow triggers
+   - Builds all packages
+   - Replaces `workspace:*` dependencies with actual versions
+   - Publishes to npm with provenance (`--provenance` flag)
+   - Creates git tag (e.g., `v1.2.0`)
+   - Creates GitHub Release with changelog notes
+
+## Linked Versioning
+
+All packages use linked versioning - they are published together with the same version number:
+- `@blimu/backend`
+- `@blimu/client`
+- `@blimu/nestjs`
+- `@blimu/react`
+- `@blimu/types`
+- `blimu` (CLI)
 
 ## Prerequisites
 
-- `NPM_TOKEN` secret must be configured in GitHub repository settings
-- The token must have publish permissions for `@blimu` scope
-- **CLI release must exist** before publishing npm packages (workflow will fail otherwise)
+### GitHub Secrets Required
+
+- `NPM_TOKEN`: npm access token with publish permissions for `@blimu` scope
+  - Generate at: https://www.npmjs.com/settings/YOUR_USERNAME/tokens
+  - Use "Automation" token type for CI/CD
+  - Add to GitHub repository secrets
+
+### Permissions
+
+The workflows require:
+- `contents: write` - For creating tags and releases
+- `id-token: write` - For npm provenance (OIDC)
+
+## Manual Publishing (Emergency Only)
+
+If you need to publish manually (e.g., CI failure):
+
+```bash
+# 1. Create changeset
+yarn changeset
+
+# 2. Version packages
+yarn changeset version
+
+# 3. Build packages
+yarn build
+
+# 4. Replace workspace dependencies
+yarn replace-workspace-deps
+
+# 5. Publish with provenance
+yarn changeset publish --provenance
+
+# 6. Create git tag
+VERSION=$(node -e "console.log(require('./packages/backend/package.json').version)")
+git tag -a "v${VERSION}" -m "Release v${VERSION}"
+git push origin "v${VERSION}"
+
+# 7. Create GitHub release
+gh release create "v${VERSION}" --title "v${VERSION}" --notes "Release notes here"
+```
 
 ## Version Format
 
-- Tags should follow semantic versioning: `v0.4.5`, `v1.0.0`, etc.
-- The `v` prefix is optional but recommended
-- Both npm packages and CLI binary must use the **exact same version number**
-- Version format: `v{major}.{minor}.{patch}` (e.g., `v0.4.5`)
+- Use semantic versioning: `MAJOR.MINOR.PATCH`
+- During pre-1.0: Only `minor` and `patch` versions allowed
+- After 1.0: All version types allowed
 
-## Version Consistency
-
-When a user installs `@blimu/backend@0.4.5`:
-
-- The `postinstall` script reads the package version (`0.4.5`)
-- It downloads the CLI binary from `blimu-cli` release `v0.4.5`
-- If the CLI release doesn't exist, installation fails with a clear error
-- This ensures all users get the same CLI version for the same npm package version
-
-## Manual Publishing (if needed)
-
-If you need to publish manually:
-
-**First, ensure CLI release exists:**
-
-```bash
-# Verify CLI release exists
-curl -s -o /dev/null -w "%{http_code}" \
-  https://api.github.com/repos/blimu-dev/blimu-cli/releases/tags/v0.4.5
-# Should return 200
-```
-
-Then proceed with npm publishing:
-
-```bash
-# 1. Update versions in all packages
-cd packages/backend
-npm version 0.4.5 --no-git-tag-version
-
-cd ../client
-npm version 0.4.5 --no-git-tag-version
-
-cd ../nestjs
-npm version 0.4.5 --no-git-tag-version
-# Update @blimu/backend dependency to match version
-# Replace "workspace:*" with "0.4.5" in package.json
-
-# 2. Build and publish backend first
-cd ../backend
-yarn build
-npm publish --access public
-
-# 3. Wait a few seconds for npm propagation
-
-# 4. Build and publish client
-cd ../client
-yarn build
-npm publish --access public
-
-# 5. Wait a few seconds for npm propagation
-
-# 6. Build and publish nestjs
-cd ../nestjs
-yarn install  # This will fetch @blimu/backend from npm
-yarn build
-npm publish --access public
-```
+Examples:
+- `1.0.0` → `1.0.1` (patch)
+- `1.0.1` → `1.1.0` (minor)
+- `1.1.0` → `2.0.0` (major, after 1.0 only)
 
 ## Troubleshooting
 
-### "CLI release v{version} not found" error
+### "No changesets found" error
 
-This means the CLI release doesn't exist. You must:
+Make sure you've created a changeset file using `yarn changeset` before merging your PR.
 
-1. Create and push the CLI release tag in `blimu-cli` repository
-2. Wait for the CLI build workflow to complete
-3. Verify the release exists on GitHub
-4. Then retry publishing npm packages
+### Publishing fails with authentication error
 
-### "Failed to download Blimu CLI binary" during npm install
+Check that:
+1. `NPM_TOKEN` secret is set in GitHub repository settings
+2. Token has publish permissions for `@blimu` scope
+3. Token hasn't expired
 
-This means the CLI release for the installed package version doesn't exist. The user should:
+### Workspace dependencies error
 
-- Install a different package version that has a corresponding CLI release
-- Or wait for the CLI release to be published
+The `replace-workspace-deps` script should handle this automatically. If it fails:
+1. Check that all packages are using `workspace:*` for internal dependencies
+2. Verify all packages have been versioned correctly
+
+### Provenance fails
+
+Ensure:
+1. Workflow has `id-token: write` permission
+2. npm registry URL is set to `https://registry.npmjs.org`
+3. Node.js setup includes `registry-url` configuration
+
+## Best Practices
+
+1. **One changeset per PR**: Keep changes focused
+2. **Descriptive changeset messages**: They become part of the CHANGELOG
+3. **Review version PR**: Check that versions and CHANGELOGs look correct before merging
+4. **Test locally**: Run `yarn build` before creating PR to catch build errors early
+5. **CI must pass**: Never merge if CI checks are failing
+
+## CI/CD Workflows
+
+- `.github/workflows/ci.yml` - Runs tests, linting, type checking, and builds on PRs
+- `.github/workflows/version.yml` - Creates version PR when changesets are merged
+- `.github/workflows/publish.yml` - Publishes packages when version PR is merged
+
+## Package Structure
+
+```
+packages/
+├── backend/     - Server-side SDK
+├── client/      - Client-side SDK
+├── nestjs/      - NestJS integration
+├── react/       - React components and hooks
+├── types/       - Shared TypeScript types
+└── cli/         - CLI tool (published as "blimu")
+```
+
+All packages are built to `dist/` with:
+- CommonJS output (`.js`)
+- ES modules output (`.mjs`)
+- TypeScript declarations (`.d.ts`)
+- Source maps (`.js.map`, `.mjs.map`)

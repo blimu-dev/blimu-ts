@@ -10,9 +10,11 @@ import { ResourcesService } from './services/resources';
 import { RolesService } from './services/roles';
 import { UsageService } from './services/usage';
 import { UsersService } from './services/users';
+
 export type ClientOption = FetchClientConfig & {
   apiKey?: ApiKeyAuthStrategy['key'];
 };
+
 export class Blimu {
   readonly bulkResources: BulkResourcesService;
   readonly bulkRoles: BulkRolesService;
@@ -23,8 +25,10 @@ export class Blimu {
   readonly roles: RolesService;
   readonly usage: UsageService;
   readonly users: UsersService;
+
   constructor(options?: ClientOption) {
-    const { apiKey, ...restCfg } = options || {};
+    const restCfg = { ...(options || {}) };
+    delete restCfg.apiKey;
 
     const authStrategies = buildAuthStrategies(options || {});
 
@@ -33,6 +37,7 @@ export class Blimu {
       baseURL: options?.baseURL ?? 'https://api.blimu.dev',
       ...(authStrategies.length > 0 ? { authStrategies } : {}),
     });
+
     this.bulkResources = new BulkResourcesService(core);
     this.bulkRoles = new BulkRolesService(core);
     this.entitlements = new EntitlementsService(core);

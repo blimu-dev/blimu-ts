@@ -19,6 +19,7 @@
     "prepublishOnly": "yarn build"
   },
   "dependencies": {
+    "@blimu/fetch": "^0.3.0",
     "@clack/prompts": "^0.11.0",
     "commander": "^14.0.2",
     "zod": "^4.3.5"
@@ -45,5 +46,6 @@
   ],
   "engines": {
     "node": ">=18.0.0"
-  }
+  },
+  "module": "dist/index.mjs"
 }

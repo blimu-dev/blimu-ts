@@ -40,10 +40,7 @@
 
   /* Destructive */
   --blimu-destructive: var(--destructive, oklch(0.577 0.245 27.325));
-  --blimu-destructive-foreground: var(
-    --destructive-foreground,
-    oklch(0.577 0.245 27.325)
-  );
+  --blimu-destructive-foreground: var(--destructive-foreground, oklch(0.577 0.245 27.325));
 
   /* Border & Input */
   --blimu-border: var(--border, oklch(0.922 0 0));
@@ -61,27 +58,24 @@
 
 .dark {
   /* Dark mode theme */
-  --blimu-background: var(--background, oklch(0.145 0 0));
-  --blimu-foreground: var(--foreground, lab(98.26% 0 0));
-  --blimu-card: var(--card, oklch(0.145 0 0));
+  --blimu-background: var(--background, oklch(21% 0.006 285.885));
+  --blimu-foreground: var(--foreground, oklch(0.985 0 0));
+  --blimu-card: var(--card, oklch(0.21 0.006 285.885));
   --blimu-card-foreground: var(--card-foreground, lab(98.26% 0 0));
-  --blimu-popover: var(--popover, oklab(0.27 0 0 / 1));
+  --blimu-popover: var(--popover, oklch(0.21 0.006 285.885));
   --blimu-popover-foreground: var(--popover-foreground, lab(98.26% 0 0));
   --blimu-primary: var(--primary, lab(98.26% 0 0));
   --blimu-primary-foreground: var(--primary-foreground, oklch(0.205 0 0));
-  --blimu-secondary: var(--secondary, oklch(0.269 0 0));
+  --blimu-secondary: var(--secondary, oklch(0.274 0.006 286.033));
   --blimu-secondary-foreground: var(--secondary-foreground, lab(98.26% 0 0));
-  --blimu-muted: var(--muted, oklch(0.269 0 0));
+  --blimu-muted: var(--muted, oklch(0.274 0.006 286.033));
   --blimu-muted-foreground: var(--muted-foreground, oklch(0.708 0 0));
-  --blimu-accent: var(--accent, lab(27.036% 0 0));
+  --blimu-accent: var(--accent, oklch(0.274 0.006 286.033));
   --blimu-accent-foreground: var(--accent-foreground, lab(98.26% 0 0));
   --blimu-destructive: var(--destructive, oklch(0.396 0.141 25.723));
-  --blimu-destructive-foreground: var(
-    --destructive-foreground,
-    oklch(0.637 0.237 25.331)
-  );
-  --blimu-border: var(--border, lab(100% 0 0 / 0.1));
-  --blimu-input: var(--input, oklch(0.269 0 0));
+  --blimu-destructive-foreground: var(--destructive-foreground, oklch(0.637 0.237 25.331));
+  --blimu-border: var(--border, oklch(1 0 0 / 10%));
+  --blimu-input: var(--input, oklch(0.274 0.006 286.033));
   --blimu-ring: var(--ring, oklch(0.439 0 0));
 }
 

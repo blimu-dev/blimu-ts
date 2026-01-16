@@ -119,7 +119,7 @@ export interface AuthContextValue {
   logout: () => Promise<void>;
 
   // Utilities
-  getToken: (options: { template: 'web' }) => Promise<string | null>;
+  getToken: (options: { template: 'web' }) => Promise<string | undefined>;
   getAuthState: () => AuthState;
 }
 

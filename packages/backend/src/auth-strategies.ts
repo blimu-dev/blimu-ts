@@ -3,6 +3,7 @@ import type { ClientOption } from './client';
 
 export function buildAuthStrategies(cfg: ClientOption): AuthStrategy[] {
   const authStrategies: AuthStrategy[] = [...(cfg?.authStrategies || [])];
+
   if (cfg.apiKey) {
     authStrategies.push({
       type: 'apiKey',

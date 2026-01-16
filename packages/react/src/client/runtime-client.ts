@@ -175,8 +175,8 @@ export class BlimuRuntimeClientWrapper {
    * Get the current session token
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  getAccessToken = async (_options: { template: 'web' }): Promise<string | null> => {
-    return (await this.session.getSessionToken()) ?? null;
+  getAccessToken = async (_options: { template: 'web' }): Promise<string | undefined> => {
+    return await this.session.getSessionToken();
   };
 
   /**

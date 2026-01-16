@@ -1,6 +1,7 @@
 {
   "name": "@blimu/react",
   "version": "1.1.1",
+  "type": "module",
   "description": "React components and hooks for Blimu authentication and authorization",
   "repository": {
     "type": "git",
@@ -88,8 +89,7 @@
     "js-cookie": "^3.0.5",
     "jwt-decode": "^4.0.0",
     "lucide-react": "^0.562.0",
-    "tailwind-merge": "^3.4.0",
-    "zustand": "^5.0.10"
+    "tailwind-merge": "^3.4.0"
   },
   "devDependencies": {
     "@storybook/addon-links": "^10.1.11",
@@ -127,5 +127,9 @@
     "workerDirectory": [
       ".storybook/public"
     ]
-  }
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "license": "MIT"
 }

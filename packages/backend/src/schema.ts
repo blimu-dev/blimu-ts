@@ -1,13 +1,5 @@
 // Generated types from OpenAPI components.schemas
 
-import type {
-  ResourceType,
-  EntitlementType,
-  PlanType,
-  LimitType,
-  UsageLimitType,
-} from '@blimu/types';
-
 export type Enum<T> = T[keyof T];
 
 export interface BalanceResponse {
@@ -23,7 +15,7 @@ export interface CheckLimitResponse {
 
 export interface EntitlementCheckBody {
   amount?: number;
-  entitlement: EntitlementType;
+  entitlement: string;
   resourceId: string;
   userId: string;
 }
@@ -63,15 +55,15 @@ export interface EntitlementsListResult {
       allowedRoles: Array<string>;
       currentPlan?: string;
       currentRole?: string;
-      entitlement: EntitlementType;
+      entitlement: string;
     }>;
     resourceId: string;
-    resourceType: ResourceType;
+    resourceType: string;
   }>;
 }
 
 export interface PlanAssignBody {
-  planKey: PlanType;
+  planKey: string;
 }
 
 export interface PlanDeleteResponse {
@@ -81,9 +73,9 @@ export interface PlanDeleteResponse {
 export interface PlanResponse {
   createdAt: string;
   environmentId: string;
-  planKey: PlanType;
+  planKey: string;
   resourceId: string;
-  resourceType: ResourceType;
+  resourceType: string;
   updatedAt: string;
 }
 
@@ -91,28 +83,28 @@ export interface Resource {
   createdAt: string;
   id: string;
   name: string | null;
-  parents?: Array<{ id: string; type: ResourceType }>;
-  type: ResourceType;
+  parents?: Array<{ id: string; type: string }>;
+  type: string;
 }
 
 export interface ResourceBulkCreateBody {
   resources: Array<{
     id?: string;
     name?: string;
-    parents?: Array<{ id: string; type: ResourceType }>;
+    parents?: Array<{ id: string; type: string }>;
     roles?: Array<{ role: string; userId: string }>;
   }>;
 }
 
 export interface ResourceBulkResult {
-  created: Array<{ environmentId: string; id: string; type: ResourceType }>;
+  created: Array<{ environmentId: string; id: string; type: string }>;
   errors: Array<{
     error: string;
     index: number;
     resource: {
       id?: string;
       name?: string;
-      parents?: Array<{ id: string; type: ResourceType }>;
+      parents?: Array<{ id: string; type: string }>;
       roles?: Array<{ role: string; userId: string }>;
     };
   }>;
@@ -123,18 +115,12 @@ export interface ResourceBulkResult {
 export interface ResourceCreateBody {
   id?: string;
   name?: string;
-  parents?: Array<{ id: string; type: ResourceType }>;
+  parents?: Array<{ id: string; type: string }>;
   roles?: Array<{ role: string; userId: string }>;
 }
 
 export interface ResourceList {
-  items: Array<{
-    createdAt: string;
-    id: string;
-    name: string | null;
-    parents?: Array<{ id: string; type: ResourceType }>;
-    type: ResourceType;
-  }>;
+  items: Array<Resource>;
   limit: number;
   page: number;
   total: number;
@@ -166,14 +152,14 @@ export interface ResourceMemberList {
 export interface ResourceUpdateBody {
   name?: string;
   /** Creates relationships with other resources. Parent resources must already exist. */
-  parents?: Array<{ id: string; type: ResourceType }>;
+  parents?: Array<{ id: string; type: string }>;
 }
 
 export interface Role {
   createdAt: string;
   environmentId: string;
   resourceId: string;
-  resourceType: ResourceType;
+  resourceType: string;
   role: string;
   userId: string;
 }
@@ -181,7 +167,7 @@ export interface Role {
 export interface RoleBulkCreateBody {
   roles: Array<{
     resourceId: string;
-    resourceType: ResourceType;
+    resourceType: string;
     role: string;
     userId: string;
   }>;
@@ -192,7 +178,7 @@ export interface RoleBulkResult {
     createdAt: string;
     environmentId: string;
     resourceId: string;
-    resourceType: ResourceType;
+    resourceType: string;
     role: string;
     userId: string;
   }>;
@@ -201,7 +187,7 @@ export interface RoleBulkResult {
     index: number;
     role: {
       resourceId: string;
-      resourceType: ResourceType;
+      resourceType: string;
       role: string;
       userId: string;
     };
@@ -212,7 +198,7 @@ export interface RoleBulkResult {
 
 export interface RoleCreateBody {
   resourceId: string;
-  resourceType: ResourceType;
+  resourceType: string;
   role: string;
 }
 
@@ -223,7 +209,7 @@ export interface RoleList {
     createdAt: string;
     environmentId: string;
     resourceId: string;
-    resourceType: ResourceType;
+    resourceType: string;
     role: string;
     userId: string;
   }>;
@@ -236,34 +222,34 @@ export interface TransactionHistoryResponse {
     createdAt: string;
     environmentId: string;
     id: string;
-    limitType: LimitType;
+    limitType: string;
     resourceId: string;
-    resourceType: ResourceType;
+    resourceType: string;
     tags: Record<string, unknown> | null;
   }>;
 }
 
 export interface UsageCheckBody {
   amount: number;
-  limitType: UsageLimitType;
+  limitType: string;
   period: 'monthly' | 'yearly' | 'lifetime';
   resourceId: string;
-  resourceType: ResourceType;
+  resourceType: string;
 }
 
 export interface UsageConsumeBody {
   amount: number;
-  limitType: UsageLimitType;
+  limitType: string;
   resourceId: string;
-  resourceType: ResourceType;
+  resourceType: string;
   tags?: Record<string, unknown>;
 }
 
 export interface UsageCreditBody {
   amount: number;
-  limitType: UsageLimitType;
+  limitType: string;
   resourceId: string;
-  resourceType: ResourceType;
+  resourceType: string;
   tags?: Record<string, unknown>;
 }
 
@@ -272,9 +258,9 @@ export interface UsageWalletResponse {
   createdAt: string;
   environmentId: string;
   id: string;
-  limitType: UsageLimitType;
+  limitType: string;
   resourceId: string;
-  resourceType: ResourceType;
+  resourceType: string;
   tags: Record<string, unknown> | null;
 }
 
@@ -324,8 +310,8 @@ export type UserResourceList = Array<{
   resource: {
     id: string;
     name: string;
-    parents: Array<{ id: string; type: ResourceType }>;
-    type: ResourceType;
+    parents: Array<{ id: string; type: string }>;
+    type: string;
   };
   role: string;
 }>;
@@ -392,7 +378,7 @@ export interface RolesListQuery {
   /** Filter roles by specific resource ID */
   resourceId?: string;
   /** Filter roles by resource type */
-  resourceType?: ResourceType;
+  resourceType?: string;
   /** Filter by role name */
   role?: string;
 }

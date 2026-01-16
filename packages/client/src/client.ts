@@ -3,14 +3,18 @@ import { type FetchClientConfig, type BearerAuthStrategy } from '@blimu/fetch';
 import { buildAuthStrategies } from './auth-strategies';
 import { AuthService } from './services/auth';
 import { EntitlementsService } from './services/entitlements';
+
 export type ClientOption = FetchClientConfig & {
   bearer?: BearerAuthStrategy['token'];
 };
+
 export class Blimu {
   readonly auth: AuthService;
   readonly entitlements: EntitlementsService;
+
   constructor(options?: ClientOption) {
-    const { bearer, ...restCfg } = options || {};
+    const restCfg = { ...(options || {}) };
+    delete restCfg.bearer;
 
     const authStrategies = buildAuthStrategies(options || {});
 
@@ -19,6 +23,7 @@ export class Blimu {
       baseURL: options?.baseURL ?? 'https://api.blimu.dev',
       ...(authStrategies.length > 0 ? { authStrategies } : {}),
     });
+
     this.auth = new AuthService(core);
     this.entitlements = new EntitlementsService(core);
   }

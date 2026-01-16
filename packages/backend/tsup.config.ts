@@ -4,6 +4,7 @@ export default defineConfig({
   entry: ["src/**/*.ts"],
   format: ["cjs", "esm"],
   dts: true,
+  keepNames: true,
   splitting: false,
   sourcemap: true,
   clean: true,

@@ -1,6 +1,5 @@
 import { FetchClient } from '@blimu/fetch';
 import * as Schema from '../schema';
-import type { ResourceType, UsageLimitType } from '@blimu/types';
 
 export class UsageService {
   constructor(private core: FetchClient) {}
@@ -10,9 +9,9 @@ export class UsageService {
    * @summary Get wallet balance*
    * @description Retrieves the current balance of a usage wallet for a specific resource and limit type within a given time period. The balance reflects all credits and consumption transactions.*/
   getBalance(
-    resourceType: ResourceType,
+    resourceType: string,
     resourceId: string,
-    limitType: UsageLimitType,
+    limitType: string,
     query?: Schema.UsageGetBalanceQuery,
     init?: Omit<RequestInit, 'method' | 'body'>
   ): Promise<Schema.BalanceResponse> {
@@ -77,9 +76,9 @@ export class UsageService {
    * @summary Get transaction history*
    * @description Retrieves the transaction history for a usage wallet, including all credits and consumption records. Supports filtering by time period and date range.*/
   getTransactionHistory(
-    resourceType: ResourceType,
+    resourceType: string,
     resourceId: string,
-    limitType: UsageLimitType,
+    limitType: string,
     query?: Schema.UsageGetTransactionHistoryQuery,
     init?: Omit<RequestInit, 'method' | 'body'>
   ): Promise<Schema.TransactionHistoryResponse> {

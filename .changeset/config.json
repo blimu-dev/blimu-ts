@@ -3,7 +3,16 @@
   "changelog": "@changesets/cli/changelog",
   "commit": false,
   "fixed": [],
-  "linked": [],
+  "linked": [
+    [
+      "@blimu/backend",
+      "@blimu/client",
+      "@blimu/nestjs",
+      "@blimu/react",
+      "@blimu/types",
+      "blimu"
+    ]
+  ],
   "access": "public",
   "baseBranch": "main",
   "updateInternalDependencies": "patch",

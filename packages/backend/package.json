@@ -50,7 +50,9 @@
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "lint": "eslint .",
     "format": "eslint --fix . && prettier --write .",
-    "prepublishOnly": "npm run build && npm run typecheck || true"
+    "prepublishOnly": "npm run build && npm run typecheck || true",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@blimu/fetch": "^0.3.0",
@@ -60,6 +62,14 @@
   },
   "devDependencies": {
     "@types/jsonwebtoken": "^9.0.10",
-    "tsup": "^8.5.1"
-  }
+    "tsup": "^8.5.1",
+    "vitest": "^4.0.17"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "license": "MIT"
 }
