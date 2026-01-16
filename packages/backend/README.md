@@ -21,14 +21,12 @@ const client = new BlimuClient({
   timeoutMs: 10000,
   retry: { retries: 2, strategy: 'exponential', backoffMs: 300, retryOn: [429, 500, 502, 503, 504] },
   // Auth configuration
-  auth: {
-    strategies: [
-      {
-        type: 'bearer',
-        token: process.env.API_TOKEN,
-      },
-    ],
-  },
+  authStrategies: [
+    {
+      type: 'bearer',
+      token: process.env.API_TOKEN,
+    },
+  ],
 });
 
 // Example: Bulk create resources

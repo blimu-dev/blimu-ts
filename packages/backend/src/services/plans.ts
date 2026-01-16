@@ -1,9 +1,9 @@
-import { CoreClient } from '../client';
+import { FetchClient } from '@blimu/fetch';
 import * as Schema from '../schema';
 import type { ResourceType } from '@blimu/types';
 
 export class PlansService {
-  constructor(private core: CoreClient) {}
+  constructor(private core: FetchClient) {}
 
   /**
    * DELETE /v1/resources/{resourceType}/{resourceId}/plan*
@@ -50,7 +50,7 @@ export class PlansService {
     return this.core.request({
       method: 'POST',
       path: `/v1/resources/${encodeURIComponent(resourceType)}/${encodeURIComponent(resourceId)}/plan`,
-      body: body as any,
+      body,
       ...(init || {}),
     });
   }

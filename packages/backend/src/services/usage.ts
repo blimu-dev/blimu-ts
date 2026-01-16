@@ -1,9 +1,9 @@
-import { CoreClient } from '../client';
+import { FetchClient } from '@blimu/fetch';
 import * as Schema from '../schema';
 import type { ResourceType, UsageLimitType } from '@blimu/types';
 
 export class UsageService {
-  constructor(private core: CoreClient) {}
+  constructor(private core: FetchClient) {}
 
   /**
    * GET /v1/usage/balance/{resourceType}/{resourceId}/{limitType}*
@@ -35,7 +35,7 @@ export class UsageService {
     return this.core.request({
       method: 'POST',
       path: `/v1/usage/check`,
-      body: body as any,
+      body,
       ...(init || {}),
     });
   }
@@ -51,7 +51,7 @@ export class UsageService {
     return this.core.request({
       method: 'POST',
       path: `/v1/usage/consume`,
-      body: body as any,
+      body,
       ...(init || {}),
     });
   }
@@ -67,7 +67,7 @@ export class UsageService {
     return this.core.request({
       method: 'POST',
       path: `/v1/usage/credit`,
-      body: body as any,
+      body,
       ...(init || {}),
     });
   }

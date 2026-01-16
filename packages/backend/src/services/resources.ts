@@ -1,9 +1,9 @@
-import { CoreClient } from '../client';
+import { FetchClient } from '@blimu/fetch';
 import * as Schema from '../schema';
 import type { ResourceType } from '@blimu/types';
 
 export class ResourcesService {
-  constructor(private core: CoreClient) {}
+  constructor(private core: FetchClient) {}
 
   /**
    * GET /v1/resources/{resourceType}*
@@ -34,7 +34,7 @@ export class ResourcesService {
     return this.core.request({
       method: 'POST',
       path: `/v1/resources/${encodeURIComponent(resourceType)}`,
-      body: body as any,
+      body,
       ...(init || {}),
     });
   }
@@ -84,7 +84,7 @@ export class ResourcesService {
     return this.core.request({
       method: 'PUT',
       path: `/v1/resources/${encodeURIComponent(resourceType)}/${encodeURIComponent(resourceId)}`,
-      body: body as any,
+      body,
       ...(init || {}),
     });
   }

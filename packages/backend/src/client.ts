@@ -1,74 +1,50 @@
-import {
-  FetchClient,
-  FetchError,
-  type FetchClientConfig,
-  type AuthStrategy,
-} from '@blimu/fetch';
+import { FetchClient, FetchError } from '@blimu/fetch';
+import { type FetchClientConfig, type ApiKeyAuthStrategy } from '@blimu/fetch';
+import { buildAuthStrategies } from './auth-strategies';
+import { BulkResourcesService } from './services/bulk_resources';
+import { BulkRolesService } from './services/bulk_roles';
+import { EntitlementsService } from './services/entitlements';
+import { PlansService } from './services/plans';
+import { ResourceMembersService } from './services/resource_members';
+import { ResourcesService } from './services/resources';
+import { RolesService } from './services/roles';
+import { UsageService } from './services/usage';
+import { UsersService } from './services/users';
+export type ClientOption = FetchClientConfig & {
+  apiKey?: ApiKeyAuthStrategy['key'];
+};
+export class Blimu {
+  readonly bulkResources: BulkResourcesService;
+  readonly bulkRoles: BulkRolesService;
+  readonly entitlements: EntitlementsService;
+  readonly plans: PlansService;
+  readonly resourceMembers: ResourceMembersService;
+  readonly resources: ResourcesService;
+  readonly roles: RolesService;
+  readonly usage: UsageService;
+  readonly users: UsersService;
+  constructor(options?: ClientOption) {
+    const { apiKey, ...restCfg } = options || {};
 
-export type ClientOption = FetchClientConfig & { apiKey?: string };
+    const authStrategies = buildAuthStrategies(options || {});
+
+    const core = new FetchClient({
+      ...restCfg,
+      baseURL: options?.baseURL ?? 'https://api.blimu.dev',
+      ...(authStrategies.length > 0 ? { authStrategies } : {}),
+    });
+    this.bulkResources = new BulkResourcesService(core);
+    this.bulkRoles = new BulkRolesService(core);
+    this.entitlements = new EntitlementsService(core);
+    this.plans = new PlansService(core);
+    this.resourceMembers = new ResourceMembersService(core);
+    this.resources = new ResourcesService(core);
+    this.roles = new RolesService(core);
+    this.usage = new UsageService(core);
+    this.users = new UsersService(core);
+  }
+}
 
 // Re-export FetchError for backward compatibility
 export { FetchError };
-
-export class CoreClient extends FetchClient {
-  constructor(cfg: ClientOption = {}) {
-    // Build auth strategies from OpenAPI security schemes
-    const authStrategies: AuthStrategy[] = [];
-
-    // Extract auth and security scheme properties to avoid passing them to FetchClient
-    const { auth: _existingAuth, apiKey, ...restCfg } = cfg;
-    if (cfg?.apiKey) {
-      const apiKeyValue = cfg.apiKey;
-      authStrategies.push({
-        type: 'apiKey',
-        key: () => apiKeyValue,
-        location: 'header',
-        name: 'X-API-KEY',
-      });
-    } // Build final auth config (merge existing with new strategies)
-    const finalAuthStrategies = [
-      ...(_existingAuth?.strategies || []),
-      ...authStrategies,
-    ];
-
-    // Build fetchConfig, ensuring auth comes after restCfg spread to override any existing auth
-    const fetchConfig: FetchClientConfig = {
-      ...restCfg,
-      baseURL: cfg.baseURL ?? 'https://api.blimu.dev',
-      // Explicitly set auth after restCfg to ensure it's not overwritten
-      // (restCfg might have an auth property that we want to replace)
-      ...(finalAuthStrategies.length > 0
-        ? {
-            auth: {
-              strategies: finalAuthStrategies,
-            },
-          }
-        : {}),
-      // Hooks are passed through directly from FetchClientConfig (no mapping needed)
-    };
-
-    super(fetchConfig);
-  }
-
-  async request(
-    init: RequestInit & {
-      path: string;
-      method: string;
-      query?: Record<string, any>;
-    }
-  ) {
-    return await super.request(init);
-  }
-
-  async *requestStream<T = any>(
-    init: RequestInit & {
-      path: string;
-      method: string;
-      query?: Record<string, any>;
-      contentType: string;
-      streamingFormat?: 'sse' | 'ndjson' | 'chunked';
-    }
-  ): AsyncGenerator<T, void, unknown> {
-    yield* super.requestStream(init);
-  }
-}
+export const BlimuError = FetchError;

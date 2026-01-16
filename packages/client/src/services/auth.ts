@@ -1,8 +1,9 @@
-import { CoreClient } from '../client';
+import { FetchClient } from '@blimu/fetch';
 import * as Schema from '../schema';
+import { isNotUndefined } from '../utils';
 
 export class AuthService {
-  constructor(private core: CoreClient) {}
+  constructor(private core: FetchClient) {}
 
   /**
    * POST /v1/auth/logout*
@@ -19,7 +20,8 @@ export class AuthService {
    * @returns ['v1/auth/logout']
    */
   logout__queryKeys() {
-    return ['v1/auth/logout'] as const;
+    const keys = ['v1/auth/logout'] as const;
+    return isNotUndefined(keys);
   }
 
   /**
@@ -41,7 +43,8 @@ export class AuthService {
    * @returns ['v1/auth/refresh', query]
    */
   refresh__queryKeys(query?: Schema.AuthRefreshQuery) {
-    return ['v1/auth/refresh', query] as const;
+    const keys = ['v1/auth/refresh', query] as const;
+    return isNotUndefined(keys);
   }
 
   /**
@@ -61,6 +64,7 @@ export class AuthService {
    * @returns ['v1/auth/session']
    */
   getSession__queryKeys() {
-    return ['v1/auth/session'] as const;
+    const keys = ['v1/auth/session'] as const;
+    return isNotUndefined(keys);
   }
 }

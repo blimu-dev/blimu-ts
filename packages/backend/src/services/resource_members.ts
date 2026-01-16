@@ -1,9 +1,9 @@
-import { CoreClient } from '../client';
+import { FetchClient } from '@blimu/fetch';
 import * as Schema from '../schema';
 import type { ResourceType } from '@blimu/types';
 
 export class ResourceMembersService {
-  constructor(private core: CoreClient) {}
+  constructor(private core: FetchClient) {}
 
   /**
    * GET /v1/resources/{resourceType}/{resourceId}/members*

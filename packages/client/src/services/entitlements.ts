@@ -1,8 +1,9 @@
-import { CoreClient } from '../client';
+import { FetchClient } from '@blimu/fetch';
 import * as Schema from '../schema';
+import { isNotUndefined } from '../utils';
 
 export class EntitlementsService {
-  constructor(private core: CoreClient) {}
+  constructor(private core: FetchClient) {}
 
   /**
    * GET /v1/client/entitlements/list-for-tenant/{tenantResourceId}*
@@ -23,9 +24,10 @@ export class EntitlementsService {
    * @returns ['v1/client/entitlements/list-for-tenant', tenantResourceId]
    */
   listForTenant__queryKeys(tenantResourceId: string) {
-    return [
+    const keys = [
       'v1/client/entitlements/list-for-tenant',
       tenantResourceId,
     ] as const;
+    return isNotUndefined(keys);
   }
 }

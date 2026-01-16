@@ -1,9 +1,9 @@
-import { CoreClient } from '../client';
+import { FetchClient } from '@blimu/fetch';
 import * as Schema from '../schema';
 import type { ResourceType } from '@blimu/types';
 
 export class RolesService {
-  constructor(private core: CoreClient) {}
+  constructor(private core: FetchClient) {}
 
   /**
    * GET /v1/users/{userId}/roles*
@@ -34,7 +34,7 @@ export class RolesService {
     return this.core.request({
       method: 'POST',
       path: `/v1/users/${encodeURIComponent(userId)}/roles`,
-      body: body as any,
+      body,
       ...(init || {}),
     });
   }

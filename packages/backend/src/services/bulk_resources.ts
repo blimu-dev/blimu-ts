@@ -1,9 +1,9 @@
-import { CoreClient } from '../client';
+import { FetchClient } from '@blimu/fetch';
 import * as Schema from '../schema';
 import type { ResourceType } from '@blimu/types';
 
 export class BulkResourcesService {
-  constructor(private core: CoreClient) {}
+  constructor(private core: FetchClient) {}
 
   /**
    * POST /v1/resources/{resourceType}/bulk*
@@ -17,7 +17,7 @@ export class BulkResourcesService {
     return this.core.request({
       method: 'POST',
       path: `/v1/resources/${encodeURIComponent(resourceType)}/bulk`,
-      body: body as any,
+      body,
       ...(init || {}),
     });
   }

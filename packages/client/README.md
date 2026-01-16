@@ -26,14 +26,12 @@ const client = new BlimuClient({
     retryOn: [429, 500, 502, 503, 504],
   },
   // Auth configuration
-  auth: {
-    strategies: [
-      {
-        type: 'bearer',
-        token: process.env.API_TOKEN,
-      },
-    ],
-  },
+  authStrategies: [
+    {
+      type: 'bearer',
+      token: process.env.API_TOKEN,
+    },
+  ],
 });
 
 // Example: Logout and invalidate session

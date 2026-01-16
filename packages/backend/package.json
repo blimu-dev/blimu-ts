@@ -6,19 +6,19 @@
     "type": "git",
     "url": "https://github.com/blimu-dev/blimu-ts"
   },
-  "main": "dist/main.js",
-  "module": "dist/main.mjs",
-  "types": "dist/main.d.ts",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
   "files": [
     "dist/**",
     "src/**"
   ],
   "exports": {
     ".": {
-      "types": "./dist/main.d.ts",
-      "import": "./dist/main.mjs",
-      "require": "./dist/main.js",
-      "default": "./dist/main.js"
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js",
+      "default": "./dist/index.js"
     },
     "./services/*": {
       "types": "./dist/services/*.d.ts",
@@ -53,7 +53,7 @@
     "prepublishOnly": "npm run build && npm run typecheck || true"
   },
   "dependencies": {
-    "@blimu/fetch": "^0.2.0",
+    "@blimu/fetch": "^0.3.0",
     "@blimu/types": "^1.1.1",
     "jsonwebtoken": "^9.0.3",
     "zod": "^4.3.5"

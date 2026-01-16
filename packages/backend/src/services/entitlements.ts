@@ -1,9 +1,9 @@
-import { CoreClient } from '../client';
+import { FetchClient } from '@blimu/fetch';
 import * as Schema from '../schema';
 import type { ResourceType } from '@blimu/types';
 
 export class EntitlementsService {
-  constructor(private core: CoreClient) {}
+  constructor(private core: FetchClient) {}
 
   /**
    * POST /v1/entitlements/check*
@@ -16,7 +16,7 @@ export class EntitlementsService {
     return this.core.request({
       method: 'POST',
       path: `/v1/entitlements/check`,
-      body: body as any,
+      body,
       ...(init || {}),
     });
   }

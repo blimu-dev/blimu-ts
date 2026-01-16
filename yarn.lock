@@ -274,7 +274,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@blimu/backend@workspace:packages/backend"
   dependencies:
-    "@blimu/fetch": "npm:^0.2.0"
+    "@blimu/fetch": "npm:^0.3.0"
     "@blimu/types": "npm:^1.1.1"
     "@types/jsonwebtoken": "npm:^9.0.10"
     jsonwebtoken: "npm:^9.0.3"
@@ -293,10 +293,10 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@blimu/fetch@npm:^0.2.0":
-  version: 0.2.0
-  resolution: "@blimu/fetch@npm:0.2.0"
-  checksum: 10/3675d7c0c334345b4676d269474ff5d7b5fd705c9ca6c4380e98c18743d05de85c0b775f6d7d8aef9d43fecd649cb7653749ba24c670dc392cda9d8692ca0ea7
+"@blimu/fetch@npm:^0.3.0":
+  version: 0.3.0
+  resolution: "@blimu/fetch@npm:0.3.0"
+  checksum: 10/a951d694124b8a10eb5686a429680203817ceda0d24fa0ae1bebbfad3a5924ffc965e4c4f3c0be8b2603b231bd98941313d8874ee7279a03b8356b5738cab5e2
   languageName: node
   linkType: hard
 
@@ -340,11 +340,11 @@ __metadata:
     "@testing-library/react": "npm:^16.3.1"
     "@testing-library/user-event": "npm:^14.6.1"
     "@types/js-cookie": "npm:^3.0.6"
-    "@types/react": "npm:^19.2.7"
+    "@types/react": "npm:^19.2.8"
     "@types/react-dom": "npm:^19.2.3"
     "@vitejs/plugin-react": "npm:^5.1.2"
-    "@vitest/coverage-v8": "npm:^4.0.16"
-    "@vitest/ui": "npm:^4.0.16"
+    "@vitest/coverage-v8": "npm:^4.0.17"
+    "@vitest/ui": "npm:^4.0.17"
     class-variance-authority: "npm:^0.7.1"
     clsx: "npm:^2.1.1"
     js-cookie: "npm:^3.0.5"
@@ -359,10 +359,10 @@ __metadata:
     tailwind-merge: "npm:^3.4.0"
     tailwindcss: "npm:^4.1.18"
     tw-animate-css: "npm:^1.4.0"
-    vite: "npm:^7.3.0"
-    vite-tsconfig-paths: "npm:^6.0.3"
-    vitest: "npm:^4.0.16"
-    zustand: "npm:^5.0.9"
+    vite: "npm:^7.3.1"
+    vite-tsconfig-paths: "npm:^6.0.4"
+    vitest: "npm:^4.0.17"
+    zustand: "npm:^5.0.10"
   peerDependencies:
     react: ^18.0.0 || ^19.0.0
     react-dom: ^18.0.0 || ^19.0.0
@@ -2782,7 +2782,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react@npm:^19.2.7":
+"@types/react@npm:^19.2.8":
   version: 19.2.8
   resolution: "@types/react@npm:19.2.8"
   dependencies:
@@ -2821,7 +2821,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@vitest/coverage-v8@npm:^4.0.16":
+"@vitest/coverage-v8@npm:^4.0.17":
   version: 4.0.17
   resolution: "@vitest/coverage-v8@npm:4.0.17"
   dependencies:
@@ -2965,7 +2965,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@vitest/ui@npm:^4.0.16":
+"@vitest/ui@npm:^4.0.17":
   version: 4.0.17
   resolution: "@vitest/ui@npm:4.0.17"
   dependencies:
@@ -6676,7 +6676,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vite-tsconfig-paths@npm:^6.0.3":
+"vite-tsconfig-paths@npm:^6.0.4":
   version: 6.0.4
   resolution: "vite-tsconfig-paths@npm:6.0.4"
   dependencies:
@@ -6693,7 +6693,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vite@npm:*, vite@npm:^7.3.0":
+"vite@npm:*, vite@npm:^7.3.1":
   version: 7.3.1
   resolution: "vite@npm:7.3.1"
   dependencies:
@@ -6803,7 +6803,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vitest@npm:^4.0.16, vitest@npm:^4.0.17":
+"vitest@npm:^4.0.17":
   version: 4.0.17
   resolution: "vitest@npm:4.0.17"
   dependencies:
@@ -7078,7 +7078,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"zustand@npm:^5.0.9":
+"zustand@npm:^5.0.10":
   version: 5.0.10
   resolution: "zustand@npm:5.0.10"
   peerDependencies:
