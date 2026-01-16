@@ -1,6 +1,6 @@
 {
   "name": "@blimu/backend",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "TypeScript SDK for Blimu API (auto-generated)",
   "repository": {
     "type": "git",
@@ -54,7 +54,7 @@
   },
   "dependencies": {
     "@blimu/fetch": "^0.2.0",
-    "@blimu/types": "^1.1.0",
+    "@blimu/types": "^1.1.1",
     "jsonwebtoken": "^9.0.3",
     "zod": "^4.3.5"
   },
