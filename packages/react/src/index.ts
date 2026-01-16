@@ -41,7 +41,7 @@ export type {
 } from './components';
 export { RedirectToSignIn, UserButton, UserAvatar, SignInButton, MembersList } from './components';
 export { useAuth, useBlimu, useUser, useMembers, useClient } from './hooks';
-export type { ResourceMember, UseMembersOptions, UseMembersResult } from './hooks';
+export type { ResourceMember, UseMembersOptions, UseMembersResult, UseAuthReturn } from './hooks';
 export { BlimuProvider, ThemeProvider, useTheme } from './providers';
 export type { Theme, ThemeContextValue, AppearanceConfig } from './providers';
 

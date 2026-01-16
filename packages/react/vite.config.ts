@@ -11,9 +11,11 @@ export default defineConfig({
     lib: {
       entry: {
         index: resolve(__dirname, 'src/index.ts'),
-        hooks: resolve(__dirname, 'src/hooks/index.ts'),
-        providers: resolve(__dirname, 'src/providers/index.ts'),
-        components: resolve(__dirname, 'src/components/index.ts'),
+        'hooks/index': resolve(__dirname, 'src/hooks/index.ts'),
+        'providers/index': resolve(__dirname, 'src/providers/index.ts'),
+        'components/index': resolve(__dirname, 'src/components/index.ts'),
+        'types/index': resolve(__dirname, 'src/types/index.ts'),
+        tailwind: resolve(__dirname, 'src/tailwind.plugin.ts'),
       },
       formats: ['es', 'cjs'],
       // IMPORTANT: ensure ESM and CJS don't write to the same filenames.
@@ -35,6 +37,7 @@ export default defineConfig({
         },
       },
     },
+    minify: false, // Don't minify - keep Tailwind classes readable for JIT
     sourcemap: true,
     outDir: 'dist',
     emptyOutDir: true,

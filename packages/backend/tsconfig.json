@@ -1,9 +1,9 @@
 {
-  "rootDir": "./src",
   "compilerOptions": {
-    "target": "ES2022",
+    "rootDir": "./src",
     "module": "ES2022",
     "moduleResolution": "Bundler",
+    "target": "ES2022",
     "esModuleInterop": true,
     "isolatedModules": true,
     "declaration": true,
@@ -16,12 +16,12 @@
     "incremental": true,
     "tsBuildInfoFile": "./dist/tsconfig.tsbuildinfo",
     "skipLibCheck": true,
-    "strictNullChecks": true,
     "forceConsistentCasingInFileNames": true,
-    "noImplicitAny": false,
-    "strictBindCallApply": false,
-    "noFallthroughCasesInSwitch": false,
-    "useDefineForClassFields": false
+    "strict": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "useDefineForClassFields": true
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]

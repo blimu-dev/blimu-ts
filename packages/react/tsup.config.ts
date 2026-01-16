@@ -3,15 +3,20 @@ import { defineConfig } from 'tsup';
 export default defineConfig({
   entry: {
     index: 'src/index.ts',
+    hooks: 'src/hooks/index.ts',
+    providers: 'src/providers/index.ts',
+    components: 'src/components/index.ts',
+    types: 'src/types/index.ts',
     tailwind: 'src/tailwind.plugin.ts',
   },
-  format: ['esm', 'cjs'],
   dts: true,
-  sourcemap: true,
+  format: ['esm', 'cjs'],
+  bundle: true,
   clean: true,
-  external: ['react', 'react-dom', '@blimu/client'],
   // Don't minify - keep Tailwind classes readable for JIT
   minify: false,
+  sourcemap: true,
+  external: ['react', 'react-dom', '@blimu/client'],
   treeshake: false, // Preserve all exports
   splitting: false,
   banner: {

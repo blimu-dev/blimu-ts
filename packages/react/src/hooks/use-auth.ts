@@ -1,7 +1,19 @@
 import { useMemo } from 'react';
 
 import { useAuthContext } from '../providers/auth/auth.hook';
-import { AuthStateGuards } from '../types';
+import { AuthStateGuards, type AuthContextValue } from '../types';
+
+/**
+ * Return type for useAuth hook
+ */
+export type UseAuthReturn = AuthContextValue & {
+  isIdle: boolean;
+  isLoading: boolean;
+  isAuthenticated: boolean;
+  isUnauthenticated: boolean;
+  isReady: boolean;
+  isError: boolean;
+};
 
 /**
  * Hook for accessing authentication state and actions
@@ -44,7 +56,7 @@ import { AuthStateGuards } from '../types';
  * }
  * ```
  */
-export function useAuth() {
+export function useAuth(): UseAuthReturn {
   const context = useAuthContext();
   const { state } = context;
 

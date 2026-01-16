@@ -59,7 +59,7 @@
     "zod": "^4.3.5"
   },
   "devDependencies": {
-    "@types/jsonwebtoken": "^9",
+    "@types/jsonwebtoken": "^9.0.10",
     "tsup": "^8.5.1"
   }
 }

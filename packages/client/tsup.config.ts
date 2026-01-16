@@ -11,5 +11,5 @@ export default defineConfig({
   tsconfig: './tsconfig.json',
   // External dependencies should not be bundled
   // This ensures proper type resolution and smaller bundle sizes
-  external: ['@blimu/types'],
+  external: [],
 });
