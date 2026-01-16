@@ -1,6 +1,6 @@
 {
   "name": "blimu",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Blimu - Authorization as a Service CLI",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
