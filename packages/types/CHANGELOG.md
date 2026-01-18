@@ -1,5 +1,11 @@
 # @blimu/types
 
+## 1.1.2
+
+### Patch Changes
+
+- 39ef3b3: Fix publish workflow to check if git tags and releases exist before creating them to prevent errors when re-running workflows
+
 ## 1.1.1
 
 ### Patch Changes
