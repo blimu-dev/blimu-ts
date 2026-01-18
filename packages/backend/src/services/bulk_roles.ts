@@ -1,8 +1,8 @@
-import { CoreClient } from '../client';
+import { FetchClient } from '@blimu/fetch';
 import * as Schema from '../schema';
 
 export class BulkRolesService {
-  constructor(private core: CoreClient) {}
+  constructor(private core: FetchClient) {}
 
   /**
    * POST /v1/users/roles/bulk*
@@ -15,7 +15,7 @@ export class BulkRolesService {
     return this.core.request({
       method: 'POST',
       path: `/v1/users/roles/bulk`,
-      body: body as any,
+      body,
       ...(init || {}),
     });
   }

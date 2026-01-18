@@ -1,5 +1,6 @@
 import { Command } from 'commander';
 import { codegenCommand } from './commands/codegen';
+import { pushCommand } from './commands/push';
 
 const program = new Command();
 
@@ -10,6 +11,7 @@ program
 
 // Register commands
 codegenCommand(program);
+pushCommand(program);
 
 // Parse arguments
 program.parse();

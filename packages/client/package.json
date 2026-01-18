@@ -15,7 +15,8 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.mjs",
-      "require": "./dist/index.js"
+      "require": "./dist/index.js",
+      "default": "./dist/index.js"
     },
     "./services/*": {
       "types": "./dist/services/*.d.ts",
@@ -43,13 +44,24 @@
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "lint": "eslint .",
     "format": "eslint --fix . && prettier --write .",
-    "prepublishOnly": "npm run build && npm run typecheck || true"
+    "prepublishOnly": "npm run build && npm run typecheck || true",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@blimu/types": "^1.1.1",
     "zod": "^4.3.5"
   },
   "devDependencies": {
-    "tsup": "^8.5.1"
-  }
+    "tsup": "^8.5.1",
+    "vitest": "^4.0.17"
+  },
+  "module": "dist/index.mjs",
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "license": "MIT"
 }

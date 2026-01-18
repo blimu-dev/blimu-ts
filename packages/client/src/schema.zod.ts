@@ -4,41 +4,37 @@
 import { z } from 'zod';
 
 /**
- * Schema for EntitlementType
- * Entitlement identifier
+ * Zod schema for EntitlementsListResult
  */
-export const EntitlementTypeSchema = z.string();
-/**
- * Schema for ResourceType
- * Resource type identifier
- */
-export const ResourceTypeSchema = z.string();
-
-/**
- * Zod schema for EntitlementsListResult*/
 export const EntitlementsListResultSchema = z.object({
-  results: z.array(
-    z.object({
-      entitlements: z.array(
-        z.object({
+  results: z
+    .object({
+      entitlements: z
+        .object({
           allowed: z.boolean(),
           allowedByPlan: z.boolean(),
           allowedByRole: z.boolean(),
-          allowedPlans: z.array(z.string()).optional(),
-          allowedRoles: z.array(z.string()),
+          allowedPlans: z.string().array().optional(),
+          allowedRoles: z.string().array(),
           currentPlan: z.string().optional(),
           currentRole: z.string().optional(),
-          entitlement: EntitlementTypeSchema,
+          entitlement: z.string(),
         })
-      ),
+        .array(),
       resourceId: z.string(),
-      resourceType: ResourceTypeSchema,
+      resourceType: z.string(),
     })
-  ),
-}); /**
- * Zod schema for RefreshResponse*/
-export const RefreshResponseSchema = z.object({ sessionToken: z.string() }); /**
- * Zod schema for SessionResponse*/
+    .array(),
+});
+
+/**
+ * Zod schema for RefreshResponse
+ */
+export const RefreshResponseSchema = z.object({ sessionToken: z.string() });
+
+/**
+ * Zod schema for SessionResponse
+ */
 export const SessionResponseSchema = z.object({
   isAuthenticated: z.boolean(),
   user: z
@@ -51,10 +47,12 @@ export const SessionResponseSchema = z.object({
     })
     .nullable(),
 });
+
 // Operation query parameter schemas
 
 /**
- * Schema for query params of Auth.Refresh*/
+ * Schema for query params of Auth.Refresh
+ */
 export const AuthRefreshQuerySchema = z.object({
   __lh_jwt: z.string().optional(),
 });

@@ -7,7 +7,7 @@ on:
 
 permissions:
   id-token: write # Required for OIDC
-  contents: read
+  contents: write
 
 jobs:
   publish:
@@ -63,8 +63,9 @@ jobs:
 
       - name: Publish to npm
         if: steps.check_changesets.outputs.has_unversioned_changesets == 'false'
-        run: yarn changeset publish
+        run: yarn changeset publish --provenance
         env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create git tag
@@ -75,3 +76,24 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git tag -a "v${VERSION}" -m "Release v${VERSION}"
           git push origin "v${VERSION}"
+
+      - name: Create GitHub Release
+        if: steps.check_changesets.outputs.has_unversioned_changesets == 'false'
+        run: |
+          VERSION="${{ steps.get_version.outputs.version }}"
+          
+          # Extract changelog for this version
+          CHANGELOG=""
+          if [ -f "packages/backend/CHANGELOG.md" ]; then
+            CHANGELOG=$(awk "/^## ${VERSION}/,/^## [0-9]/" packages/backend/CHANGELOG.md | sed '$d' | tail -n +2)
+          fi
+          
+          if [ -z "$CHANGELOG" ]; then
+            CHANGELOG="Release v${VERSION}"
+          fi
+          
+          gh release create "v${VERSION}" \
+            --title "v${VERSION}" \
+            --notes "$CHANGELOG"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

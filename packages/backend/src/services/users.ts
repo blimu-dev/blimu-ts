@@ -1,8 +1,8 @@
-import { CoreClient } from '../client';
+import { FetchClient } from '@blimu/fetch';
 import * as Schema from '../schema';
 
 export class UsersService {
-  constructor(private core: CoreClient) {}
+  constructor(private core: FetchClient) {}
 
   /**
    * GET /v1/users*
@@ -31,7 +31,7 @@ export class UsersService {
     return this.core.request({
       method: 'POST',
       path: `/v1/users`,
-      body: body as any,
+      body,
       ...(init || {}),
     });
   }
@@ -78,7 +78,7 @@ export class UsersService {
     return this.core.request({
       method: 'PUT',
       path: `/v1/users/${encodeURIComponent(userId)}`,
-      body: body as any,
+      body,
       ...(init || {}),
     });
   }

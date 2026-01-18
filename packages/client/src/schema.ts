@@ -1,7 +1,5 @@
 // Generated types from OpenAPI components.schemas
 
-import type { ResourceType, EntitlementType } from '@blimu/types';
-
 export type Enum<T> = T[keyof T];
 
 export interface EntitlementsListResult {
@@ -14,10 +12,10 @@ export interface EntitlementsListResult {
       allowedRoles: Array<string>;
       currentPlan?: string;
       currentRole?: string;
-      entitlement: EntitlementType;
+      entitlement: string;
     }>;
     resourceId: string;
-    resourceType: ResourceType;
+    resourceType: string;
   }>;
 }
 

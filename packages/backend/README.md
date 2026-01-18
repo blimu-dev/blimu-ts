@@ -21,14 +21,12 @@ const client = new BlimuClient({
   timeoutMs: 10000,
   retry: { retries: 2, strategy: 'exponential', backoffMs: 300, retryOn: [429, 500, 502, 503, 504] },
   // Auth configuration
-  auth: {
-    strategies: [
-      {
-        type: 'bearer',
-        token: process.env.API_TOKEN,
-      },
-    ],
-  },
+  authStrategies: [
+    {
+      type: 'bearer',
+      token: process.env.API_TOKEN,
+    },
+  ],
 });
 
 // Example: Bulk create resources
@@ -195,20 +193,16 @@ The SDK includes the following TypeScript interfaces:
 - **CheckLimitResponse**
 - **EntitlementCheckBody**
 - **EntitlementCheckResult**
-- **EntitlementType**: Entitlement identifier
 - **EntitlementsListResult**
-- **LimitType**: Limit type identifier
 - **PlanAssignBody**
 - **PlanDeleteResponse**
 - **PlanResponse**
-- **PlanType**: Plan type identifier
 - **Resource**
 - **ResourceBulkCreateBody**
 - **ResourceBulkResult**
 - **ResourceCreateBody**
 - **ResourceList**
 - **ResourceMemberList**
-- **ResourceType**: Resource type identifier
 - **ResourceUpdateBody**
 - **Role**
 - **RoleBulkCreateBody**
@@ -219,7 +213,6 @@ The SDK includes the following TypeScript interfaces:
 - **UsageCheckBody**
 - **UsageConsumeBody**
 - **UsageCreditBody**
-- **UsageLimitType**: Usage-based limit type identifier
 - **UsageWalletResponse**
 - **User**
 - **UserCreateBody**

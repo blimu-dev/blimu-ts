@@ -1,9 +1,8 @@
-import { CoreClient } from '../client';
+import { FetchClient } from '@blimu/fetch';
 import * as Schema from '../schema';
-import type { ResourceType } from '@blimu/types';
 
 export class RolesService {
-  constructor(private core: CoreClient) {}
+  constructor(private core: FetchClient) {}
 
   /**
    * GET /v1/users/{userId}/roles*
@@ -34,7 +33,7 @@ export class RolesService {
     return this.core.request({
       method: 'POST',
       path: `/v1/users/${encodeURIComponent(userId)}/roles`,
-      body: body as any,
+      body,
       ...(init || {}),
     });
   }
@@ -45,7 +44,7 @@ export class RolesService {
    * @description Removes a role assignment from a user on a specific resource. This only removes the direct role assignment and does not affect inherited roles from parent resources.*/
   delete(
     userId: string,
-    resourceType: ResourceType,
+    resourceType: string,
     resourceId: string,
     init?: Omit<RequestInit, 'method' | 'body'>
   ): Promise<unknown> {
