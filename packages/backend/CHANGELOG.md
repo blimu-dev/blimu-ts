@@ -1,5 +1,13 @@
 # @blimu/backend
 
+## 1.1.2
+
+### Patch Changes
+
+- 39ef3b3: Fix publish workflow to check if git tags and releases exist before creating them to prevent errors when re-running workflows
+- Updated dependencies [39ef3b3]
+  - @blimu/types@1.1.2
+
 ## 1.1.1
 
 ### Patch Changes
