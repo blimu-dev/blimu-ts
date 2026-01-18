@@ -18,6 +18,7 @@
     "packages/*/dist/**"
   ],
   "scripts": {
+    "dev": "yarn build && yarn typecheck",
     "build": "yarn workspaces foreach -At run build",
     "build:backend": "yarn workspace @blimu/backend build",
     "build:client": "yarn workspace @blimu/client build",
