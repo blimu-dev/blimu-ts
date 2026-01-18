@@ -1,15 +1,14 @@
-import { defineConfig } from "tsup";
+import { defineConfig } from 'tsup';
 
 export default defineConfig({
-  entry: ["src/**/*.ts"],
-  format: ["cjs", "esm"],
+  entry: ['src/**/*.ts'],
+  format: ['cjs', 'esm'],
   dts: true,
-  keepNames: true,
   splitting: false,
   sourcemap: true,
   clean: true,
-  outDir: "dist",
-  tsconfig: "./tsconfig.json",
+  outDir: 'dist',
+  tsconfig: './tsconfig.json',
   // External dependencies should not be bundled
   // This ensures proper type resolution and smaller bundle sizes
   external: [],
