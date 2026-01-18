@@ -165,12 +165,7 @@ export interface Role {
 }
 
 export interface RoleBulkCreateBody {
-  roles: Array<{
-    resourceId: string;
-    resourceType: string;
-    role: string;
-    userId: string;
-  }>;
+  roles: Array<{ resourceId: string; resourceType: string; role: string; userId: string }>;
 }
 
 export interface RoleBulkResult {
@@ -185,12 +180,7 @@ export interface RoleBulkResult {
   errors: Array<{
     error: string;
     index: number;
-    role: {
-      resourceId: string;
-      resourceType: string;
-      role: string;
-      userId: string;
-    };
+    role: { resourceId: string; resourceType: string; role: string; userId: string };
   }>;
   success: boolean;
   summary: { failed: number; successful: number; total: number };

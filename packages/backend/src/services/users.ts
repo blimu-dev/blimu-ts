@@ -40,10 +40,7 @@ export class UsersService {
    * DELETE /v1/users/{userId}*
    * @summary Delete a user*
    * @description Deletes a user by their ID or lookup key. This operation is permanent and cannot be undone. Deleting a user will also remove all role assignments for that user.*/
-  delete(
-    userId: string,
-    init?: Omit<RequestInit, 'method' | 'body'>
-  ): Promise<unknown> {
+  delete(userId: string, init?: Omit<RequestInit, 'method' | 'body'>): Promise<unknown> {
     return this.core.request({
       method: 'DELETE',
       path: `/v1/users/${encodeURIComponent(userId)}`,
@@ -55,10 +52,7 @@ export class UsersService {
    * GET /v1/users/{userId}*
    * @summary Get a user by ID*
    * @description Retrieves a single user by their ID or lookup key. Returns user information including email, name, and metadata.*/
-  read(
-    userId: string,
-    init?: Omit<RequestInit, 'method' | 'body'>
-  ): Promise<Schema.User> {
+  read(userId: string, init?: Omit<RequestInit, 'method' | 'body'>): Promise<Schema.User> {
     return this.core.request({
       method: 'GET',
       path: `/v1/users/${encodeURIComponent(userId)}`,

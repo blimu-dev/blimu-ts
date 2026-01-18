@@ -252,14 +252,13 @@ export const ResourceMemberListSchema = z.object({
  */
 export const ResourceUpdateBodySchema = z.object({
   name: z.string().optional(),
-  /** Creates relationships with other resources. Parent resources must already exist. */ parents:
-    z
-      .object({
-        id: z.string(),
-        type: z.string(),
-      })
-      .array()
-      .optional(),
+  /** Creates relationships with other resources. Parent resources must already exist. */ parents: z
+    .object({
+      id: z.string(),
+      type: z.string(),
+    })
+    .array()
+    .optional(),
 });
 
 /**

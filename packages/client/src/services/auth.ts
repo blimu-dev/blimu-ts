@@ -50,9 +50,7 @@ export class AuthService {
   /**
    * GET /v1/auth/session*
    * @summary Get current session*/
-  getSession(
-    init?: Omit<RequestInit, 'method' | 'body'>
-  ): Promise<Schema.SessionResponse> {
+  getSession(init?: Omit<RequestInit, 'method' | 'body'>): Promise<Schema.SessionResponse> {
     return this.core.request({
       method: 'GET',
       path: `/v1/auth/session`,

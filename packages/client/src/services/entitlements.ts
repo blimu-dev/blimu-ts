@@ -24,10 +24,7 @@ export class EntitlementsService {
    * @returns ['v1/client/entitlements/list-for-tenant', tenantResourceId]
    */
   listForTenant__queryKeys(tenantResourceId: string) {
-    const keys = [
-      'v1/client/entitlements/list-for-tenant',
-      tenantResourceId,
-    ] as const;
+    const keys = ['v1/client/entitlements/list-for-tenant', tenantResourceId] as const;
     return isNotUndefined(keys);
   }
 }

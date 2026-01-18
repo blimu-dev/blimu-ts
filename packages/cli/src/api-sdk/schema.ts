@@ -68,21 +68,6 @@ export interface DefinitionDto_Output {
   resources?: Record<string, unknown>;
 }
 
-export interface DefinitionGenerateSDKRequestDto {
-  entitlements?: Record<string, unknown>;
-  features?: Record<string, unknown>;
-  plans?: Record<string, unknown>;
-  resources: Record<string, unknown>;
-  sdk_options: { client_name: string; package_name: string; type: string };
-  version?: string;
-}
-
-export interface DefinitionGenerateSDKResponseDto_Output {
-  errors?: Array<{ field: string; message: string; resource: string }>;
-  spec: Record<string, unknown>;
-  success: boolean;
-}
-
 export interface DefinitionUpdateDto {
   entitlements?: Record<string, unknown>;
   features?: Record<string, unknown>;
