@@ -7,9 +7,7 @@ export class WorkspacesService {
   /**
    * GET /v1/workspaces*
    * @summary Get all workspaces*/
-  list(
-    init?: Omit<RequestInit, 'method' | 'body'>
-  ): Promise<Schema.WorkspaceListDto_Output> {
+  list(init?: Omit<RequestInit, 'method' | 'body'>): Promise<Schema.WorkspaceListDto_Output> {
     return this.core.request({
       method: 'GET',
       path: `/v1/workspaces`,

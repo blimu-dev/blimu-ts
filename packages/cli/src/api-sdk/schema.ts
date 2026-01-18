@@ -51,13 +51,7 @@ export type CustomHostnameListDto_Output = Array<{
   issuedAt: string | null;
   provider: string;
   retryCount: number;
-  status:
-    | 'PENDING'
-    | 'PROVISIONING'
-    | 'ACTIVE'
-    | 'RENEWING'
-    | 'FAILED'
-    | 'EXPIRED';
+  status: 'PENDING' | 'PROVISIONING' | 'ACTIVE' | 'RENEWING' | 'FAILED' | 'EXPIRED';
   updatedAt: string;
 }>;
 
@@ -126,24 +120,12 @@ export interface EnvironmentCreateDto {
 export interface EnvironmentDto_Output {
   createdAt: string;
   domain: string;
-  domainStatus?:
-    | 'PENDING'
-    | 'VALIDATING'
-    | 'VERIFIED'
-    | 'FAILED'
-    | 'TIMED_OUT'
-    | 'UNHEALTHY';
+  domainStatus?: 'PENDING' | 'VALIDATING' | 'VERIFIED' | 'FAILED' | 'TIMED_OUT' | 'UNHEALTHY';
   id: string;
   isAccessible?: boolean;
   lookupKey: string | null;
   name: string;
-  sslStatus?:
-    | 'PENDING'
-    | 'PROVISIONING'
-    | 'ACTIVE'
-    | 'RENEWING'
-    | 'FAILED'
-    | 'EXPIRED';
+  sslStatus?: 'PENDING' | 'PROVISIONING' | 'ACTIVE' | 'RENEWING' | 'FAILED' | 'EXPIRED';
   updatedAt: string;
   variant: 'TEST' | 'LIVE';
   workspaceId: string;
@@ -153,24 +135,12 @@ export interface EnvironmentListDto_Output {
   data: Array<{
     createdAt: string;
     domain: string;
-    domainStatus?:
-      | 'PENDING'
-      | 'VALIDATING'
-      | 'VERIFIED'
-      | 'FAILED'
-      | 'TIMED_OUT'
-      | 'UNHEALTHY';
+    domainStatus?: 'PENDING' | 'VALIDATING' | 'VERIFIED' | 'FAILED' | 'TIMED_OUT' | 'UNHEALTHY';
     id: string;
     isAccessible?: boolean;
     lookupKey: string | null;
     name: string;
-    sslStatus?:
-      | 'PENDING'
-      | 'PROVISIONING'
-      | 'ACTIVE'
-      | 'RENEWING'
-      | 'FAILED'
-      | 'EXPIRED';
+    sslStatus?: 'PENDING' | 'PROVISIONING' | 'ACTIVE' | 'RENEWING' | 'FAILED' | 'EXPIRED';
     updatedAt: string;
     variant: 'TEST' | 'LIVE';
     workspaceId: string;
@@ -192,24 +162,12 @@ export interface EnvironmentWithDefinitionDto_Output {
     resources?: Record<string, unknown>;
   } | null;
   domain: string;
-  domainStatus?:
-    | 'PENDING'
-    | 'VALIDATING'
-    | 'VERIFIED'
-    | 'FAILED'
-    | 'TIMED_OUT'
-    | 'UNHEALTHY';
+  domainStatus?: 'PENDING' | 'VALIDATING' | 'VERIFIED' | 'FAILED' | 'TIMED_OUT' | 'UNHEALTHY';
   id: string;
   isAccessible?: boolean;
   lookupKey: string | null;
   name: string;
-  sslStatus?:
-    | 'PENDING'
-    | 'PROVISIONING'
-    | 'ACTIVE'
-    | 'RENEWING'
-    | 'FAILED'
-    | 'EXPIRED';
+  sslStatus?: 'PENDING' | 'PROVISIONING' | 'ACTIVE' | 'RENEWING' | 'FAILED' | 'EXPIRED';
   updatedAt: string;
   variant: 'TEST' | 'LIVE';
   workspaceId: string;
@@ -307,23 +265,11 @@ export interface SslStatusResponseDto_Output {
     issuedAt: string | null;
     provider: string;
     retryCount: number;
-    status:
-      | 'PENDING'
-      | 'PROVISIONING'
-      | 'ACTIVE'
-      | 'RENEWING'
-      | 'FAILED'
-      | 'EXPIRED';
+    status: 'PENDING' | 'PROVISIONING' | 'ACTIVE' | 'RENEWING' | 'FAILED' | 'EXPIRED';
     updatedAt: string;
   }>;
   sslIssuedAt: string | null;
-  status:
-    | 'PENDING'
-    | 'PROVISIONING'
-    | 'ACTIVE'
-    | 'RENEWING'
-    | 'FAILED'
-    | 'EXPIRED';
+  status: 'PENDING' | 'PROVISIONING' | 'ACTIVE' | 'RENEWING' | 'FAILED' | 'EXPIRED';
 }
 
 export interface UpdateRoleDto {
@@ -393,24 +339,12 @@ export interface WorkspaceCreateResponseDto_Output {
   environments: Array<{
     createdAt: string;
     domain: string;
-    domainStatus?:
-      | 'PENDING'
-      | 'VALIDATING'
-      | 'VERIFIED'
-      | 'FAILED'
-      | 'TIMED_OUT'
-      | 'UNHEALTHY';
+    domainStatus?: 'PENDING' | 'VALIDATING' | 'VERIFIED' | 'FAILED' | 'TIMED_OUT' | 'UNHEALTHY';
     id: string;
     isAccessible?: boolean;
     lookupKey: string | null;
     name: string;
-    sslStatus?:
-      | 'PENDING'
-      | 'PROVISIONING'
-      | 'ACTIVE'
-      | 'RENEWING'
-      | 'FAILED'
-      | 'EXPIRED';
+    sslStatus?: 'PENDING' | 'PROVISIONING' | 'ACTIVE' | 'RENEWING' | 'FAILED' | 'EXPIRED';
     updatedAt: string;
     variant: 'TEST' | 'LIVE';
     workspaceId: string;
@@ -428,12 +362,7 @@ export interface WorkspaceDto_Output {
 }
 
 export interface WorkspaceListDto_Output {
-  data: Array<{
-    createdAt: string;
-    id: string;
-    name: string;
-    updatedAt: string;
-  }>;
+  data: Array<{ createdAt: string; id: string; name: string; updatedAt: string }>;
   total: number;
 }
 

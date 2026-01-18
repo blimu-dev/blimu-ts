@@ -176,8 +176,11 @@ describe('defineConfig', () => {
     });
 
     expect(config.resources).toBeDefined();
+    // @ts-expect-error - entitlements is optional
     expect(config.entitlements).toBeUndefined();
+    // @ts-expect-error - plans is optional
     expect(config.plans).toBeUndefined();
+    // @ts-expect-error - features is optional
     expect(config.features).toBeUndefined();
   });
 });
