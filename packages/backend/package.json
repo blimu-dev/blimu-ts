@@ -46,6 +46,7 @@
     }
   },
   "scripts": {
+    "d:build": "npm run build && npm run typecheck",
     "build": "tsup",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "lint": "eslint .",

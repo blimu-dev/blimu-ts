@@ -20,6 +20,7 @@
     }
   },
   "scripts": {
+    "d:build": "npm run build && npm run type-check",
     "build": "tsup",
     "type-check": "tsc --noEmit"
   },

@@ -12,7 +12,9 @@
     "dist"
   ],
   "scripts": {
+    "d:build": "npm run build && npm run typecheck",
     "build": "tsup",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
     "clean": "rm -rf dist",
     "test": "vitest run",
     "test:watch": "vitest"
