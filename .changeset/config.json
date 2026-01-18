@@ -16,7 +16,5 @@
   "access": "public",
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
-  "ignore": [
-    "@blimu/platform-sdk"
-  ]
+  "ignore": []
 }
