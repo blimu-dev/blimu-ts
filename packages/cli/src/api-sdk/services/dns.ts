@@ -15,7 +15,7 @@ export class DnsService {
     return this.core.request({
       method: 'GET',
       path: `/v1/workspaces/${encodeURIComponent(workspaceId)}/environments/${encodeURIComponent(environmentId)}/dns/records`,
-      ...(init || {}),
+      ...(init ?? {}),
     });
   }
 
@@ -30,7 +30,7 @@ export class DnsService {
     return this.core.request({
       method: 'POST',
       path: `/v1/workspaces/${encodeURIComponent(workspaceId)}/environments/${encodeURIComponent(environmentId)}/dns/validate`,
-      ...(init || {}),
+      ...(init ?? {}),
     });
   }
 }

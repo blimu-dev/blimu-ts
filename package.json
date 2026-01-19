@@ -11,7 +11,7 @@
   ],
   "packageManager": "yarn@4.12.0",
   "volta": {
-    "node": "24.1.0",
+    "node": "25.2.1",
     "yarn": "4.12.0"
   },
   "files": [
@@ -32,7 +32,9 @@
     "replace-workspace-deps": "node scripts/replace-workspace-deps.js",
     "publish": "yarn replace-workspace-deps && changeset publish",
     "link:packages": "node scripts/link-packages.js",
-    "unlink:packages": "node scripts/link-packages.js reset"
+    "unlink:packages": "node scripts/link-packages.js reset",
+    "check:portals": "node scripts/check-portals.js",
+    "prepare": "husky"
   },
   "devDependencies": {
     "@changesets/cli": "^2.29.8",
@@ -40,6 +42,8 @@
     "eslint": "^9.39.2",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.5",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7",
     "prettier": "^3.8.0",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.53.0"

@@ -27,10 +27,10 @@ export class Blimu {
   readonly users: UsersService;
 
   constructor(options?: ClientOption) {
-    const restCfg = { ...(options || {}) };
+    const restCfg = { ...(options ?? {}) };
     delete restCfg.apiKey;
 
-    const authStrategies = buildAuthStrategies(options || {});
+    const authStrategies = buildAuthStrategies(options ?? {});
 
     const core = new FetchClient({
       ...restCfg,

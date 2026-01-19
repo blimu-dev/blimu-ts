@@ -19,9 +19,8 @@ export class AuthService {
    * @summary Get query keys for logout
    * @returns ['v1/auth/logout']
    */
-  logout__queryKeys() {
-    const keys = ['v1/auth/logout'] as const;
-    return isNotUndefined(keys);
+  logout__queryKeys(): readonly ['v1/auth/logout'] {
+    return ['v1/auth/logout'] as const;
   }
 
   /**
@@ -42,9 +41,9 @@ export class AuthService {
    * @summary Get query keys for refresh
    * @returns ['v1/auth/refresh', query]
    */
-  refresh__queryKeys(query?: Schema.AuthRefreshQuery) {
+  refresh__queryKeys(query?: Schema.AuthRefreshQuery): readonly string[] {
     const keys = ['v1/auth/refresh', query] as const;
-    return isNotUndefined(keys);
+    return isNotUndefined(keys) as readonly string[];
   }
 
   /**
@@ -61,8 +60,7 @@ export class AuthService {
    * @summary Get query keys for getSession
    * @returns ['v1/auth/session']
    */
-  getSession__queryKeys() {
-    const keys = ['v1/auth/session'] as const;
-    return isNotUndefined(keys);
+  getSession__queryKeys(): readonly ['v1/auth/session'] {
+    return ['v1/auth/session'] as const;
   }
 }

@@ -52,7 +52,7 @@
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "lint": "eslint .",
     "format": "eslint --fix . && prettier --write .",
-    "prepublishOnly": "npm run build && npm run typecheck || true",
+    "prepublishOnly": "npm run build && npm run typecheck",
     "test": "vitest run",
     "test:watch": "vitest"
   },

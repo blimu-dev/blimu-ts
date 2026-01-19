@@ -16,7 +16,7 @@ export class EnvironmentsService {
       method: 'GET',
       path: `/v1/workspace/${encodeURIComponent(workspaceId)}/environments`,
       query,
-      ...(init || {}),
+      ...(init ?? {}),
     });
   }
 
@@ -32,7 +32,7 @@ export class EnvironmentsService {
       method: 'POST',
       path: `/v1/workspace/${encodeURIComponent(workspaceId)}/environments`,
       body,
-      ...(init || {}),
+      ...(init ?? {}),
     });
   }
 
@@ -47,7 +47,7 @@ export class EnvironmentsService {
     return this.core.request({
       method: 'DELETE',
       path: `/v1/workspace/${encodeURIComponent(workspaceId)}/environments/${encodeURIComponent(environmentId)}`,
-      ...(init || {}),
+      ...(init ?? {}),
     });
   }
 
@@ -62,7 +62,7 @@ export class EnvironmentsService {
     return this.core.request({
       method: 'GET',
       path: `/v1/workspace/${encodeURIComponent(workspaceId)}/environments/${encodeURIComponent(environmentId)}`,
-      ...(init || {}),
+      ...(init ?? {}),
     });
   }
 
@@ -79,7 +79,7 @@ export class EnvironmentsService {
       method: 'PUT',
       path: `/v1/workspace/${encodeURIComponent(workspaceId)}/environments/${encodeURIComponent(environmentId)}`,
       body,
-      ...(init || {}),
+      ...(init ?? {}),
     });
   }
 
@@ -94,7 +94,7 @@ export class EnvironmentsService {
     return this.core.request({
       method: 'GET',
       path: `/v1/workspace/${encodeURIComponent(workspaceId)}/environments/${encodeURIComponent(environmentId)}/auth-config`,
-      ...(init || {}),
+      ...(init ?? {}),
     });
   }
 
@@ -111,7 +111,7 @@ export class EnvironmentsService {
       method: 'PUT',
       path: `/v1/workspace/${encodeURIComponent(workspaceId)}/environments/${encodeURIComponent(environmentId)}/auth-config`,
       body,
-      ...(init || {}),
+      ...(init ?? {}),
     });
   }
 }

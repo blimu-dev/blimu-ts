@@ -17,7 +17,7 @@ export class ResourcesService {
       method: 'GET',
       path: `/v1/workspaces/${encodeURIComponent(workspaceId)}/environments/${encodeURIComponent(environmentId)}/resources`,
       query,
-      ...(init || {}),
+      ...(init ?? {}),
     });
   }
 
@@ -34,7 +34,7 @@ export class ResourcesService {
       method: 'POST',
       path: `/v1/workspaces/${encodeURIComponent(workspaceId)}/environments/${encodeURIComponent(environmentId)}/resources`,
       body,
-      ...(init || {}),
+      ...(init ?? {}),
     });
   }
 
@@ -51,7 +51,7 @@ export class ResourcesService {
     return this.core.request({
       method: 'DELETE',
       path: `/v1/workspaces/${encodeURIComponent(workspaceId)}/environments/${encodeURIComponent(environmentId)}/resources/${encodeURIComponent(resourceType)}/${encodeURIComponent(resourceId)}`,
-      ...(init || {}),
+      ...(init ?? {}),
     });
   }
 
@@ -68,7 +68,7 @@ export class ResourcesService {
     return this.core.request({
       method: 'GET',
       path: `/v1/workspaces/${encodeURIComponent(workspaceId)}/environments/${encodeURIComponent(environmentId)}/resources/${encodeURIComponent(resourceType)}/${encodeURIComponent(resourceId)}`,
-      ...(init || {}),
+      ...(init ?? {}),
     });
   }
 
@@ -87,7 +87,7 @@ export class ResourcesService {
       method: 'PUT',
       path: `/v1/workspaces/${encodeURIComponent(workspaceId)}/environments/${encodeURIComponent(environmentId)}/resources/${encodeURIComponent(resourceType)}/${encodeURIComponent(resourceId)}`,
       body,
-      ...(init || {}),
+      ...(init ?? {}),
     });
   }
 
@@ -106,7 +106,7 @@ export class ResourcesService {
       method: 'GET',
       path: `/v1/workspaces/${encodeURIComponent(workspaceId)}/environments/${encodeURIComponent(environmentId)}/resources/${encodeURIComponent(resourceType)}/${encodeURIComponent(resourceId)}/children`,
       query,
-      ...(init || {}),
+      ...(init ?? {}),
     });
   }
 
@@ -125,7 +125,7 @@ export class ResourcesService {
       method: 'GET',
       path: `/v1/workspaces/${encodeURIComponent(workspaceId)}/environments/${encodeURIComponent(environmentId)}/resources/${encodeURIComponent(resourceType)}/${encodeURIComponent(resourceId)}/users`,
       query,
-      ...(init || {}),
+      ...(init ?? {}),
     });
   }
 }

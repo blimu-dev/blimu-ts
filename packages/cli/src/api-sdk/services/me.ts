@@ -11,7 +11,7 @@ export class MeService {
     return this.core.request({
       method: 'GET',
       path: `/v1/me/access`,
-      ...(init || {}),
+      ...(init ?? {}),
     });
   }
 }

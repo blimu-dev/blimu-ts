@@ -15,7 +15,7 @@ export class DefinitionsService {
     return this.core.request({
       method: 'GET',
       path: `/v1/workspace/${encodeURIComponent(workspaceId)}/environments/${encodeURIComponent(environmentId)}/definitions`,
-      ...(init || {}),
+      ...(init ?? {}),
     });
   }
 
@@ -32,7 +32,7 @@ export class DefinitionsService {
       method: 'PUT',
       path: `/v1/workspace/${encodeURIComponent(workspaceId)}/environments/${encodeURIComponent(environmentId)}/definitions`,
       body,
-      ...(init || {}),
+      ...(init ?? {}),
     });
   }
 
@@ -50,7 +50,7 @@ export class DefinitionsService {
       method: 'POST',
       path: `/v1/workspace/${encodeURIComponent(workspaceId)}/environments/${encodeURIComponent(environmentId)}/definitions/validate`,
       body,
-      ...(init || {}),
+      ...(init ?? {}),
     });
   }
 }

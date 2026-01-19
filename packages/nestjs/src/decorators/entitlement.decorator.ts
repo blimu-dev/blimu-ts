@@ -2,7 +2,7 @@ import { applyDecorators, UseGuards } from '@nestjs/common';
 import {
   EntitlementGuard,
   SetEntitlementMetadata,
-  EntitlementInfo,
+  type EntitlementInfo,
 } from '../guards/entitlement.guard';
 import type { EntitlementType } from '@blimu/types';
 
@@ -94,10 +94,10 @@ import type { EntitlementType } from '@blimu/types';
  * }
  * ```
  */
-export const Entitlement = <TRequest = any>(
+export const Entitlement = <TRequest = unknown>(
   entitlementKey: EntitlementType,
   getEntitlementInfo: (request: TRequest) => EntitlementInfo | Promise<EntitlementInfo>,
-) => {
+): MethodDecorator => {
   return applyDecorators(
     SetEntitlementMetadata<TRequest>(entitlementKey, getEntitlementInfo),
     UseGuards(EntitlementGuard),

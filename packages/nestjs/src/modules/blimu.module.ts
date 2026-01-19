@@ -1,17 +1,17 @@
 import {
-  DynamicModule,
   Module,
-  Type,
-  ForwardReference,
-  InjectionToken,
-  OptionalFactoryDependency,
+  type DynamicModule,
+  type Type,
+  type ForwardReference,
+  type InjectionToken,
+  type OptionalFactoryDependency,
 } from '@nestjs/common';
+
+import { BLIMU_CONFIG, type BlimuConfig } from '../config/blimu.config';
 import { Reflector } from '@nestjs/core';
-import { EntitlementGuard } from '../guards/entitlement.guard';
-import type { BlimuConfig } from '../config/blimu.config';
-import { BLIMU_CONFIG } from '../config/blimu.config';
+import { EntitlementGuard } from 'guards/entitlement.guard';
+import { JWKService } from 'services/jwk.service';
 import { Blimu } from '@blimu/backend';
-import { JWKService } from '../services/jwk.service';
 
 const DEFAULT_BASE_URL = 'https://api.blimu.dev';
 
@@ -66,12 +66,11 @@ export class BlimuModule {
    */
   static forRoot<TRequest = unknown>(config: BlimuConfig<TRequest>): DynamicModule {
     return {
+      ...(config.global ? { global: true } : {}),
       module: BlimuModule,
-      global: true,
       providers: [
         Reflector,
-        EntitlementGuard,
-        JWKService,
+        // Register factory providers first so dependencies are available
         {
           provide: BLIMU_CONFIG,
           useValue: {
@@ -84,14 +83,18 @@ export class BlimuModule {
         },
         {
           provide: Blimu,
-          useFactory: (config: BlimuConfig) =>
-            new Blimu({
+          useFactory: (config: BlimuConfig) => {
+            return new Blimu({
               apiKey: config.apiKey,
               baseURL: config.baseURL ?? DEFAULT_BASE_URL,
               timeoutMs: config.timeoutMs ?? 30000,
-            }),
+            });
+          },
           inject: [BLIMU_CONFIG],
         },
+        // Register class providers after their dependencies are available
+        EntitlementGuard,
+        JWKService,
       ],
       exports: [Reflector, EntitlementGuard, Blimu, BLIMU_CONFIG, JWKService],
     };
@@ -172,6 +175,7 @@ export class BlimuModule {
    * ```
    */
   static forRootAsync<TRequest = unknown>(options: {
+    global?: boolean | undefined;
     useFactory: (...args: unknown[]) => Promise<BlimuConfig<TRequest>> | BlimuConfig<TRequest>;
     inject?: (InjectionToken | OptionalFactoryDependency)[];
     imports?: (
@@ -183,9 +187,9 @@ export class BlimuModule {
   }): DynamicModule {
     const additionalImports = options.imports ?? [];
 
-    return {
+    const module = {
+      ...(options.global ? { global: true } : {}),
       module: BlimuModule,
-      global: true,
       imports: [...additionalImports] as (
         | Type<unknown>
         | DynamicModule
@@ -194,12 +198,12 @@ export class BlimuModule {
       )[],
       providers: [
         Reflector,
-        EntitlementGuard,
-        JWKService,
+        // Register factory providers first so dependencies are available
         {
           provide: BLIMU_CONFIG,
           useFactory: async (...args: unknown[]) => {
-            const config = await options.useFactory(...args);
+            const configResult = options.useFactory(...args);
+            const config = configResult instanceof Promise ? await configResult : configResult;
             return {
               apiKey: config.apiKey,
               baseURL: config.baseURL ?? DEFAULT_BASE_URL,
@@ -212,16 +216,21 @@ export class BlimuModule {
         },
         {
           provide: Blimu,
-          useFactory: (config: BlimuConfig) =>
-            new Blimu({
+          useFactory: (config: BlimuConfig) => {
+            return new Blimu({
               apiKey: config.apiKey,
               baseURL: config.baseURL ?? DEFAULT_BASE_URL,
               timeoutMs: config.timeoutMs ?? 30000,
-            }),
+            });
+          },
           inject: [BLIMU_CONFIG],
         },
+        // Register class providers after their dependencies are available
+        EntitlementGuard,
+        JWKService,
       ],
       exports: [Reflector, EntitlementGuard, Blimu, BLIMU_CONFIG, JWKService],
     };
+    return module;
   }
 }

@@ -4,7 +4,7 @@ export type PaginableQuery = { limit?: number; offset?: number } & Record<string
 
 export async function* paginate<T>(
   fetchPage: (
-    query?: any,
+    query?: PaginableQuery,
     init?: Omit<RequestInit, 'method' | 'body'>
   ) => Promise<{ data?: T[]; hasMore?: boolean; limit?: number; offset?: number }>,
   initialQuery: PaginableQuery = {},
@@ -13,12 +13,12 @@ export async function* paginate<T>(
   let offset = Number(initialQuery.offset ?? 0);
   const limit = Number(initialQuery.limit ?? pageSize);
   // shallow copy to avoid mutating caller
-  const baseQuery: any = { ...initialQuery };
+  const baseQuery: PaginableQuery = { ...initialQuery };
   while (true) {
     const page = await fetchPage({ ...baseQuery, limit, offset });
     const items = page.data ?? [];
     for (const item of items) {
-      yield item as T;
+      yield item;
     }
     if (!page.hasMore || items.length < limit) break;
     offset += limit;
@@ -27,7 +27,7 @@ export async function* paginate<T>(
 
 export async function listAll<T>(
   fetchPage: (
-    query?: any,
+    query?: PaginableQuery,
     init?: Omit<RequestInit, 'method' | 'body'>
   ) => Promise<{ data?: T[]; hasMore?: boolean; limit?: number; offset?: number }>,
   query: PaginableQuery = {},
@@ -41,9 +41,14 @@ export async function listAll<T>(
 /**
  * Filters out undefined values from an array while preserving type safety
  * Useful for query keys where optional parameters might be undefined
+ * Preserves tuple types when no undefined values are present
  */
-export function isNotUndefined<T>(arr: readonly (T | undefined)[]): T[] {
-  return arr.filter((item): item is T => item !== undefined);
+export function isNotUndefined<T extends readonly unknown[]>(arr: T): T {
+  // Type assertion: when no undefined values exist, tuple is preserved
+  // When undefined values exist, they are filtered but type system can't infer exact tuple shape
+  return arr.filter(
+    (item): item is Exclude<T[number], undefined> => item !== undefined
+  ) as unknown as T;
 }
 
 // Re-export streaming parsers from @blimu/fetch

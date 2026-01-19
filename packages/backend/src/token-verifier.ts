@@ -142,7 +142,7 @@ export class TokenVerifier {
   /**
    * Verify JWT token using JWKs from runtime-api
    */
-  async verifyToken<T = any>(options: VerifyTokenOptions): Promise<T> {
+  async verifyToken<T = unknown>(options: VerifyTokenOptions): Promise<T> {
     const { url, secretKey, token, runtimeApiUrl } = options;
 
     if (!url && !secretKey) {
@@ -243,7 +243,7 @@ export class TokenVerifier {
 /**
  * Convenience function to verify a token
  */
-export async function verifyToken<T = any>(options: VerifyTokenOptions): Promise<T> {
+export async function verifyToken<T = unknown>(options: VerifyTokenOptions): Promise<T> {
   const verifier = new TokenVerifier();
   return verifier.verifyToken<T>(options);
 }

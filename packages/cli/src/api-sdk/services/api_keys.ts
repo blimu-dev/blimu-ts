@@ -14,7 +14,7 @@ export class ApiKeysService {
     return this.core.request({
       method: 'GET',
       path: `/v1/workspace/${encodeURIComponent(workspaceId)}/api-keys`,
-      ...(init || {}),
+      ...(init ?? {}),
     });
   }
 
@@ -30,7 +30,7 @@ export class ApiKeysService {
       method: 'POST',
       path: `/v1/workspace/${encodeURIComponent(workspaceId)}/api-keys`,
       body,
-      ...(init || {}),
+      ...(init ?? {}),
     });
   }
 
@@ -45,7 +45,7 @@ export class ApiKeysService {
     return this.core.request({
       method: 'DELETE',
       path: `/v1/workspace/${encodeURIComponent(workspaceId)}/api-keys/${encodeURIComponent(id)}`,
-      ...(init || {}),
+      ...(init ?? {}),
     });
   }
 
@@ -60,7 +60,7 @@ export class ApiKeysService {
     return this.core.request({
       method: 'GET',
       path: `/v1/workspace/${encodeURIComponent(workspaceId)}/api-keys/${encodeURIComponent(id)}`,
-      ...(init || {}),
+      ...(init ?? {}),
     });
   }
 
@@ -75,7 +75,7 @@ export class ApiKeysService {
     return this.core.request({
       method: 'POST',
       path: `/v1/workspace/${encodeURIComponent(workspaceId)}/api-keys/${encodeURIComponent(id)}/reveal`,
-      ...(init || {}),
+      ...(init ?? {}),
     });
   }
 }

@@ -17,31 +17,31 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.mjs",
       "require": "./dist/index.cjs",
-      "default": "./dist/index.js"
+      "default": "./dist/index.cjs"
     },
     "./services/*": {
       "types": "./dist/services/*.d.ts",
       "import": "./dist/services/*.mjs",
       "require": "./dist/services/*.cjs",
-      "default": "./dist/services/*.js"
+      "default": "./dist/services/*.cjs"
     },
     "./schema": {
       "types": "./dist/schema.d.ts",
       "import": "./dist/schema.mjs",
       "require": "./dist/schema.cjs",
-      "default": "./dist/schema.js"
+      "default": "./dist/schema.cjs"
     },
     "./client": {
       "types": "./dist/client.d.ts",
       "import": "./dist/client.mjs",
       "require": "./dist/client.cjs",
-      "default": "./dist/client.js"
+      "default": "./dist/client.cjs"
     },
     "./utils": {
       "types": "./dist/utils.d.ts",
       "import": "./dist/utils.mjs",
       "require": "./dist/utils.cjs",
-      "default": "./dist/utils.js"
+      "default": "./dist/utils.cjs"
     },
     "./package.json": "./package.json"
   },
@@ -52,7 +52,7 @@
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "lint": "eslint .",
     "format": "eslint --fix . && prettier --write .",
-    "prepublishOnly": "npm run build && npm run typecheck || true",
+    "prepublishOnly": "npm run build && npm run typecheck",
     "test": "vitest run",
     "test:watch": "vitest"
   },

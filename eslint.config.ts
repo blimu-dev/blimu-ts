@@ -23,6 +23,7 @@ export default defineConfig(
     },
     rules: {
       '@typescript-eslint/no-explicit-any': 'error',
+      '@typescript-eslint/no-unsafe-assignment': 'error',
       '@typescript-eslint/no-unused-vars': [
         'warn',
         {
@@ -30,6 +31,7 @@ export default defineConfig(
           varsIgnorePattern: '^_',
         },
       ],
+      '@typescript-eslint/explicit-module-boundary-types': 'error',
     },
   },
   {

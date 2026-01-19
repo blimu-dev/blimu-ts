@@ -18,7 +18,7 @@ export interface ApiKeyDto_Output {
 }
 
 export interface ApiKeyListDto_Output {
-  data: Array<{
+  data: {
     createdAt: string;
     id: string;
     isActive: boolean;
@@ -26,7 +26,7 @@ export interface ApiKeyListDto_Output {
     name: string;
     updatedAt: string;
     workspaceId: string;
-  }>;
+  }[];
   total: number;
 }
 
@@ -41,7 +41,7 @@ export interface ApiKeyRevealDto_Output {
   workspaceId: string;
 }
 
-export type CustomHostnameListDto_Output = Array<{
+export type CustomHostnameListDto_Output = {
   createdAt: string;
   domain: string;
   environmentId: string;
@@ -53,7 +53,7 @@ export type CustomHostnameListDto_Output = Array<{
   retryCount: number;
   status: 'PENDING' | 'PROVISIONING' | 'ACTIVE' | 'RENEWING' | 'FAILED' | 'EXPIRED';
   updatedAt: string;
-}>;
+}[];
 
 export interface DefinitionDto_Output {
   entitlements?: Record<string, unknown>;
@@ -78,12 +78,12 @@ export interface DefinitionValidateRequestDto {
 }
 
 export interface DefinitionValidateResponseDto_Output {
-  errors: Array<{ field: string; message: string; resource: string }>;
+  errors: { field: string; message: string; resource: string }[];
   spec?: Record<string, unknown>;
   valid: boolean;
 }
 
-export type DnsRecordListDto_Output = Array<{
+export type DnsRecordListDto_Output = {
   actualValue: string | null;
   expectedValue: string;
   hostname: string;
@@ -93,7 +93,7 @@ export type DnsRecordListDto_Output = Array<{
   recordType: string;
   status: 'PENDING' | 'VERIFIED' | 'FAILED' | 'UNHEALTHY';
   verifiedAt: string | null;
-}>;
+}[];
 
 export interface EnvironmentAuthConfigDto_Output {
   authMethod?: 'code' | 'password' | 'both';
@@ -132,7 +132,7 @@ export interface EnvironmentDto_Output {
 }
 
 export interface EnvironmentListDto_Output {
-  data: Array<{
+  data: {
     createdAt: string;
     domain: string;
     domainStatus?: 'PENDING' | 'VALIDATING' | 'VERIFIED' | 'FAILED' | 'TIMED_OUT' | 'UNHEALTHY';
@@ -144,7 +144,7 @@ export interface EnvironmentListDto_Output {
     updatedAt: string;
     variant: 'TEST' | 'LIVE';
     workspaceId: string;
-  }>;
+  }[];
   meta: { limit: number; page: number; total: number; totalPages: number };
 }
 
@@ -183,7 +183,7 @@ export interface InviteMemberResponseDto_Output {
 }
 
 export interface MemberListResponseDto_Output {
-  items: Array<{
+  items: {
     avatarUrl: string | null;
     createdAt: string;
     email: string;
@@ -193,7 +193,7 @@ export interface MemberListResponseDto_Output {
     role: 'admin' | 'owner' | 'member';
     status: 'active' | 'pending';
     userId: string;
-  }>;
+  }[];
   limit: number;
   page: number;
   total: number;
@@ -202,7 +202,7 @@ export interface MemberListResponseDto_Output {
 export interface ResourceCreateDto {
   id?: string;
   name?: string;
-  parents?: Array<{ id: string; type: string }>;
+  parents?: { id: string; type: string }[];
   type: string;
 }
 
@@ -210,18 +210,18 @@ export interface ResourceDto_Output {
   createdAt: string;
   id: string;
   name: string | null;
-  parents?: Array<{ id: string; type: string }>;
+  parents?: { id: string; type: string }[];
   type: string;
 }
 
 export interface ResourceListResponseDto_Output {
-  items: Array<{
+  items: {
     createdAt: string;
     id: string;
     name: string | null;
-    parents?: Array<{ id: string; type: string }>;
+    parents?: { id: string; type: string }[];
     type: string;
-  }>;
+  }[];
   limit: number;
   page: number;
   total: number;
@@ -229,11 +229,11 @@ export interface ResourceListResponseDto_Output {
 
 export interface ResourceUpdateDto {
   name?: string;
-  parents?: Array<{ id: string; type: string }>;
+  parents?: { id: string; type: string }[];
 }
 
 export interface ResourceUserListResponseDto_Output {
-  items: Array<{
+  items: {
     inherited: boolean;
     role: string;
     user: {
@@ -248,14 +248,14 @@ export interface ResourceUserListResponseDto_Output {
       updatedAt: string;
     };
     userId: string;
-  }>;
+  }[];
   limit: number;
   page: number;
   total: number;
 }
 
 export interface SslStatusResponseDto_Output {
-  certificates: Array<{
+  certificates: {
     createdAt: string;
     domain: string;
     environmentId: string;
@@ -267,7 +267,7 @@ export interface SslStatusResponseDto_Output {
     retryCount: number;
     status: 'PENDING' | 'PROVISIONING' | 'ACTIVE' | 'RENEWING' | 'FAILED' | 'EXPIRED';
     updatedAt: string;
-  }>;
+  }[];
   sslIssuedAt: string | null;
   status: 'PENDING' | 'PROVISIONING' | 'ACTIVE' | 'RENEWING' | 'FAILED' | 'EXPIRED';
 }
@@ -278,17 +278,12 @@ export interface UpdateRoleDto {
 
 export interface UserAccessDto_Output {
   roles: Record<string, unknown>;
-  workspaces: Array<{
-    environments: Array<{
-      id: string;
-      name: string;
-      type: 'environment';
-      variant: 'TEST' | 'LIVE';
-    }>;
+  workspaces: {
+    environments: { id: string; name: string; type: 'environment'; variant: 'TEST' | 'LIVE' }[];
     id: string;
     name: string;
     type: 'workspace';
-  }>;
+  }[];
 }
 
 export interface UserDto_Output {
@@ -304,7 +299,7 @@ export interface UserDto_Output {
 }
 
 export interface UserListResponseDto_Output {
-  items: Array<{
+  items: {
     avatarUrl: string | null;
     createdAt: string;
     email: string;
@@ -314,7 +309,7 @@ export interface UserListResponseDto_Output {
     lastLoginAt: string | null;
     lastName: string | null;
     updatedAt: string;
-  }>;
+  }[];
   limit: number;
   page: number;
   total: number;
@@ -323,7 +318,7 @@ export interface UserListResponseDto_Output {
 export interface UserResourceDto_Output {
   inherited: boolean;
   name: string;
-  parentIds: Array<string>;
+  parentIds: string[];
   resourceId: string;
   resourceType: string;
   role: string;
@@ -336,7 +331,7 @@ export interface WorkspaceCreateDto {
 
 export interface WorkspaceCreateResponseDto_Output {
   createdAt: string;
-  environments: Array<{
+  environments: {
     createdAt: string;
     domain: string;
     domainStatus?: 'PENDING' | 'VALIDATING' | 'VERIFIED' | 'FAILED' | 'TIMED_OUT' | 'UNHEALTHY';
@@ -348,7 +343,7 @@ export interface WorkspaceCreateResponseDto_Output {
     updatedAt: string;
     variant: 'TEST' | 'LIVE';
     workspaceId: string;
-  }>;
+  }[];
   id: string;
   name: string;
   updatedAt: string;
@@ -362,7 +357,7 @@ export interface WorkspaceDto_Output {
 }
 
 export interface WorkspaceListDto_Output {
-  data: Array<{ createdAt: string; id: string; name: string; updatedAt: string }>;
+  data: { createdAt: string; id: string; name: string; updatedAt: string }[];
   total: number;
 }
 

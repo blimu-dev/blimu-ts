@@ -34,11 +34,11 @@ export class BlimuCli {
   readonly workspaces: WorkspacesService;
 
   constructor(options?: ClientOption) {
-    const restCfg = { ...(options || {}) };
+    const restCfg = { ...(options ?? {}) };
     delete restCfg.apiKey;
     delete restCfg.bearer;
 
-    const authStrategies = buildAuthStrategies(options || {});
+    const authStrategies = buildAuthStrategies(options ?? {});
 
     const core = new FetchClient({
       ...restCfg,

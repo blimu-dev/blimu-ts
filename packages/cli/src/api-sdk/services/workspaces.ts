@@ -11,7 +11,7 @@ export class WorkspacesService {
     return this.core.request({
       method: 'GET',
       path: `/v1/workspaces`,
-      ...(init || {}),
+      ...(init ?? {}),
     });
   }
 
@@ -26,7 +26,7 @@ export class WorkspacesService {
       method: 'POST',
       path: `/v1/workspaces`,
       body,
-      ...(init || {}),
+      ...(init ?? {}),
     });
   }
 
@@ -40,7 +40,7 @@ export class WorkspacesService {
     return this.core.request({
       method: 'GET',
       path: `/v1/workspaces/${encodeURIComponent(workspaceId)}`,
-      ...(init || {}),
+      ...(init ?? {}),
     });
   }
 
@@ -56,7 +56,7 @@ export class WorkspacesService {
       method: 'PUT',
       path: `/v1/workspaces/${encodeURIComponent(workspaceId)}`,
       body,
-      ...(init || {}),
+      ...(init ?? {}),
     });
   }
 }

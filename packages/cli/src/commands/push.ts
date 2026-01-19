@@ -19,11 +19,7 @@ export function pushCommand(program: Command): void {
     .option('--environment-id <id>', 'Environment ID (required)')
     .option('--api-key <key>', 'API key for authentication')
     .option('--bearer <token>', 'Bearer token for authentication')
-    .option(
-      '--base-url <url>',
-      'Base URL for the API',
-      'https://runtime.blimu.dev'
-    )
+    .option('--base-url <url>', 'Base URL for the API', 'https://runtime.blimu.dev')
     .action(async (options) => {
       const spinner = clack.spinner();
 
@@ -87,16 +83,12 @@ export function pushCommand(program: Command): void {
 
         // Push definitions
         spinner.start('Pushing definitions to Blimu...');
-        await client.definitions.update(
-          options.workspaceId,
-          options.environmentId,
-          {
-            resources: config.resources,
-            entitlements: config.entitlements,
-            features: config.features,
-            plans: config.plans,
-          }
-        );
+        await client.definitions.update(options.workspaceId, options.environmentId, {
+          resources: config.resources,
+          ...(config.entitlements ? { entitlements: config.entitlements } : {}),
+          ...(config.features ? { features: config.features } : {}),
+          ...(config.plans ? { plans: config.plans } : {}),
+        });
         spinner.stop('✓ Definitions pushed successfully');
 
         clack.log.success(

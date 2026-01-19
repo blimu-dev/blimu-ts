@@ -2,6 +2,7 @@
  * Configuration interface for Blimu NestJS integration
  */
 export interface BlimuConfig<TRequest = unknown> {
+  global?: boolean | undefined;
   /**
    * The API secret key for authenticating with Blimu Runtime API
    */
@@ -11,19 +12,19 @@ export interface BlimuConfig<TRequest = unknown> {
    * The base URL for the Blimu Runtime API
    * @default 'https://api.blimu.dev'
    */
-  baseURL?: string;
+  baseURL?: string | undefined;
 
   /**
    * Environment ID for the Blimu environment
    * This will be used in future versions for environment-specific configurations
    */
-  environmentId?: string;
+  environmentId?: string | undefined;
 
   /**
    * Request timeout in milliseconds
    * @default 30000
    */
-  timeoutMs?: number;
+  timeoutMs?: number | undefined;
 
   /**
    * Function to extract user ID from the request

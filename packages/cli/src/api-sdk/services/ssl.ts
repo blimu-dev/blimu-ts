@@ -15,7 +15,7 @@ export class SslService {
     return this.core.request({
       method: 'POST',
       path: `/v1/workspaces/${encodeURIComponent(workspaceId)}/environments/${encodeURIComponent(environmentId)}/ssl/provision`,
-      ...(init || {}),
+      ...(init ?? {}),
     });
   }
 
@@ -30,7 +30,7 @@ export class SslService {
     return this.core.request({
       method: 'GET',
       path: `/v1/workspaces/${encodeURIComponent(workspaceId)}/environments/${encodeURIComponent(environmentId)}/ssl/status`,
-      ...(init || {}),
+      ...(init ?? {}),
     });
   }
 }

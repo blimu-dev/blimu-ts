@@ -13,10 +13,10 @@ export class Blimu {
   readonly entitlements: EntitlementsService;
 
   constructor(options?: ClientOption) {
-    const restCfg = { ...(options || {}) };
+    const restCfg = { ...(options ?? {}) };
     delete restCfg.bearer;
 
-    const authStrategies = buildAuthStrategies(options || {});
+    const authStrategies = buildAuthStrategies(options ?? {});
 
     const core = new FetchClient({
       ...restCfg,

@@ -16,7 +16,7 @@ export class WorkspaceMembersService {
       method: 'GET',
       path: `/v1/workspaces/${encodeURIComponent(workspaceId)}/members`,
       query,
-      ...(init || {}),
+      ...(init ?? {}),
     });
   }
 
@@ -31,7 +31,7 @@ export class WorkspaceMembersService {
     return this.core.request({
       method: 'DELETE',
       path: `/v1/workspaces/${encodeURIComponent(workspaceId)}/members/${encodeURIComponent(userId)}`,
-      ...(init || {}),
+      ...(init ?? {}),
     });
   }
 
@@ -48,7 +48,7 @@ export class WorkspaceMembersService {
       method: 'PUT',
       path: `/v1/workspaces/${encodeURIComponent(workspaceId)}/members/${encodeURIComponent(userId)}/role`,
       body,
-      ...(init || {}),
+      ...(init ?? {}),
     });
   }
 
@@ -64,7 +64,7 @@ export class WorkspaceMembersService {
       method: 'POST',
       path: `/v1/workspaces/${encodeURIComponent(workspaceId)}/members/invite`,
       body,
-      ...(init || {}),
+      ...(init ?? {}),
     });
   }
 }

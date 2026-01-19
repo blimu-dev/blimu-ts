@@ -1,17 +1,17 @@
 import {
-  CanActivate,
-  ExecutionContext,
+  type CanActivate,
+  type ExecutionContext,
   ForbiddenException,
   Injectable,
   SetMetadata,
   Inject,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { Blimu } from '@blimu/backend';
+
 import type { EntitlementType } from '@blimu/types';
-import type { BlimuConfig } from '../config/blimu.config';
-import { BLIMU_CONFIG } from '../config/blimu.config';
 import { BlimuForbiddenException } from '../exceptions/blimu-forbidden.exception';
+import { Blimu } from '@blimu/backend';
+import { BLIMU_CONFIG, type BlimuConfig } from 'config/blimu.config';
 
 export const ENTITLEMENT_KEY = 'entitlement';
 export const ENTITLEMENT_METADATA_KEY = Symbol('entitlement');
@@ -39,7 +39,7 @@ export interface EntitlementMetadata<TRequest = unknown> {
 export const SetEntitlementMetadata = <TRequest = unknown>(
   entitlementKey: string,
   getEntitlementInfo: (request: TRequest) => EntitlementInfo | Promise<EntitlementInfo>,
-) =>
+): MethodDecorator =>
   SetMetadata(ENTITLEMENT_METADATA_KEY, {
     entitlementKey,
     getEntitlementInfo,
@@ -57,10 +57,9 @@ export const SetEntitlementMetadata = <TRequest = unknown>(
 @Injectable()
 export class EntitlementGuard<TRequest = unknown> implements CanActivate {
   constructor(
-    private readonly reflector: Reflector,
     @Inject(BLIMU_CONFIG)
     private readonly config: BlimuConfig<TRequest>,
-    @Inject(Blimu)
+    private readonly reflector: Reflector,
     private readonly runtime: Blimu,
   ) {}
 
