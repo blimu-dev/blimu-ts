@@ -12,40 +12,40 @@
 :root {
   /* Background & Foreground */
   --blimu-background: var(--background, oklch(1 0 0));
-  --blimu-foreground: var(--foreground, oklch(0.145 0 0));
+  --blimu-foreground: var(--foreground, oklch(0.141 0.005 285.823));
 
   /* Card */
   --blimu-card: var(--card, oklch(1 0 0));
-  --blimu-card-foreground: var(--card-foreground, oklch(0.145 0 0));
+  --blimu-card-foreground: var(--card-foreground, oklch(0.141 0.005 285.823));
 
   /* Popover */
-  --blimu-popover: var(--popover, oklab(0.27 0 0 / 1));
-  --blimu-popover-foreground: var(--popover-foreground, oklch(0.145 0 0));
+  --blimu-popover: var(--popover, oklch(1 0 0));
+  --blimu-popover-foreground: var(--popover-foreground, oklch(0.141 0.005 285.823));
 
   /* Primary */
-  --blimu-primary: var(--primary, oklch(0.205 0 0));
+  --blimu-primary: var(--primary, oklch(0.21 0.006 285.885));
   --blimu-primary-foreground: var(--primary-foreground, oklch(0.985 0 0));
 
   /* Secondary */
-  --blimu-secondary: var(--secondary, oklch(0.97 0 0));
-  --blimu-secondary-foreground: var(--secondary-foreground, oklch(0.205 0 0));
+  --blimu-secondary: var(--secondary, oklch(0.967 0.001 286.375));
+  --blimu-secondary-foreground: var(--secondary-foreground, oklch(0.21 0.006 285.885));
 
   /* Muted */
-  --blimu-muted: var(--muted, oklch(0.97 0 0));
-  --blimu-muted-foreground: var(--muted-foreground, oklch(0.556 0 0));
+  --blimu-muted: var(--muted, oklch(0.967 0.001 286.375));
+  --blimu-muted-foreground: var(--muted-foreground, oklch(0.552 0.016 285.938));
 
   /* Accent */
-  --blimu-accent: var(--accent, oklch(0.97 0 0));
-  --blimu-accent-foreground: var(--accent-foreground, oklch(0.205 0 0));
+  --blimu-accent: var(--accent, oklch(0.967 0.001 286.375));
+  --blimu-accent-foreground: var(--accent-foreground, oklch(0.21 0.006 285.885));
 
   /* Destructive */
   --blimu-destructive: var(--destructive, oklch(0.577 0.245 27.325));
   --blimu-destructive-foreground: var(--destructive-foreground, oklch(0.577 0.245 27.325));
 
   /* Border & Input */
-  --blimu-border: var(--border, oklch(0.922 0 0));
-  --blimu-input: var(--input, oklch(0.922 0 0));
-  --blimu-ring: var(--ring, oklch(0.708 0 0));
+  --blimu-border: var(--border, oklch(0.92 0.004 286.32));
+  --blimu-input: var(--input, oklch(0.92 0.004 286.32));
+  --blimu-ring: var(--ring, oklch(0.705 0.015 286.067));
 
   /* Border Radius */
   --blimu-radius: var(--radius, 0.625rem);
@@ -58,25 +58,25 @@
 
 .dark {
   /* Dark mode theme */
-  --blimu-background: var(--background, oklch(21% 0.006 285.885));
+  --blimu-background: var(--background, oklch(0.141 0.005 285.823));
   --blimu-foreground: var(--foreground, oklch(0.985 0 0));
   --blimu-card: var(--card, oklch(0.21 0.006 285.885));
-  --blimu-card-foreground: var(--card-foreground, lab(98.26% 0 0));
+  --blimu-card-foreground: var(--card-foreground, oklch(0.985 0 0));
   --blimu-popover: var(--popover, oklch(0.21 0.006 285.885));
-  --blimu-popover-foreground: var(--popover-foreground, lab(98.26% 0 0));
-  --blimu-primary: var(--primary, lab(98.26% 0 0));
-  --blimu-primary-foreground: var(--primary-foreground, oklch(0.205 0 0));
+  --blimu-popover-foreground: var(--popover-foreground, oklch(0.985 0 0));
+  --blimu-primary: var(--primary, oklch(0.92 0.004 286.32));
+  --blimu-primary-foreground: var(--primary-foreground, oklch(0.21 0.006 285.885));
   --blimu-secondary: var(--secondary, oklch(0.274 0.006 286.033));
-  --blimu-secondary-foreground: var(--secondary-foreground, lab(98.26% 0 0));
+  --blimu-secondary-foreground: var(--secondary-foreground, oklch(0.985 0 0));
   --blimu-muted: var(--muted, oklch(0.274 0.006 286.033));
-  --blimu-muted-foreground: var(--muted-foreground, oklch(0.708 0 0));
+  --blimu-muted-foreground: var(--muted-foreground, oklch(0.705 0.015 286.067));
   --blimu-accent: var(--accent, oklch(0.274 0.006 286.033));
-  --blimu-accent-foreground: var(--accent-foreground, lab(98.26% 0 0));
-  --blimu-destructive: var(--destructive, oklch(0.396 0.141 25.723));
-  --blimu-destructive-foreground: var(--destructive-foreground, oklch(0.637 0.237 25.331));
+  --blimu-accent-foreground: var(--accent-foreground, oklch(0.985 0 0));
+  --blimu-destructive: var(--destructive, oklch(0.704 0.191 22.216));
+  --blimu-destructive-foreground: var(--destructive-foreground, oklch(0.704 0.191 22.216));
   --blimu-border: var(--border, oklch(1 0 0 / 10%));
-  --blimu-input: var(--input, oklch(0.274 0.006 286.033));
-  --blimu-ring: var(--ring, oklch(0.439 0 0));
+  --blimu-input: var(--input, oklch(1 0 0 / 15%));
+  --blimu-ring: var(--ring, oklch(0.552 0.016 285.938));
 }
 
 /*
