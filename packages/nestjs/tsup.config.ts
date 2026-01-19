@@ -18,6 +18,8 @@ export default defineConfig({
     'reflect-metadata',
     'rxjs',
     '@blimu/backend',
-    '@blimu/types'
+    '@blimu/types',
+    'src/**/*.test.ts',
+    'src/**/__tests__/**'
   ],
 });
