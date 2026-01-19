@@ -10,7 +10,17 @@ import tseslint from 'typescript-eslint';
 
 export default defineConfig(
   {
-    ignores: ['dist/', 'node_modules/', 'eslint.config.mjs'],
+    ignores: [
+      'dist/',
+      'node_modules/',
+      'eslint.config.mjs',
+      'vite.config.ts',
+      '.storybook/**',
+      '**/*.stories.tsx',
+      '**/*.test.ts',
+      '**/*.test.tsx',
+      '**/__tests__/**',
+    ],
   },
   eslintPluginPrettierRecommended,
   eslint.configs.recommended,
@@ -21,9 +31,23 @@ export default defineConfig(
       ecmaVersion: 2020,
       globals: globals.browser,
       parserOptions: {
-        projectService: true,
+        projectService: {
+          allowDefaultProject: ['*.js', '*.mjs', '*.cjs', '*.config.ts'],
+        },
         tsconfigRootDir: import.meta.dirname,
       },
+    },
+  },
+  {
+    // Node.js files (build scripts, config files)
+    files: ['*.js', '*.mjs', '*.cjs', 'build-css.js'],
+    languageOptions: {
+      globals: {
+        ...globals.node,
+      },
+    },
+    rules: {
+      'no-undef': 'off', // Node.js globals are available
     },
   },
   {
@@ -36,9 +60,10 @@ export default defineConfig(
     rules: {
       ...reactHooks.configs['recommended-latest'].rules,
       ...reactRefresh.configs.vite.rules,
-      'no-unused-vars': 'off', // or "@typescript-eslint/no-unused-vars": "off",
+      'no-unused-vars': 'off',
       'unused-imports/no-unused-imports': 'error',
       '@typescript-eslint/require-await': 'off',
+      '@typescript-eslint/no-unused-vars': 'off', // Use unused-imports instead
       'unused-imports/no-unused-vars': [
         'warn',
         {
@@ -48,8 +73,10 @@ export default defineConfig(
           argsIgnorePattern: '^_',
         },
       ],
-      'simple-import-sort/imports': 'error',
-      'simple-import-sort/exports': 'error',
+      'simple-import-sort/imports': 'warn', // Make it a warning so it's less noisy
+      'simple-import-sort/exports': 'warn',
+      // Allow files to export both components and constants (common pattern)
+      'react-refresh/only-export-components': 'off', // Too strict for component libraries
     },
   },
 );

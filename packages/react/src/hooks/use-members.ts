@@ -58,7 +58,7 @@ export function useMembers({
   resourceId,
   page = 1,
   limit = 20,
-  search = '',
+  search: _search = '',
   enabled = true,
 }: UseMembersOptions): UseMembersResult {
   const { client } = useBlimu();
@@ -79,7 +79,7 @@ export function useMembers({
       // TODO: Implement when resourceMembers API is available in runtime client
       // For now, this is a placeholder that will need to be implemented
       // when the runtime client exposes the resourceMembers service
-      const runtimeClient = client.getClient();
+      const _runtimeClient = client.getClient();
 
       // This will need to be implemented when the API is available
       // const response = await runtimeClient.resourceMembers.list(resourceType, resourceId, {
@@ -106,7 +106,7 @@ export function useMembers({
     } finally {
       setIsLoading(false);
     }
-  }, [client, resourceType, resourceId, page, limit, search, enabled]);
+  }, [client, resourceType, resourceId, page, limit, enabled]);
 
   useEffect(() => {
     fetchMembers();

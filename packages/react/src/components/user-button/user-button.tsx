@@ -1,4 +1,6 @@
+import { LogOut } from 'lucide-react';
 import React from 'react';
+
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import {
   DropdownMenu,
@@ -9,14 +11,13 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
-import { LogOut, Settings } from 'lucide-react';
 
 import { useAuth, useUser } from '../../hooks/use-auth';
 import type { BlimuComponentProps } from '../../types';
 import {
-  userButtonTriggerVariants,
   userButtonContentVariants,
   type UserButtonTriggerVariants,
+  userButtonTriggerVariants,
 } from './styles';
 
 export interface UserButtonProps extends BlimuComponentProps, UserButtonTriggerVariants {
@@ -33,7 +34,7 @@ export interface UserButtonProps extends BlimuComponentProps, UserButtonTriggerV
 export function UserButton({
   className,
   classes,
-  onManageAccount,
+  onManageAccount: _onManageAccount,
   variant,
   size,
   showNameInTrigger = false,
