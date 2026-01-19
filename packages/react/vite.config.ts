@@ -28,6 +28,7 @@ export default defineConfig({
       output: {
         preserveModules: true,
         preserveModulesRoot: 'src',
+        exports: 'named', // Fix warning about named and default exports
         // Note: leave entryFileNames unset so Vite can apply `lib.fileName` per-format.
         assetFileNames: (assetInfo) => {
           if (assetInfo.names?.[0]?.endsWith('.css')) {
