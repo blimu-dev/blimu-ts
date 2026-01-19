@@ -1,5 +1,17 @@
 # @blimu/react
 
+## 1.1.4
+
+### Patch Changes
+
+- a1b1bd3: Fix package publishing issues
+  - Fix CLI bin path to use correct .cjs extension
+  - Fix React build warnings with exports configuration
+  - Resolve npm permission issues for blimu package
+
+- Updated dependencies [a1b1bd3]
+  - @blimu/client@1.1.4
+
 ## 1.1.3
 
 ### Patch Changes

@@ -1,6 +1,6 @@
 {
   "name": "@blimu/types",
-  "version": "1.1.3",
+  "version": "1.1.4",
   "description": "TypeScript type definitions for Blimu simple types",
   "repository": {
     "type": "git",
