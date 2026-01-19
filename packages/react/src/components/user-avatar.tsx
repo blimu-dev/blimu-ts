@@ -1,8 +1,8 @@
 import * as React from 'react';
 
-import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { cn } from '../lib/utils';
-import { avatarVariants, type AvatarVariants } from '../lib/variants';
+import { type AvatarVariants, avatarVariants } from '../lib/variants';
+import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 
 export interface UserAvatarProps extends React.ComponentPropsWithoutRef<typeof Avatar> {
   /**

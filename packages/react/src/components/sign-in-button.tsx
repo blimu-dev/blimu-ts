@@ -1,9 +1,8 @@
 import * as React from 'react';
 
-import { cn } from '../lib/utils';
-import { buttonVariants, type ButtonVariants } from '../lib/variants';
-
 import { useAuth } from '../hooks/use-auth';
+import { cn } from '../lib/utils';
+import { type ButtonVariants, buttonVariants } from '../lib/variants';
 
 export interface SignInButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   /**

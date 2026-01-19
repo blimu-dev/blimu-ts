@@ -63,30 +63,30 @@ export type AuthStatus = 'idle' | 'loading' | 'authenticated' | 'unauthenticated
  */
 export type AuthState =
   | {
-    status: 'idle';
-    user: null;
-    error: null;
-  }
+      status: 'idle';
+      user: null;
+      error: null;
+    }
   | {
-    status: 'loading';
-    user: null;
-    error: null;
-  }
+      status: 'loading';
+      user: null;
+      error: null;
+    }
   | {
-    status: 'authenticated';
-    user: User;
-    error: null;
-  }
+      status: 'authenticated';
+      user: User;
+      error: null;
+    }
   | {
-    status: 'unauthenticated';
-    user: null;
-    error: null;
-  }
+      status: 'unauthenticated';
+      user: null;
+      error: null;
+    }
   | {
-    status: 'error';
-    user: null;
-    error: string;
-  };
+      status: 'error';
+      user: null;
+      error: string;
+    };
 
 type ReadyState = Extract<AuthState, { status: 'authenticated' | 'unauthenticated' | 'error' }>;
 

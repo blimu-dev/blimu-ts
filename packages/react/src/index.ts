@@ -33,17 +33,17 @@
 
 // Core exports
 export type {
-  RedirectToSignInProps,
-  UserButtonProps,
-  UserAvatarProps,
-  SignInButtonProps,
   MembersListProps,
+  RedirectToSignInProps,
+  SignInButtonProps,
+  UserAvatarProps,
+  UserButtonProps,
 } from './components';
-export { RedirectToSignIn, UserButton, UserAvatar, SignInButton, MembersList } from './components';
-export { useAuth, useBlimu, useUser, useMembers, useClient } from './hooks';
-export type { ResourceMember, UseMembersOptions, UseMembersResult, UseAuthReturn } from './hooks';
+export { MembersList, RedirectToSignIn, SignInButton, UserAvatar, UserButton } from './components';
+export type { ResourceMember, UseAuthReturn, UseMembersOptions, UseMembersResult } from './hooks';
+export { useAuth, useBlimu, useClient, useMembers, useUser } from './hooks';
+export type { AppearanceConfig, Theme, ThemeContextValue } from './providers';
 export { BlimuProvider, ThemeProvider, useTheme } from './providers';
-export type { Theme, ThemeContextValue, AppearanceConfig } from './providers';
 
 // Types
 export type { AuthContextValue, AuthState, BlimuConfig, User } from './types';

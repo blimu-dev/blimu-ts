@@ -62,6 +62,7 @@ export function ThemeProvider({
         ? 'dark'
         : 'light';
       root.classList.add(systemTheme);
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setResolvedTheme(systemTheme);
       return;
     }

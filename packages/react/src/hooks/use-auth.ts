@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 
 import { useAuthContext } from '../providers/auth/auth.hook';
-import { AuthStateGuards, type AuthContextValue } from '../types';
+import { type AuthContextValue, AuthStateGuards } from '../types';
 
 /**
  * Return type for useAuth hook

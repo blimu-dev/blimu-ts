@@ -1,9 +1,8 @@
 import * as React from 'react';
 
-import { UserAvatar } from './user-avatar';
+import { type ResourceMember, useMembers } from '../hooks/use-members';
 import { cn } from '../lib/utils';
-
-import { useMembers, type ResourceMember } from '../hooks/use-members';
+import { UserAvatar } from './user-avatar';
 
 export interface MembersListProps {
   /**

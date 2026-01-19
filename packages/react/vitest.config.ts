@@ -1,5 +1,5 @@
-import { defineConfig, Plugin } from 'vitest/config';
 import tsconfigPaths from 'vite-tsconfig-paths';
+import { defineConfig, Plugin } from 'vitest/config';
 
 export default defineConfig({
   plugins: [

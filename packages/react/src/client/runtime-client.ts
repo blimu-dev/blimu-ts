@@ -1,8 +1,8 @@
 import { Blimu } from '@blimu/client';
 
-import type { AuthState, BlimuConfig, User } from '../types';
+import type { AuthState, BlimuConfig } from '../types';
 import { getAuthApiUrl, getAuthDomainFromPublishableKey } from '../utils/publishable-key';
-import { AuthSessionService, LOCALHOST_JWT_URL_PARAM_NAME } from './auth.service';
+import { AuthSessionService } from './auth.service';
 import { ExternalStore } from './external-store';
 
 export class BlimuRuntimeClientWrapper {
@@ -174,7 +174,7 @@ export class BlimuRuntimeClientWrapper {
   /**
    * Get the current session token
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
   getAccessToken = async (_options: { template: 'web' }): Promise<string | undefined> => {
     return await this.session.getSessionToken();
   };
