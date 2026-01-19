@@ -6,7 +6,7 @@ import {
   SetMetadata,
   Inject,
 } from '@nestjs/common';
-import { Reflector } from '@nestjs/core';
+import 'reflect-metadata';
 
 import type { EntitlementType } from '@blimu/types';
 import { BlimuForbiddenException } from '../exceptions/blimu-forbidden.exception';
@@ -59,16 +59,16 @@ export class EntitlementGuard<TRequest = unknown> implements CanActivate {
   constructor(
     @Inject(BLIMU_CONFIG)
     private readonly config: BlimuConfig<TRequest>,
-    private readonly reflector: Reflector,
+    @Inject(Blimu)
     private readonly runtime: Blimu,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<TRequest>();
-    const metadata = this.reflector.get<EntitlementMetadata<TRequest>>(
-      ENTITLEMENT_METADATA_KEY,
-      context.getHandler(),
-    );
+    const handler = context.getHandler();
+    const metadata = Reflect.getMetadata(ENTITLEMENT_METADATA_KEY, handler) as
+      | EntitlementMetadata<TRequest>
+      | undefined;
 
     if (!metadata) {
       // No entitlement check required

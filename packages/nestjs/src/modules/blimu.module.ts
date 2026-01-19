@@ -8,7 +8,6 @@ import {
 } from '@nestjs/common';
 
 import { BLIMU_CONFIG, type BlimuConfig } from '../config/blimu.config';
-import { Reflector } from '@nestjs/core';
 import { EntitlementGuard } from 'guards/entitlement.guard';
 import { JWKService } from 'services/jwk.service';
 import { Blimu } from '@blimu/backend';
@@ -69,7 +68,6 @@ export class BlimuModule {
       ...(config.global ? { global: true } : {}),
       module: BlimuModule,
       providers: [
-        Reflector,
         // Register factory providers first so dependencies are available
         {
           provide: BLIMU_CONFIG,
@@ -96,7 +94,7 @@ export class BlimuModule {
         EntitlementGuard,
         JWKService,
       ],
-      exports: [Reflector, EntitlementGuard, Blimu, BLIMU_CONFIG, JWKService],
+      exports: [EntitlementGuard, Blimu, BLIMU_CONFIG, JWKService],
     };
   }
 
@@ -197,7 +195,6 @@ export class BlimuModule {
         | ForwardReference
       )[],
       providers: [
-        Reflector,
         // Register factory providers first so dependencies are available
         {
           provide: BLIMU_CONFIG,
@@ -229,7 +226,7 @@ export class BlimuModule {
         EntitlementGuard,
         JWKService,
       ],
-      exports: [Reflector, EntitlementGuard, Blimu, BLIMU_CONFIG, JWKService],
+      exports: [EntitlementGuard, Blimu, BLIMU_CONFIG, JWKService],
     };
     return module;
   }
