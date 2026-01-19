@@ -57,7 +57,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@blimu/fetch": "^0.3.0",
+    "@blimu/fetch": "^0.4.0",
     "@blimu/types": "workspace:*",
     "jsonwebtoken": "^9.0.3",
     "zod": "^4.3.5"

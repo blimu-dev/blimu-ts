@@ -274,7 +274,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@blimu/backend@workspace:packages/backend"
   dependencies:
-    "@blimu/fetch": "npm:^0.3.0"
+    "@blimu/fetch": "npm:^0.4.0"
     "@blimu/types": "workspace:*"
     "@types/jsonwebtoken": "npm:^9.0.10"
     jsonwebtoken: "npm:^9.0.3"
@@ -295,10 +295,10 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@blimu/fetch@npm:^0.3.0":
-  version: 0.3.0
-  resolution: "@blimu/fetch@npm:0.3.0"
-  checksum: 10/a951d694124b8a10eb5686a429680203817ceda0d24fa0ae1bebbfad3a5924ffc965e4c4f3c0be8b2603b231bd98941313d8874ee7279a03b8356b5738cab5e2
+"@blimu/fetch@npm:^0.4.0":
+  version: 0.4.0
+  resolution: "@blimu/fetch@npm:0.4.0"
+  checksum: 10/b2475c94500de92302003dff73b5dabeccea08ca48b7925fed01b97ee26b01a53aced53a5280c97aa0b7b17a80dc498f13ac04bbe9efc2c94486dfbb7b3caa7d
   languageName: node
   linkType: hard
 
@@ -341,7 +341,7 @@ __metadata:
     "@tailwindcss/vite": "npm:^4.1.18"
     "@testing-library/dom": "npm:^10.4.1"
     "@testing-library/jest-dom": "npm:^6.9.1"
-    "@testing-library/react": "npm:^16.3.1"
+    "@testing-library/react": "npm:^16.3.2"
     "@testing-library/user-event": "npm:^14.6.1"
     "@types/js-cookie": "npm:^3.0.6"
     "@types/react": "npm:^19.2.8"
@@ -2719,9 +2719,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@testing-library/react@npm:^16.3.1":
-  version: 16.3.1
-  resolution: "@testing-library/react@npm:16.3.1"
+"@testing-library/react@npm:^16.3.2":
+  version: 16.3.2
+  resolution: "@testing-library/react@npm:16.3.2"
   dependencies:
     "@babel/runtime": "npm:^7.12.5"
   peerDependencies:
@@ -2735,7 +2735,7 @@ __metadata:
       optional: true
     "@types/react-dom":
       optional: true
-  checksum: 10/2d1221861c41711f2767c57c5b5158593baf6f7ca4bf15fad9e79bc9aeaadb56c2e327943b8733d2788f1826499fe01daef7289a7a0149b48dd7f51b33b12e58
+  checksum: 10/0ca88c6f672d00c2afd1bdedeff9b5382dd8157038efeb9762dc016731030075624be7106b92d2b5e5c52812faea85263e69272c14b6f8700eb48a4a8af6feef
   languageName: node
   linkType: hard
 
@@ -3508,7 +3508,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "blimu@workspace:packages/cli"
   dependencies:
-    "@blimu/fetch": "npm:^0.3.0"
+    "@blimu/fetch": "npm:^0.4.0"
     "@clack/prompts": "npm:^0.11.0"
     "@types/node": "npm:^25.0.9"
     commander: "npm:^14.0.2"

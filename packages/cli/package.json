@@ -31,7 +31,7 @@
     "prepublishOnly": "yarn build"
   },
   "dependencies": {
-    "@blimu/fetch": "^0.3.0",
+    "@blimu/fetch": "^0.4.0",
     "@clack/prompts": "^0.11.0",
     "commander": "^14.0.2",
     "zod": "^4.3.5"
