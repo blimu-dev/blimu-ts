@@ -2,7 +2,6 @@ import { defineConfig } from 'tsup';
 
 export default defineConfig({
   entry: ['src/**/*.ts'],
-
   format: ['cjs', 'esm'],
   dts: true,
   splitting: false,
@@ -15,5 +14,5 @@ export default defineConfig({
   },
   // External dependencies should not be bundled
   // This ensures proper type resolution and smaller bundle sizes
-  external: ['src/**/*.test.ts', 'src/**/__tests__/**'],
+  external: [],
 });

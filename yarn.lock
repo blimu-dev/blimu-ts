@@ -3676,7 +3676,7 @@ __metadata:
     vitest: "npm:^4.0.17"
     zod: "npm:^4.3.5"
   bin:
-    blimu: ./dist/main.js
+    blimu: ./dist/main.cjs
   languageName: unknown
   linkType: soft
 
