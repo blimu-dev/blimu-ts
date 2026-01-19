@@ -28,7 +28,7 @@
     "format": "yarn workspaces foreach -A run format",
     "clean": "yarn workspaces foreach -A run clean",
     "changeset": "changeset",
-    "changeset:version": "changeset version && yarn install",
+    "changeset:version": "changeset version && YARN_ENABLE_IMMUTABLE_INSTALLS=false yarn install",
     "changeset:publish": "yarn replace-workspace-deps && changeset publish",
     "version": "changeset version",
     "replace-workspace-deps": "node scripts/replace-workspace-deps.js",
