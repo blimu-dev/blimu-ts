@@ -108,6 +108,7 @@
     "@vitejs/plugin-react": "^5.1.2",
     "@vitest/coverage-v8": "^4.0.17",
     "@vitest/ui": "^4.0.17",
+    "eslint-plugin-react-hooks": "^7.0.1",
     "jsdom": "^27.4.0",
     "msw": "^2.12.7",
     "node-fetch": "^3.3.2",
