@@ -12,7 +12,7 @@ export class AuthService {
     return this.core.request({
       method: 'POST',
       path: `/v1/auth/logout`,
-      ...(init || {}),
+      ...(init ?? {}),
     });
   }
   /**
@@ -35,7 +35,7 @@ export class AuthService {
       method: 'POST',
       path: `/v1/auth/refresh`,
       query,
-      ...(init || {}),
+      ...(init ?? {}),
     });
   }
   /**
@@ -54,7 +54,7 @@ export class AuthService {
     return this.core.request({
       method: 'GET',
       path: `/v1/auth/session`,
-      ...(init || {}),
+      ...(init ?? {}),
     });
   }
   /**

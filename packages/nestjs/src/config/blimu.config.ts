@@ -1,7 +1,7 @@
 /**
  * Configuration interface for Blimu NestJS integration
  */
-export interface BlimuConfig<TRequest = any> {
+export interface BlimuConfig<TRequest = unknown> {
   /**
    * The API secret key for authenticating with Blimu Runtime API
    */

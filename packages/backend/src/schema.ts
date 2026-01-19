@@ -33,33 +33,33 @@ export interface EntitlementCheckResult {
   } | null;
   plans?: {
     allowed: boolean;
-    allowedPlans?: Array<string>;
+    allowedPlans?: string[];
     plan?: string | null;
     reason?: string;
   } | null;
   roles?: {
     allowed: boolean;
-    allowedRoles?: Array<string>;
+    allowedRoles?: string[];
     reason?: string;
-    userRoles?: Array<string>;
+    userRoles?: string[];
   } | null;
 }
 
 export interface EntitlementsListResult {
-  results: Array<{
-    entitlements: Array<{
+  results: {
+    entitlements: {
       allowed: boolean;
       allowedByPlan: boolean;
       allowedByRole: boolean;
-      allowedPlans?: Array<string>;
-      allowedRoles: Array<string>;
+      allowedPlans?: string[];
+      allowedRoles: string[];
       currentPlan?: string;
       currentRole?: string;
       entitlement: string;
-    }>;
+    }[];
     resourceId: string;
     resourceType: string;
-  }>;
+  }[];
 }
 
 export interface PlanAssignBody {
@@ -83,31 +83,31 @@ export interface Resource {
   createdAt: string;
   id: string;
   name: string | null;
-  parents?: Array<{ id: string; type: string }>;
+  parents?: { id: string; type: string }[];
   type: string;
 }
 
 export interface ResourceBulkCreateBody {
-  resources: Array<{
+  resources: {
     id?: string;
     name?: string;
-    parents?: Array<{ id: string; type: string }>;
-    roles?: Array<{ role: string; userId: string }>;
-  }>;
+    parents?: { id: string; type: string }[];
+    roles?: { role: string; userId: string }[];
+  }[];
 }
 
 export interface ResourceBulkResult {
-  created: Array<{ environmentId: string; id: string; type: string }>;
-  errors: Array<{
+  created: { environmentId: string; id: string; type: string }[];
+  errors: {
     error: string;
     index: number;
     resource: {
       id?: string;
       name?: string;
-      parents?: Array<{ id: string; type: string }>;
-      roles?: Array<{ role: string; userId: string }>;
+      parents?: { id: string; type: string }[];
+      roles?: { role: string; userId: string }[];
     };
-  }>;
+  }[];
   success: boolean;
   summary: { failed: number; successful: number; total: number };
 }
@@ -115,19 +115,19 @@ export interface ResourceBulkResult {
 export interface ResourceCreateBody {
   id?: string;
   name?: string;
-  parents?: Array<{ id: string; type: string }>;
-  roles?: Array<{ role: string; userId: string }>;
+  parents?: { id: string; type: string }[];
+  roles?: { role: string; userId: string }[];
 }
 
 export interface ResourceList {
-  items: Array<Resource>;
+  items: Resource[];
   limit: number;
   page: number;
   total: number;
 }
 
 export interface ResourceMemberList {
-  items: Array<{
+  items: {
     inherited: boolean;
     role: string;
     user: {
@@ -143,7 +143,7 @@ export interface ResourceMemberList {
       updatedAt: string;
     };
     userId: string;
-  }>;
+  }[];
   limit: number;
   page: number;
   total: number;
@@ -152,7 +152,7 @@ export interface ResourceMemberList {
 export interface ResourceUpdateBody {
   name?: string;
   /** Creates relationships with other resources. Parent resources must already exist. */
-  parents?: Array<{ id: string; type: string }>;
+  parents?: { id: string; type: string }[];
 }
 
 export interface Role {
@@ -165,23 +165,23 @@ export interface Role {
 }
 
 export interface RoleBulkCreateBody {
-  roles: Array<{ resourceId: string; resourceType: string; role: string; userId: string }>;
+  roles: { resourceId: string; resourceType: string; role: string; userId: string }[];
 }
 
 export interface RoleBulkResult {
-  created: Array<{
+  created: {
     createdAt: string;
     environmentId: string;
     resourceId: string;
     resourceType: string;
     role: string;
     userId: string;
-  }>;
-  errors: Array<{
+  }[];
+  errors: {
     error: string;
     index: number;
     role: { resourceId: string; resourceType: string; role: string; userId: string };
-  }>;
+  }[];
   success: boolean;
   summary: { failed: number; successful: number; total: number };
 }
@@ -195,19 +195,19 @@ export interface RoleCreateBody {
 export interface RoleList {
   limit: number;
   page: number;
-  roles: Array<{
+  roles: {
     createdAt: string;
     environmentId: string;
     resourceId: string;
     resourceType: string;
     role: string;
     userId: string;
-  }>;
+  }[];
   total: number;
 }
 
 export interface TransactionHistoryResponse {
-  items: Array<{
+  items: {
     amount: number;
     createdAt: string;
     environmentId: string;
@@ -216,7 +216,7 @@ export interface TransactionHistoryResponse {
     resourceId: string;
     resourceType: string;
     tags: Record<string, unknown> | null;
-  }>;
+  }[];
 }
 
 export interface UsageCheckBody {
@@ -278,7 +278,7 @@ export interface UserCreateBody {
 }
 
 export interface UserList {
-  items: Array<{
+  items: {
     avatarUrl: string | null;
     createdAt: string;
     email: string;
@@ -289,22 +289,17 @@ export interface UserList {
     lastName: string | null;
     lookupKey: string | null;
     updatedAt: string;
-  }>;
+  }[];
   limit: number;
   page: number;
   total: number;
 }
 
-export type UserResourceList = Array<{
+export type UserResourceList = {
   inherited: boolean;
-  resource: {
-    id: string;
-    name: string;
-    parents: Array<{ id: string; type: string }>;
-    type: string;
-  };
+  resource: { id: string; name: string; parents: { id: string; type: string }[]; type: string };
   role: string;
-}>;
+}[];
 
 export interface UserUpdateBody {
   avatarUrl?: string | null;

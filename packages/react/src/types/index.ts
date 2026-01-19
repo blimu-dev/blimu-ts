@@ -40,11 +40,11 @@ export interface BlimuTheme {
 
 export interface BlimuConfig {
   /** Redirect URI for auth flow (where to return after authentication) */
-  redirectUri?: string;
+  redirectUri?: string | undefined;
   /** Publishable key for the environment (contains full UI domain) */
   publishableKey: string;
   /** Theme customization */
-  theme?: BlimuTheme;
+  theme?: BlimuTheme | undefined;
 }
 
 export interface User {
@@ -63,30 +63,30 @@ export type AuthStatus = 'idle' | 'loading' | 'authenticated' | 'unauthenticated
  */
 export type AuthState =
   | {
-      status: 'idle';
-      user: null;
-      error: null;
-    }
+    status: 'idle';
+    user: null;
+    error: null;
+  }
   | {
-      status: 'loading';
-      user: null;
-      error: null;
-    }
+    status: 'loading';
+    user: null;
+    error: null;
+  }
   | {
-      status: 'authenticated';
-      user: User;
-      error: null;
-    }
+    status: 'authenticated';
+    user: User;
+    error: null;
+  }
   | {
-      status: 'unauthenticated';
-      user: null;
-      error: null;
-    }
+    status: 'unauthenticated';
+    user: null;
+    error: null;
+  }
   | {
-      status: 'error';
-      user: null;
-      error: string;
-    };
+    status: 'error';
+    user: null;
+    error: string;
+  };
 
 type ReadyState = Extract<AuthState, { status: 'authenticated' | 'unauthenticated' | 'error' }>;
 
@@ -124,18 +124,43 @@ export interface AuthContextValue {
 }
 
 /**
- * Component customization props for className overrides
+ * Known class keys for component customization
+ * These are the specific sub-elements that can be styled via the `classes` prop
  */
-export interface ComponentClasses {
-  [key: string]: string | undefined;
-}
+export type ComponentClassKey =
+  // UserButton component
+  | 'avatar'
+  | 'avatarFallback'
+  | 'userInfo'
+  | 'userName'
+  | 'userEmail'
+  | 'trigger'
+  | 'popover'
+  | 'signOutButton'
+  | 'manageAccountButton';
+
+/**
+ * Component customization props for className overrides
+ * Allows styling specific sub-elements of components
+ *
+ * @example
+ * ```tsx
+ * <UserButton
+ *   classes={{
+ *     avatar: 'ring-2 ring-primary',
+ *     trigger: 'hover:scale-105',
+ *   }}
+ * />
+ * ```
+ */
+export type ComponentClasses = Partial<Record<ComponentClassKey, string>>;
 
 /**
  * Common props for all Blimu components
  */
 export interface BlimuComponentProps {
   /** Custom className to apply to the root element */
-  className?: string;
+  className?: string | undefined;
   /** Object of classNames to apply to specific sub-elements */
-  classes?: ComponentClasses;
+  classes?: ComponentClasses | undefined;
 }

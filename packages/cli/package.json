@@ -2,7 +2,8 @@
   "name": "blimu",
   "version": "1.1.1",
   "description": "Blimu - Authorization as a Service CLI",
-  "main": "dist/index.js",
+  "main": "dist/index.cjs",
+  "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
   "bin": "./dist/main.js",
   "files": [
@@ -10,11 +11,21 @@
     "README.md",
     "bin/**"
   ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs",
+      "default": "./dist/index.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "sideEffects": false,
   "scripts": {
-    "d:build": "npm run build && npm run type-check",
+    "d:build": "npm run build && npm run typecheck",
     "build": "tsup",
     "dev": "tsx watch src/main.ts",
-    "type-check": "tsc --noEmit",
+    "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
     "prepublishOnly": "yarn build"
@@ -47,6 +58,5 @@
   ],
   "engines": {
     "node": ">=18.0.0"
-  },
-  "module": "dist/index.mjs"
+  }
 }

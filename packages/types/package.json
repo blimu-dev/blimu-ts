@@ -6,7 +6,8 @@
     "type": "git",
     "url": "https://github.com/blimu-dev/blimu-ts"
   },
-  "main": "dist/index.js",
+  "main": "dist/index.cjs",
+  "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
   "files": [
     "dist"
@@ -15,14 +16,16 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.mjs",
-      "require": "./dist/index.js",
-      "default": "./dist/index.js"
-    }
+      "require": "./dist/index.cjs",
+      "default": "./dist/index.cjs"
+    },
+    "./package.json": "./package.json"
   },
+  "sideEffects": false,
   "scripts": {
-    "d:build": "npm run build && npm run type-check",
+    "d:build": "npm run build && npm run typecheck",
     "build": "tsup",
-    "type-check": "tsc --noEmit"
+    "typecheck": "tsc --noEmit"
   },
   "author": "viniciusdacal",
   "license": "MIT",
@@ -38,7 +41,6 @@
     "tsup": "^8.5.1",
     "typescript": "^5.9.3"
   },
-  "module": "dist/index.mjs",
   "publishConfig": {
     "access": "public"
   }

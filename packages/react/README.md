@@ -269,7 +269,7 @@ function Component() {
     isLoading,          // Boolean
     login,              // (returnUrl?) => void
     logout,             // () => Promise<void>
-    getToken,           // (options) => Promise<string | null>
+    getToken,           // (options) => Promise<string | undefined>
   } = useAuth();
 }
 ```

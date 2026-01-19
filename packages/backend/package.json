@@ -6,45 +6,46 @@
     "type": "git",
     "url": "https://github.com/blimu-dev/blimu-ts"
   },
-  "main": "dist/index.js",
+  "main": "dist/index.cjs",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
   "files": [
-    "dist/**",
-    "src/**"
+    "dist/**"
   ],
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.mjs",
-      "require": "./dist/index.js",
-      "default": "./dist/index.js"
+      "require": "./dist/index.cjs",
+      "default": "./dist/index.cjs"
     },
     "./services/*": {
       "types": "./dist/services/*.d.ts",
       "import": "./dist/services/*.mjs",
-      "require": "./dist/services/*.js",
-      "default": "./dist/services/*.js"
+      "require": "./dist/services/*.cjs",
+      "default": "./dist/services/*.cjs"
     },
     "./schema": {
       "types": "./dist/schema.d.ts",
       "import": "./dist/schema.mjs",
-      "require": "./dist/schema.js",
-      "default": "./dist/schema.js"
+      "require": "./dist/schema.cjs",
+      "default": "./dist/schema.cjs"
     },
     "./client": {
       "types": "./dist/client.d.ts",
       "import": "./dist/client.mjs",
-      "require": "./dist/client.js",
-      "default": "./dist/client.js"
+      "require": "./dist/client.cjs",
+      "default": "./dist/client.cjs"
     },
     "./utils": {
       "types": "./dist/utils.d.ts",
       "import": "./dist/utils.mjs",
-      "require": "./dist/utils.js",
-      "default": "./dist/utils.js"
-    }
+      "require": "./dist/utils.cjs",
+      "default": "./dist/utils.cjs"
+    },
+    "./package.json": "./package.json"
   },
+  "sideEffects": false,
   "scripts": {
     "d:build": "npm run build && npm run typecheck",
     "build": "tsup",
@@ -57,7 +58,7 @@
   },
   "dependencies": {
     "@blimu/fetch": "^0.3.0",
-    "@blimu/types": "^1.1.2",
+    "@blimu/types": "workspace:*",
     "jsonwebtoken": "^9.0.3",
     "zod": "^4.3.5"
   },

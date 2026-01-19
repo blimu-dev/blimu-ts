@@ -9,23 +9,23 @@ export interface AppearanceConfig {
    * Base theme (light, dark, or system)
    * @default "system"
    */
-  baseTheme?: Theme;
+  baseTheme?: Theme | undefined;
   /**
    * CSS variable overrides
    */
-  variables?: Record<string, string>;
+  variables?: Record<string, string> | undefined;
   /**
    * Whether to inherit theme from parent app (e.g., next-themes)
    * @default true
    */
-  inheritTheme?: boolean;
+  inheritTheme?: boolean | undefined;
 }
 
 export interface BlimuContextValue {
   client: BlimuRuntimeClientWrapper;
   config: BlimuConfig;
   state: AuthState;
-  appearance?: AppearanceConfig;
+  appearance?: AppearanceConfig | undefined;
 }
 
 export const BlimuContext = createContext<BlimuContextValue | null>(null);

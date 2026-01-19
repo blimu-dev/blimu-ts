@@ -17,7 +17,7 @@ export class RolesService {
       method: 'GET',
       path: `/v1/users/${encodeURIComponent(userId)}/roles`,
       query,
-      ...(init || {}),
+      ...(init ?? {}),
     });
   }
 
@@ -34,7 +34,7 @@ export class RolesService {
       method: 'POST',
       path: `/v1/users/${encodeURIComponent(userId)}/roles`,
       body,
-      ...(init || {}),
+      ...(init ?? {}),
     });
   }
 
@@ -51,7 +51,7 @@ export class RolesService {
     return this.core.request({
       method: 'DELETE',
       path: `/v1/users/${encodeURIComponent(userId)}/roles/${encodeURIComponent(resourceType)}/${encodeURIComponent(resourceId)}`,
-      ...(init || {}),
+      ...(init ?? {}),
     });
   }
 }

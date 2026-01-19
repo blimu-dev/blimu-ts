@@ -11,6 +11,9 @@ export default defineConfig([
     sourcemap: true,
     clean: true,
     outDir: 'dist',
+    outExtension({ format }) {
+      return format === 'esm' ? { js: '.mjs' } : { js: '.cjs' };
+    },
     external: [],
   },
 ]);

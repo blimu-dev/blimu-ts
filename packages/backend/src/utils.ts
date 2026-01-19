@@ -4,7 +4,7 @@ export type PaginableQuery = { limit?: number; offset?: number } & Record<string
 
 export async function* paginate<T>(
   fetchPage: (
-    query?: any,
+    query?: PaginableQuery,
     init?: Omit<RequestInit, 'method' | 'body'>
   ) => Promise<{ data?: T[]; hasMore?: boolean; limit?: number; offset?: number }>,
   initialQuery: PaginableQuery = {},
@@ -13,7 +13,7 @@ export async function* paginate<T>(
   let offset = Number(initialQuery.offset ?? 0);
   const limit = Number(initialQuery.limit ?? pageSize);
   // shallow copy to avoid mutating caller
-  const baseQuery: any = { ...initialQuery };
+  const baseQuery: PaginableQuery = { ...initialQuery };
   while (true) {
     const page = await fetchPage({ ...baseQuery, limit, offset });
     const items = page.data ?? [];
@@ -27,7 +27,7 @@ export async function* paginate<T>(
 
 export async function listAll<T>(
   fetchPage: (
-    query?: any,
+    query?: PaginableQuery,
     init?: Omit<RequestInit, 'method' | 'body'>
   ) => Promise<{ data?: T[]; hasMore?: boolean; limit?: number; offset?: number }>,
   query: PaginableQuery = {},

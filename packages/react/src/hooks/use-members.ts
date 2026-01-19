@@ -22,10 +22,10 @@ export interface ResourceMember {
 export interface UseMembersOptions {
   resourceType: string;
   resourceId: string;
-  page?: number;
-  limit?: number;
-  search?: string;
-  enabled?: boolean;
+  page?: number | undefined;
+  limit?: number | undefined;
+  search?: string | undefined;
+  enabled?: boolean | undefined;
 }
 
 export interface UseMembersResult {
@@ -80,14 +80,14 @@ export function useMembers({
       // For now, this is a placeholder that will need to be implemented
       // when the runtime client exposes the resourceMembers service
       const runtimeClient = client.getClient();
-      
+
       // This will need to be implemented when the API is available
       // const response = await runtimeClient.resourceMembers.list(resourceType, resourceId, {
       //   page,
       //   limit,
       //   search,
       // });
-      
+
       // Placeholder response
       const response = {
         items: [],

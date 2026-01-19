@@ -16,7 +16,7 @@ export class BulkRolesService {
       method: 'POST',
       path: `/v1/users/roles/bulk`,
       body,
-      ...(init || {}),
+      ...(init ?? {}),
     });
   }
 }

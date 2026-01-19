@@ -19,7 +19,7 @@ export class UsageService {
       method: 'GET',
       path: `/v1/usage/balance/${encodeURIComponent(resourceType)}/${encodeURIComponent(resourceId)}/${encodeURIComponent(limitType)}`,
       query,
-      ...(init || {}),
+      ...(init ?? {}),
     });
   }
 
@@ -35,7 +35,7 @@ export class UsageService {
       method: 'POST',
       path: `/v1/usage/check`,
       body,
-      ...(init || {}),
+      ...(init ?? {}),
     });
   }
 
@@ -51,7 +51,7 @@ export class UsageService {
       method: 'POST',
       path: `/v1/usage/consume`,
       body,
-      ...(init || {}),
+      ...(init ?? {}),
     });
   }
 
@@ -67,7 +67,7 @@ export class UsageService {
       method: 'POST',
       path: `/v1/usage/credit`,
       body,
-      ...(init || {}),
+      ...(init ?? {}),
     });
   }
 
@@ -86,7 +86,7 @@ export class UsageService {
       method: 'GET',
       path: `/v1/usage/transactions/${encodeURIComponent(resourceType)}/${encodeURIComponent(resourceId)}/${encodeURIComponent(limitType)}`,
       query,
-      ...(init || {}),
+      ...(init ?? {}),
     });
   }
 }

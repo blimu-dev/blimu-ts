@@ -6,10 +6,7 @@ import { z } from 'zod';
 /**
  * Zod schema for ApiKeyCreateDto
  */
-export const ApiKeyCreateDtoSchema = z.object({
-  environmentId: z.string(),
-  name: z.string(),
-});
+export const ApiKeyCreateDtoSchema = z.object({ environmentId: z.string(), name: z.string() });
 
 /**
  * Zod schema for ApiKeyDto_Output
@@ -70,14 +67,7 @@ export const CustomHostnameListDto_OutputSchema = z.array(
     issuedAt: z.iso.datetime().nullable(),
     provider: z.string(),
     retryCount: z.number().int(),
-    status: z.enum([
-      'PENDING',
-      'PROVISIONING',
-      'ACTIVE',
-      'RENEWING',
-      'FAILED',
-      'EXPIRED',
-    ]),
+    status: z.enum(['PENDING', 'PROVISIONING', 'ACTIVE', 'RENEWING', 'FAILED', 'EXPIRED']),
     updatedAt: z.iso.datetime(),
   })
 );
@@ -119,13 +109,7 @@ export const DefinitionDto_OutputSchema = z.object({
                 feature_type: z.enum(['boolean', 'usage', 'seat']),
                 included_quantity: z.number().int().optional(),
                 included_usage: z.number().int().optional(),
-                item_type: z.enum([
-                  'included',
-                  'addon',
-                  'usage',
-                  'credit',
-                  'seat',
-                ]),
+                item_type: z.enum(['included', 'addon', 'usage', 'credit', 'seat']),
                 limit_type: z.string().optional(),
               })
               .array()
@@ -213,13 +197,7 @@ export const DefinitionUpdateDtoSchema = z.object({
                 feature_type: z.enum(['boolean', 'usage', 'seat']),
                 included_quantity: z.number().int().optional(),
                 included_usage: z.number().int().optional(),
-                item_type: z.enum([
-                  'included',
-                  'addon',
-                  'usage',
-                  'credit',
-                  'seat',
-                ]),
+                item_type: z.enum(['included', 'addon', 'usage', 'credit', 'seat']),
                 limit_type: z.string().optional(),
               })
               .array()
@@ -390,28 +368,14 @@ export const EnvironmentDto_OutputSchema = z.object({
   createdAt: z.iso.datetime(),
   domain: z.string(),
   domainStatus: z
-    .enum([
-      'PENDING',
-      'VALIDATING',
-      'VERIFIED',
-      'FAILED',
-      'TIMED_OUT',
-      'UNHEALTHY',
-    ])
+    .enum(['PENDING', 'VALIDATING', 'VERIFIED', 'FAILED', 'TIMED_OUT', 'UNHEALTHY'])
     .optional(),
   id: z.string(),
   isAccessible: z.boolean().optional(),
   lookupKey: z.string().nullable(),
   name: z.string(),
   sslStatus: z
-    .enum([
-      'PENDING',
-      'PROVISIONING',
-      'ACTIVE',
-      'RENEWING',
-      'FAILED',
-      'EXPIRED',
-    ])
+    .enum(['PENDING', 'PROVISIONING', 'ACTIVE', 'RENEWING', 'FAILED', 'EXPIRED'])
     .optional(),
   updatedAt: z.iso.datetime(),
   variant: z.enum(['TEST', 'LIVE']),
@@ -427,28 +391,14 @@ export const EnvironmentListDto_OutputSchema = z.object({
       createdAt: z.iso.datetime(),
       domain: z.string(),
       domainStatus: z
-        .enum([
-          'PENDING',
-          'VALIDATING',
-          'VERIFIED',
-          'FAILED',
-          'TIMED_OUT',
-          'UNHEALTHY',
-        ])
+        .enum(['PENDING', 'VALIDATING', 'VERIFIED', 'FAILED', 'TIMED_OUT', 'UNHEALTHY'])
         .optional(),
       id: z.string(),
       isAccessible: z.boolean().optional(),
       lookupKey: z.string().nullable(),
       name: z.string(),
       sslStatus: z
-        .enum([
-          'PENDING',
-          'PROVISIONING',
-          'ACTIVE',
-          'RENEWING',
-          'FAILED',
-          'EXPIRED',
-        ])
+        .enum(['PENDING', 'PROVISIONING', 'ACTIVE', 'RENEWING', 'FAILED', 'EXPIRED'])
         .optional(),
       updatedAt: z.iso.datetime(),
       variant: z.enum(['TEST', 'LIVE']),
@@ -511,13 +461,7 @@ export const EnvironmentWithDefinitionDto_OutputSchema = z.object({
                     feature_type: z.enum(['boolean', 'usage', 'seat']),
                     included_quantity: z.number().int().optional(),
                     included_usage: z.number().int().optional(),
-                    item_type: z.enum([
-                      'included',
-                      'addon',
-                      'usage',
-                      'credit',
-                      'seat',
-                    ]),
+                    item_type: z.enum(['included', 'addon', 'usage', 'credit', 'seat']),
                     limit_type: z.string().optional(),
                   })
                   .array()
@@ -562,9 +506,7 @@ export const EnvironmentWithDefinitionDto_OutputSchema = z.object({
               )
               .optional(),
             roles: z.string().array(),
-            roles_inheritance: z
-              .record(z.string(), z.string().array())
-              .optional(),
+            roles_inheritance: z.record(z.string(), z.string().array()).optional(),
           })
         )
         .optional(),
@@ -572,28 +514,14 @@ export const EnvironmentWithDefinitionDto_OutputSchema = z.object({
     .nullable(),
   domain: z.string(),
   domainStatus: z
-    .enum([
-      'PENDING',
-      'VALIDATING',
-      'VERIFIED',
-      'FAILED',
-      'TIMED_OUT',
-      'UNHEALTHY',
-    ])
+    .enum(['PENDING', 'VALIDATING', 'VERIFIED', 'FAILED', 'TIMED_OUT', 'UNHEALTHY'])
     .optional(),
   id: z.string(),
   isAccessible: z.boolean().optional(),
   lookupKey: z.string().nullable(),
   name: z.string(),
   sslStatus: z
-    .enum([
-      'PENDING',
-      'PROVISIONING',
-      'ACTIVE',
-      'RENEWING',
-      'FAILED',
-      'EXPIRED',
-    ])
+    .enum(['PENDING', 'PROVISIONING', 'ACTIVE', 'RENEWING', 'FAILED', 'EXPIRED'])
     .optional(),
   updatedAt: z.iso.datetime(),
   variant: z.enum(['TEST', 'LIVE']),
@@ -611,9 +539,7 @@ export const InviteMemberDtoSchema = z.object({
 /**
  * Zod schema for InviteMemberResponseDto_Output
  */
-export const InviteMemberResponseDto_OutputSchema = z.object({
-  id: z.string(),
-});
+export const InviteMemberResponseDto_OutputSchema = z.object({ id: z.string() });
 
 /**
  * Zod schema for MemberListResponseDto_Output
@@ -750,34 +676,18 @@ export const SslStatusResponseDto_OutputSchema = z.object({
       issuedAt: z.iso.datetime().nullable(),
       provider: z.string(),
       retryCount: z.number().int(),
-      status: z.enum([
-        'PENDING',
-        'PROVISIONING',
-        'ACTIVE',
-        'RENEWING',
-        'FAILED',
-        'EXPIRED',
-      ]),
+      status: z.enum(['PENDING', 'PROVISIONING', 'ACTIVE', 'RENEWING', 'FAILED', 'EXPIRED']),
       updatedAt: z.iso.datetime(),
     })
     .array(),
   sslIssuedAt: z.iso.datetime().nullable(),
-  status: z.enum([
-    'PENDING',
-    'PROVISIONING',
-    'ACTIVE',
-    'RENEWING',
-    'FAILED',
-    'EXPIRED',
-  ]),
+  status: z.enum(['PENDING', 'PROVISIONING', 'ACTIVE', 'RENEWING', 'FAILED', 'EXPIRED']),
 });
 
 /**
  * Zod schema for UpdateRoleDto
  */
-export const UpdateRoleDtoSchema = z.object({
-  role: z.enum(['admin', 'owner', 'member']),
-});
+export const UpdateRoleDtoSchema = z.object({ role: z.enum(['admin', 'owner', 'member']) });
 
 /**
  * Zod schema for UserAccessDto_Output
@@ -853,10 +763,7 @@ export const UserResourceDto_OutputSchema = z.object({
 /**
  * Zod schema for WorkspaceCreateDto
  */
-export const WorkspaceCreateDtoSchema = z.object({
-  key: z.string().optional(),
-  name: z.string(),
-});
+export const WorkspaceCreateDtoSchema = z.object({ key: z.string().optional(), name: z.string() });
 
 /**
  * Zod schema for WorkspaceCreateResponseDto_Output
@@ -868,28 +775,14 @@ export const WorkspaceCreateResponseDto_OutputSchema = z.object({
       createdAt: z.iso.datetime(),
       domain: z.string(),
       domainStatus: z
-        .enum([
-          'PENDING',
-          'VALIDATING',
-          'VERIFIED',
-          'FAILED',
-          'TIMED_OUT',
-          'UNHEALTHY',
-        ])
+        .enum(['PENDING', 'VALIDATING', 'VERIFIED', 'FAILED', 'TIMED_OUT', 'UNHEALTHY'])
         .optional(),
       id: z.string(),
       isAccessible: z.boolean().optional(),
       lookupKey: z.string().nullable(),
       name: z.string(),
       sslStatus: z
-        .enum([
-          'PENDING',
-          'PROVISIONING',
-          'ACTIVE',
-          'RENEWING',
-          'FAILED',
-          'EXPIRED',
-        ])
+        .enum(['PENDING', 'PROVISIONING', 'ACTIVE', 'RENEWING', 'FAILED', 'EXPIRED'])
         .optional(),
       updatedAt: z.iso.datetime(),
       variant: z.enum(['TEST', 'LIVE']),

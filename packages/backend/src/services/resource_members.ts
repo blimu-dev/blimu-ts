@@ -18,7 +18,7 @@ export class ResourceMembersService {
       method: 'GET',
       path: `/v1/resources/${encodeURIComponent(resourceType)}/${encodeURIComponent(resourceId)}/members`,
       query,
-      ...(init || {}),
+      ...(init ?? {}),
     });
   }
 }

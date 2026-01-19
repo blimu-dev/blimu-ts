@@ -1,6 +1,6 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { TokenVerifier } from '@blimu/backend';
-import { BLIMU_CONFIG, BlimuConfig } from '../config/blimu.config';
+import { BLIMU_CONFIG, type BlimuConfig } from '../config/blimu.config';
 
 @Injectable()
 export class JWKService {

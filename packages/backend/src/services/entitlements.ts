@@ -16,7 +16,7 @@ export class EntitlementsService {
       method: 'POST',
       path: `/v1/entitlements/check`,
       body,
-      ...(init || {}),
+      ...(init ?? {}),
     });
   }
 
@@ -34,7 +34,7 @@ export class EntitlementsService {
       method: 'GET',
       path: `/v1/entitlements/list-for-resource/${encodeURIComponent(resourceType)}/${encodeURIComponent(resourceId)}`,
       query,
-      ...(init || {}),
+      ...(init ?? {}),
     });
   }
 
@@ -51,7 +51,7 @@ export class EntitlementsService {
       method: 'GET',
       path: `/v1/entitlements/list-for-tenant/${encodeURIComponent(tenantResourceId)}`,
       query,
-      ...(init || {}),
+      ...(init ?? {}),
     });
   }
 }

@@ -4,12 +4,12 @@ import { BlimuRuntimeClientWrapper } from '../../client/runtime-client';
 import { useStore } from '../../hooks/use-store';
 import type { BlimuRadiusPreset, BlimuTheme } from '../../types';
 import { AuthProvider } from '../auth/auth.provider';
-import { BlimuContext } from './blimu.context';
+import { BlimuContext, type BlimuContextValue } from './blimu.context';
 
 interface BlimuProviderProps {
   publishableKey: string;
   children: React.ReactNode;
-  theme?: BlimuTheme;
+  theme?: BlimuTheme | undefined;
 }
 
 /**
@@ -113,7 +113,7 @@ export function BlimuProvider({ publishableKey, children, theme }: BlimuProvider
   const state = useStore(client.store);
   const themeVars = useMemo(() => themeToStyleVars(theme), [theme]);
 
-  const value = {
+  const value: BlimuContextValue = {
     client,
     state,
     config: {

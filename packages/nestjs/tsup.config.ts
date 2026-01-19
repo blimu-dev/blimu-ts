@@ -9,6 +9,9 @@ export default defineConfig({
   clean: true,
   outDir: "dist",
   tsconfig: "./tsconfig.json",
+  outExtension({ format }) {
+    return format === 'esm' ? { js: '.mjs' } : { js: '.cjs' };
+  },
   external: [
     "@nestjs/common",
     "@nestjs/core",

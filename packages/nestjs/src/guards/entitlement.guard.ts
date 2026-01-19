@@ -27,7 +27,7 @@ export interface EntitlementInfo {
 /**
  * Metadata interface for entitlement checks
  */
-export interface EntitlementMetadata<TRequest = any> {
+export interface EntitlementMetadata<TRequest = unknown> {
   entitlementKey: EntitlementType;
   getEntitlementInfo: (request: TRequest) => EntitlementInfo | Promise<EntitlementInfo>;
 }
@@ -36,7 +36,7 @@ export interface EntitlementMetadata<TRequest = any> {
  * Sets entitlement metadata for a route handler
  * @internal This is used internally by the @Entitlement decorator
  */
-export const SetEntitlementMetadata = <TRequest = any>(
+export const SetEntitlementMetadata = <TRequest = unknown>(
   entitlementKey: string,
   getEntitlementInfo: (request: TRequest) => EntitlementInfo | Promise<EntitlementInfo>,
 ) =>
@@ -55,7 +55,7 @@ export const SetEntitlementMetadata = <TRequest = any>(
  * 4. Allows or denies access based on the result
  */
 @Injectable()
-export class EntitlementGuard<TRequest = any> implements CanActivate {
+export class EntitlementGuard<TRequest = unknown> implements CanActivate {
   constructor(
     private readonly reflector: Reflector,
     @Inject(BLIMU_CONFIG)
@@ -80,7 +80,7 @@ export class EntitlementGuard<TRequest = any> implements CanActivate {
     let userId: string;
     try {
       userId = await this.config.getUserId(request);
-    } catch (error) {
+    } catch {
       throw new ForbiddenException('Failed to extract user ID from request');
     }
 
@@ -91,7 +91,7 @@ export class EntitlementGuard<TRequest = any> implements CanActivate {
     // Extract entitlement info from request
     const entitlementInfo = await metadata.getEntitlementInfo(request);
 
-    if (!entitlementInfo || !entitlementInfo.resourceId) {
+    if (!entitlementInfo?.resourceId) {
       throw new ForbiddenException('Resource ID is required for entitlement check');
     }
 
@@ -101,7 +101,7 @@ export class EntitlementGuard<TRequest = any> implements CanActivate {
         userId,
         entitlement: metadata.entitlementKey,
         resourceId: entitlementInfo.resourceId,
-        amount: entitlementInfo.amount,
+        ...(entitlementInfo.amount !== undefined ? { amount: entitlementInfo.amount } : {}),
       });
 
       if (!result.allowed) {

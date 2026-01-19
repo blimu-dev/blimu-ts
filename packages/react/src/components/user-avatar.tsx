@@ -8,23 +8,23 @@ export interface UserAvatarProps extends React.ComponentPropsWithoutRef<typeof A
   /**
    * Image source URL
    */
-  src?: string;
+  src?: string | undefined;
 
   /**
    * Alt text for the image
    */
-  alt?: string;
+  alt?: string | undefined;
 
   /**
    * Fallback text or initials to display when image is not available
    */
-  fallback?: string;
+  fallback?: string | undefined;
 
   /**
    * Size variant
    * @default "default"
    */
-  size?: AvatarVariants['size'];
+  size?: AvatarVariants['size'] | undefined;
 
   /**
    * Custom className

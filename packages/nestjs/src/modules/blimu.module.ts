@@ -13,6 +13,8 @@ import { BLIMU_CONFIG } from '../config/blimu.config';
 import { Blimu } from '@blimu/backend';
 import { JWKService } from '../services/jwk.service';
 
+const DEFAULT_BASE_URL = 'https://api.blimu.dev';
+
 /**
  * Blimu NestJS Module
  *
@@ -62,7 +64,7 @@ export class BlimuModule {
    * export class AppModule {}
    * ```
    */
-  static forRoot<TRequest = any>(config: BlimuConfig<TRequest>): DynamicModule {
+  static forRoot<TRequest = unknown>(config: BlimuConfig<TRequest>): DynamicModule {
     return {
       module: BlimuModule,
       global: true,
@@ -74,7 +76,7 @@ export class BlimuModule {
           provide: BLIMU_CONFIG,
           useValue: {
             apiKey: config.apiKey,
-            baseURL: config.baseURL || 'https://api.blimu.dev',
+            baseURL: config.baseURL ?? DEFAULT_BASE_URL,
             environmentId: config.environmentId,
             timeoutMs: config.timeoutMs ?? 30000,
             getUserId: config.getUserId,
@@ -85,7 +87,7 @@ export class BlimuModule {
           useFactory: (config: BlimuConfig) =>
             new Blimu({
               apiKey: config.apiKey,
-              baseURL: config.baseURL || 'https://api.blimu.dev',
+              baseURL: config.baseURL ?? DEFAULT_BASE_URL,
               timeoutMs: config.timeoutMs ?? 30000,
             }),
           inject: [BLIMU_CONFIG],
@@ -169,21 +171,27 @@ export class BlimuModule {
    * export class AppModule {}
    * ```
    */
-  static forRootAsync<TRequest = any>(options: {
+  static forRootAsync<TRequest = unknown>(options: {
     useFactory: (...args: unknown[]) => Promise<BlimuConfig<TRequest>> | BlimuConfig<TRequest>;
-    inject?: Array<InjectionToken | OptionalFactoryDependency>;
-    imports?: Array<
-      Type<unknown> | DynamicModule | Promise<DynamicModule> | ForwardReference<() => Type<unknown>>
-    >;
+    inject?: (InjectionToken | OptionalFactoryDependency)[];
+    imports?: (
+      | Type<unknown>
+      | DynamicModule
+      | Promise<DynamicModule>
+      | ForwardReference<() => Type<unknown>>
+    )[];
   }): DynamicModule {
-    const additionalImports = options.imports || [];
+    const additionalImports = options.imports ?? [];
 
     return {
       module: BlimuModule,
       global: true,
-      imports: [...additionalImports] as Array<
-        Type<unknown> | DynamicModule | Promise<DynamicModule> | ForwardReference
-      >,
+      imports: [...additionalImports] as (
+        | Type<unknown>
+        | DynamicModule
+        | Promise<DynamicModule>
+        | ForwardReference
+      )[],
       providers: [
         Reflector,
         EntitlementGuard,
@@ -194,20 +202,20 @@ export class BlimuModule {
             const config = await options.useFactory(...args);
             return {
               apiKey: config.apiKey,
-              baseURL: config.baseURL || 'https://api.blimu.dev',
+              baseURL: config.baseURL ?? DEFAULT_BASE_URL,
               environmentId: config.environmentId,
               timeoutMs: config.timeoutMs ?? 30000,
               getUserId: config.getUserId,
             };
           },
-          inject: options.inject,
+          ...(options.inject ? { inject: options.inject } : {}),
         },
         {
           provide: Blimu,
           useFactory: (config: BlimuConfig) =>
             new Blimu({
               apiKey: config.apiKey,
-              baseURL: config.baseURL || 'https://api.blimu.dev',
+              baseURL: config.baseURL ?? DEFAULT_BASE_URL,
               timeoutMs: config.timeoutMs ?? 30000,
             }),
           inject: [BLIMU_CONFIG],

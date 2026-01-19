@@ -17,7 +17,7 @@ export class BulkResourcesService {
       method: 'POST',
       path: `/v1/resources/${encodeURIComponent(resourceType)}/bulk`,
       body,
-      ...(init || {}),
+      ...(init ?? {}),
     });
   }
 }

@@ -16,7 +16,7 @@ export class PlansService {
     return this.core.request({
       method: 'DELETE',
       path: `/v1/resources/${encodeURIComponent(resourceType)}/${encodeURIComponent(resourceId)}/plan`,
-      ...(init || {}),
+      ...(init ?? {}),
     });
   }
 
@@ -32,7 +32,7 @@ export class PlansService {
     return this.core.request({
       method: 'GET',
       path: `/v1/resources/${encodeURIComponent(resourceType)}/${encodeURIComponent(resourceId)}/plan`,
-      ...(init || {}),
+      ...(init ?? {}),
     });
   }
 
@@ -50,7 +50,7 @@ export class PlansService {
       method: 'POST',
       path: `/v1/resources/${encodeURIComponent(resourceType)}/${encodeURIComponent(resourceId)}/plan`,
       body,
-      ...(init || {}),
+      ...(init ?? {}),
     });
   }
 }

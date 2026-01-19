@@ -12,6 +12,9 @@ export default [
     clean: false, // Don't clean on first build
     minify: true,
     outDir: 'dist',
+    outExtension({ format }) {
+      return format === 'esm' ? { js: '.mjs' } : { js: '.cjs' };
+    },
     banner: {
       js: '#!/usr/bin/env node',
     },
@@ -28,6 +31,9 @@ export default [
     clean: false, // Don't clean on second build
     minify: false, // Keep library code readable
     outDir: 'dist',
+    outExtension({ format }) {
+      return format === 'esm' ? { js: '.mjs' } : { js: '.cjs' };
+    },
     external: [
       // Don't bundle dependencies for library
       'zod',

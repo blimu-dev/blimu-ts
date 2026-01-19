@@ -319,7 +319,7 @@ export class AuthSessionService {
     };
   }
 
-  private async refreshSession({ signal }: { signal?: AbortSignal } = {}) {
+  private async refreshSession({ signal }: { signal?: AbortSignal | undefined } = {}) {
     if (signal) {
       // Add signal to tracking set (was using .has() instead of .add() - bug fix)
       this.refreshingSignals.add(signal);

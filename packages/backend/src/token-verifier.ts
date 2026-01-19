@@ -1,4 +1,4 @@
-import { FetchError } from 'client';
+import { FetchError } from './client';
 import * as crypto from 'crypto';
 import * as jwt from 'jsonwebtoken';
 
@@ -25,12 +25,12 @@ export interface VerifyTokenOptions {
   url?: string; // Direct URL to JWK endpoint (for custom scenarios)
   secretKey?: string; // API key/secret key - uses runtimeApiUrl + JWK endpoint
   token: string;
-  runtimeApiUrl?: string; // Optional override for runtime API URL
+  runtimeApiUrl?: string | undefined; // Optional override for runtime API URL
 }
 
 export interface TokenVerifierOptions {
-  runtimeApiUrl?: string; // Default from BLIMU_AUTH_API_URL env var
-  cacheTTL?: number; // Default: 1 hour
+  runtimeApiUrl?: string | undefined;
+  cacheTTL?: number | undefined; // Default: 1 hour
 }
 
 export class TokenVerifier {
@@ -41,22 +41,13 @@ export class TokenVerifier {
   constructor(options?: TokenVerifierOptions) {
     this.cacheTTL = options?.cacheTTL ?? 60 * 60 * 1000; // 1 hour
 
-    const blimuAuthApiUrl =
-      typeof process !== 'undefined' && process.env.BLIMU_AUTH_API_URL
-        ? process.env.BLIMU_AUTH_API_URL
-        : undefined;
-
-    // if we have secretKey, we can call runtime-api directly, otherwise we need to use customer specific auth-api
-    this.runtimeApiUrl = blimuAuthApiUrl ?? 'https://api.blimu.dev';
+    this.runtimeApiUrl = options?.runtimeApiUrl ?? 'https://api.blimu.dev';
   }
 
   /**
    * Fetch JWK Set from runtime-api
    */
-  private async fetchJWKSet(
-    endpoint: string,
-    headers?: Record<string, string>
-  ): Promise<JWKSet> {
+  private async fetchJWKSet(endpoint: string, headers?: Record<string, string>): Promise<JWKSet> {
     console.log(`[TokenVerifier] 📡 Fetching JWK Set from: ${endpoint}`);
     if (headers) {
       console.log(
@@ -72,22 +63,16 @@ export class TokenVerifier {
       },
     });
 
-    console.log(
-      `[TokenVerifier] 📡 Response status: ${response.status} ${response.statusText}`
-    );
+    console.log(`[TokenVerifier] 📡 Response status: ${response.status} ${response.statusText}`);
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error(
-        `[TokenVerifier] ❌ Failed to fetch JWKs: ${response.status} ${errorText}`
-      );
+      console.error(`[TokenVerifier] ❌ Failed to fetch JWKs: ${response.status} ${errorText}`);
       throw new FetchError('Failed to fetch JWKs', response.status, errorText);
     }
 
     const jwkSet = (await response.json()) as JWKSet;
-    console.log(
-      `[TokenVerifier] ✅ Successfully fetched JWK Set with ${jwkSet.keys.length} keys`
-    );
+    console.log(`[TokenVerifier] ✅ Successfully fetched JWK Set with ${jwkSet.keys.length} keys`);
     return jwkSet;
   }
 
@@ -122,9 +107,7 @@ export class TokenVerifier {
       return cached.key;
     }
 
-    console.log(
-      `[TokenVerifier] 🔍 Cache miss or expired. Fetching new key for kid: ${kid}`
-    );
+    console.log(`[TokenVerifier] 🔍 Cache miss or expired. Fetching new key for kid: ${kid}`);
 
     // Fetch JWK Set
     const jwkSet = await this.fetchJWKSet(endpoint, headers);
@@ -208,15 +191,8 @@ export class TokenVerifier {
     // Get public key for this kid
     let publicKey: crypto.KeyObject;
     try {
-      publicKey = await this.getPublicKey(
-        header.kid,
-        cacheKey,
-        endpoint,
-        headers
-      );
-      console.log(
-        `[TokenVerifier] ✅ Successfully retrieved public key for kid: ${header.kid}`
-      );
+      publicKey = await this.getPublicKey(header.kid, cacheKey, endpoint, headers);
+      console.log(`[TokenVerifier] ✅ Successfully retrieved public key for kid: ${header.kid}`);
     } catch (error) {
       console.error(
         `[TokenVerifier] ❌ Failed to get public key (first attempt): ${error instanceof Error ? error.message : String(error)}`
@@ -225,12 +201,7 @@ export class TokenVerifier {
       this.clearCache(cacheKey);
       console.log(`[TokenVerifier] 🔄 Retrying after cache clear...`);
       try {
-        publicKey = await this.getPublicKey(
-          header.kid,
-          cacheKey,
-          endpoint,
-          headers
-        );
+        publicKey = await this.getPublicKey(header.kid, cacheKey, endpoint, headers);
         console.log(
           `[TokenVerifier] ✅ Successfully retrieved public key for kid: ${header.kid} (retry)`
         );
@@ -272,9 +243,7 @@ export class TokenVerifier {
 /**
  * Convenience function to verify a token
  */
-export async function verifyToken<T = any>(
-  options: VerifyTokenOptions
-): Promise<T> {
+export async function verifyToken<T = any>(options: VerifyTokenOptions): Promise<T> {
   const verifier = new TokenVerifier();
   return verifier.verifyToken<T>(options);
 }

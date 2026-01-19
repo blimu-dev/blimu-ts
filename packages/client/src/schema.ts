@@ -3,20 +3,20 @@
 export type Enum<T> = T[keyof T];
 
 export interface EntitlementsListResult {
-  results: Array<{
-    entitlements: Array<{
+  results: {
+    entitlements: {
       allowed: boolean;
       allowedByPlan: boolean;
       allowedByRole: boolean;
-      allowedPlans?: Array<string>;
-      allowedRoles: Array<string>;
+      allowedPlans?: string[];
+      allowedRoles: string[];
       currentPlan?: string;
       currentRole?: string;
       entitlement: string;
-    }>;
+    }[];
     resourceId: string;
     resourceType: string;
-  }>;
+  }[];
 }
 
 export interface RefreshResponse {

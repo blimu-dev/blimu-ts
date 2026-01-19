@@ -21,3 +21,6 @@ tsconfig.tsbuildinfo
 # Changeset files (keep config and README, ignore generated files)
 !.changeset/config.json
 !.changeset/README.md
+
+# Link state (stores original package versions when linking)
+.link-state.json

@@ -30,7 +30,9 @@
     "changeset": "changeset",
     "version": "changeset version",
     "replace-workspace-deps": "node scripts/replace-workspace-deps.js",
-    "publish": "yarn replace-workspace-deps && changeset publish"
+    "publish": "yarn replace-workspace-deps && changeset publish",
+    "link:packages": "node scripts/link-packages.js",
+    "unlink:packages": "node scripts/link-packages.js reset"
   },
   "devDependencies": {
     "@changesets/cli": "^2.29.8",

@@ -16,7 +16,7 @@ export class UsersService {
       method: 'GET',
       path: `/v1/users`,
       query,
-      ...(init || {}),
+      ...(init ?? {}),
     });
   }
 
@@ -32,7 +32,7 @@ export class UsersService {
       method: 'POST',
       path: `/v1/users`,
       body,
-      ...(init || {}),
+      ...(init ?? {}),
     });
   }
 
@@ -44,7 +44,7 @@ export class UsersService {
     return this.core.request({
       method: 'DELETE',
       path: `/v1/users/${encodeURIComponent(userId)}`,
-      ...(init || {}),
+      ...(init ?? {}),
     });
   }
 
@@ -56,7 +56,7 @@ export class UsersService {
     return this.core.request({
       method: 'GET',
       path: `/v1/users/${encodeURIComponent(userId)}`,
-      ...(init || {}),
+      ...(init ?? {}),
     });
   }
 
@@ -73,7 +73,7 @@ export class UsersService {
       method: 'PUT',
       path: `/v1/users/${encodeURIComponent(userId)}`,
       body,
-      ...(init || {}),
+      ...(init ?? {}),
     });
   }
 
@@ -88,7 +88,7 @@ export class UsersService {
     return this.core.request({
       method: 'GET',
       path: `/v1/users/${encodeURIComponent(userId)}/effective-user-resources-roles`,
-      ...(init || {}),
+      ...(init ?? {}),
     });
   }
 }

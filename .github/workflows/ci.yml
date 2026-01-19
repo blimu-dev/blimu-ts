@@ -32,10 +32,10 @@ jobs:
         run: yarn typecheck
 
       - name: Lint
-        run: yarn lint || echo "Linting failed but continuing..."
+        run: yarn lint
 
       - name: Build
         run: yarn build
 
       - name: Test
-        run: yarn workspaces foreach -A run test || echo "Tests failed but continuing..."
+        run: yarn workspaces foreach -A run test

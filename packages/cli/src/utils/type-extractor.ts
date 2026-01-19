@@ -1,4 +1,3 @@
-import * as fs from 'fs';
 import * as path from 'path';
 
 /**
@@ -16,10 +15,10 @@ export interface ExtractedTypes {
  * Customer config structure (from .blimu config files)
  */
 export interface BlimuConfig {
-  resources?: Record<string, any>;
-  entitlements?: Record<string, any>;
-  plans?: Record<string, PlanConfig>;
-  features?: Record<string, any>;
+  resources?: Record<string, unknown> | undefined;
+  entitlements?: Record<string, unknown> | undefined;
+  plans?: Record<string, PlanConfig> | undefined;
+  features?: Record<string, unknown> | undefined;
 }
 
 export interface PlanConfig {
@@ -49,32 +48,48 @@ async function loadConfigFile(filePath: string): Promise<BlimuConfig> {
 
   if (ext === '.mjs' || ext === '.js') {
     // Dynamic import for MJS/JS files
-    const module = await import(path.resolve(filePath));
+    const module = (await import(path.resolve(filePath))) as {
+      default?: BlimuConfig | (() => Promise<BlimuConfig> | BlimuConfig);
+      config?: BlimuConfig | (() => Promise<BlimuConfig> | BlimuConfig);
+      [key: string]: unknown;
+    };
     // Config should be exported as default or named export
-    const config = module.default || module.config || module;
+    const configValue = module.default ?? module.config ?? module;
+    const config: BlimuConfig | (() => Promise<BlimuConfig> | BlimuConfig) = configValue as
+      | BlimuConfig
+      | (() => Promise<BlimuConfig> | BlimuConfig);
 
     // If it's a function (factory), call it
     if (typeof config === 'function') {
-      return await config();
+      const result = await config();
+      return result;
     }
 
-    return config as BlimuConfig;
+    return config;
   } else if (ext === '.ts') {
     // For TS files, use tsx to load them
     // This requires tsx to be available
     try {
       // Use dynamic import with tsx loader
-      const module = await import(path.resolve(filePath));
-      const config = module.default || module.config || module;
+      const module = (await import(path.resolve(filePath))) as {
+        default?: BlimuConfig | (() => Promise<BlimuConfig> | BlimuConfig);
+        config?: BlimuConfig | (() => Promise<BlimuConfig> | BlimuConfig);
+        [key: string]: unknown;
+      };
+      const configValue = module.default ?? module.config ?? module;
+      const config: BlimuConfig | (() => Promise<BlimuConfig> | BlimuConfig) = configValue as
+        | BlimuConfig
+        | (() => Promise<BlimuConfig> | BlimuConfig);
 
       if (typeof config === 'function') {
-        return await config();
+        const result = await config();
+        return result;
       }
 
-      return config as BlimuConfig;
+      return config;
     } catch (error) {
       throw new Error(
-        `Failed to load TypeScript config file. Make sure tsx is available or use .mjs instead. Error: ${error instanceof Error ? error.message : String(error)}`,
+        `Failed to load TypeScript config file. Make sure tsx is available or use .mjs instead. Error: ${error instanceof Error ? error.message : String(error)}`
       );
     }
   } else {

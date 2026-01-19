@@ -16,7 +16,7 @@ export class EntitlementsService {
     return this.core.request({
       method: 'GET',
       path: `/v1/client/entitlements/list-for-tenant/${encodeURIComponent(tenantResourceId)}`,
-      ...(init || {}),
+      ...(init ?? {}),
     });
   }
   /**
