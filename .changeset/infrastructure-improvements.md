@@ -1,10 +1,10 @@
 ---
-"@blimu/backend": minor
-"@blimu/client": minor
-"@blimu/nestjs": minor
-"@blimu/react": minor
-"@blimu/types": minor
-"blimu": minor
+"@blimu/backend": patch
+"@blimu/client": patch
+"@blimu/nestjs": patch
+"@blimu/react": patch
+"@blimu/types": patch
+"blimu": patch
 ---
 
 ### Infrastructure Improvements
