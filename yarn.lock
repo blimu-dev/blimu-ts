@@ -477,6 +477,7 @@ __metadata:
   resolution: "@blimu/react@workspace:packages/react"
   dependencies:
     "@blimu/client": "workspace:*"
+    "@eslint/js": "npm:^9.39.2"
     "@radix-ui/react-avatar": "npm:^1.1.11"
     "@radix-ui/react-dropdown-menu": "npm:^2.1.16"
     "@radix-ui/react-popover": "npm:^1.1.15"
@@ -499,6 +500,8 @@ __metadata:
     class-variance-authority: "npm:^0.7.1"
     clsx: "npm:^2.1.1"
     eslint: "npm:^9.39.2"
+    eslint-config-prettier: "npm:^10.1.8"
+    eslint-plugin-prettier: "npm:^5.5.5"
     eslint-plugin-react-hooks: "npm:^7.0.1"
     eslint-plugin-react-refresh: "npm:^0.4.26"
     eslint-plugin-simple-import-sort: "npm:^12.1.1"

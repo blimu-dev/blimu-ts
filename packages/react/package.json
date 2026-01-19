@@ -93,6 +93,7 @@
     "tailwind-merge": "^3.4.0"
   },
   "devDependencies": {
+    "@eslint/js": "^9.39.2",
     "@storybook/addon-links": "^10.1.11",
     "@storybook/react": "^10.1.11",
     "@storybook/react-vite": "^10.1.11",
@@ -109,6 +110,8 @@
     "@vitest/coverage-v8": "^4.0.17",
     "@vitest/ui": "^4.0.17",
     "eslint": "^9.39.2",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.5",
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.4.26",
     "eslint-plugin-simple-import-sort": "^12.1.1",
