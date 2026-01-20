@@ -8,8 +8,8 @@ import {
 } from '@nestjs/common';
 
 import { BLIMU_CONFIG, type BlimuConfig } from '../config/blimu.config';
-import { EntitlementGuard } from 'guards/entitlement.guard';
-import { JWKService } from 'services/jwk.service';
+import { EntitlementGuard } from '../guards/entitlement.guard';
+import { JWKService } from '../services/jwk.service';
 import { Blimu } from '@blimu/backend';
 
 const DEFAULT_BASE_URL = 'https://api.blimu.dev';
@@ -39,6 +39,9 @@ export class BlimuModule {
    *       environmentId: 'your-environment-id', // optional
    *       timeoutMs: 30000, // optional
    *       getUserId: (req) => req.user?.id, // required
+   *       defaultEntitlementCtxResolver: ({ entitlement, resourceType }, req) => ({
+   *         resourceId: req.params.resourceId,
+   *       }), // optional
    *     }),
    *   ],
    * })
@@ -77,6 +80,7 @@ export class BlimuModule {
             environmentId: config.environmentId,
             timeoutMs: config.timeoutMs ?? 30000,
             getUserId: config.getUserId,
+            defaultEntitlementCtxResolver: config.defaultEntitlementCtxResolver,
           },
         },
         {
@@ -120,6 +124,9 @@ export class BlimuModule {
    *         environmentId: configService.get('BLIMU_ENVIRONMENT_ID'),
    *         timeoutMs: configService.get('BLIMU_TIMEOUT_MS'),
    *         getUserId: (req) => req.user?.id,
+   *         defaultEntitlementCtxResolver: (entitlementKey, req) => ({
+   *           resourceId: req.params.resourceId,
+   *         }),
    *       }),
    *       inject: [ConfigService],
    *     }),
@@ -207,6 +214,7 @@ export class BlimuModule {
               environmentId: config.environmentId,
               timeoutMs: config.timeoutMs ?? 30000,
               getUserId: config.getUserId,
+              defaultEntitlementCtxResolver: config.defaultEntitlementCtxResolver,
             };
           },
           ...(options.inject ? { inject: options.inject } : {}),

@@ -11,15 +11,15 @@ import 'reflect-metadata';
 import type { EntitlementType } from '@blimu/types';
 import { BlimuForbiddenException } from '../exceptions/blimu-forbidden.exception';
 import { Blimu } from '@blimu/backend';
-import { BLIMU_CONFIG, type BlimuConfig } from 'config/blimu.config';
+import { BLIMU_CONFIG, type BlimuConfig } from '../config/blimu.config';
 
 export const ENTITLEMENT_KEY = 'entitlement';
 export const ENTITLEMENT_METADATA_KEY = Symbol('entitlement');
 
 /**
- * Entitlement information returned by the getEntitlementInfo callback
+ * Entitlement context returned by the entitlementCtxResolver callback
  */
-export interface EntitlementInfo {
+export interface EntitlementCtx {
   resourceId: string;
   amount?: number; // Amount to check against usage limit (for consumption)
 }
@@ -29,7 +29,7 @@ export interface EntitlementInfo {
  */
 export interface EntitlementMetadata<TRequest = unknown> {
   entitlementKey: EntitlementType;
-  getEntitlementInfo: (request: TRequest) => EntitlementInfo | Promise<EntitlementInfo>;
+  entitlementCtxResolver?: (request: TRequest) => EntitlementCtx | Promise<EntitlementCtx>;
 }
 
 /**
@@ -38,11 +38,11 @@ export interface EntitlementMetadata<TRequest = unknown> {
  */
 export const SetEntitlementMetadata = <TRequest = unknown>(
   entitlementKey: string,
-  getEntitlementInfo: (request: TRequest) => EntitlementInfo | Promise<EntitlementInfo>,
+  entitlementCtxResolver?: (request: TRequest) => EntitlementCtx | Promise<EntitlementCtx>,
 ): MethodDecorator =>
   SetMetadata(ENTITLEMENT_METADATA_KEY, {
     entitlementKey,
-    getEntitlementInfo,
+    entitlementCtxResolver,
   } as EntitlementMetadata<TRequest>);
 
 /**
@@ -87,10 +87,26 @@ export class EntitlementGuard<TRequest = unknown> implements CanActivate {
       throw new ForbiddenException('User ID is required for entitlement check');
     }
 
-    // Extract entitlement info from request
-    const entitlementInfo = await metadata.getEntitlementInfo(request);
+    // Resolve entitlement context from request
+    // Priority: decorator resolver > default resolver > error
+    let entitlementCtx: EntitlementCtx | undefined;
+    if (metadata.entitlementCtxResolver) {
+      entitlementCtx = await metadata.entitlementCtxResolver(request);
+    } else if (this.config.defaultEntitlementCtxResolver) {
+      // Parse resourceType from entitlementKey (format: "resourceType:action")
+      const resourceType = metadata.entitlementKey.split(':')[0] || '';
+      entitlementCtx = await this.config.defaultEntitlementCtxResolver(
+        {
+          entitlement: metadata.entitlementKey,
+          resourceType,
+        },
+        request,
+      );
+    } else {
+      throw new ForbiddenException('No entitlement context resolver available');
+    }
 
-    if (!entitlementInfo?.resourceId) {
+    if (!entitlementCtx?.resourceId) {
       throw new ForbiddenException('Resource ID is required for entitlement check');
     }
 
@@ -99,15 +115,15 @@ export class EntitlementGuard<TRequest = unknown> implements CanActivate {
       const result = await this.runtime.entitlements.checkEntitlement({
         userId,
         entitlement: metadata.entitlementKey,
-        resourceId: entitlementInfo.resourceId,
-        ...(entitlementInfo.amount !== undefined ? { amount: entitlementInfo.amount } : {}),
+        resourceId: entitlementCtx.resourceId,
+        ...(entitlementCtx.amount !== undefined ? { amount: entitlementCtx.amount } : {}),
       });
 
       if (!result.allowed) {
         throw new BlimuForbiddenException(
           result,
           metadata.entitlementKey,
-          entitlementInfo.resourceId,
+          entitlementCtx.resourceId,
           userId,
         );
       }

@@ -2,7 +2,7 @@ import { applyDecorators, UseGuards } from '@nestjs/common';
 import {
   EntitlementGuard,
   SetEntitlementMetadata,
-  type EntitlementInfo,
+  type EntitlementCtx,
 } from '../guards/entitlement.guard';
 import type { EntitlementType } from '@blimu/types';
 
@@ -13,7 +13,8 @@ import type { EntitlementType } from '@blimu/types';
  * to provide a clean, declarative way to protect routes with entitlement checks.
  *
  * @param entitlementKey - The entitlement key to check (e.g., 'brand:read', 'organization:create_workspace')
- * @param getEntitlementInfo - Function that returns entitlement information including resourceId and optionally amount for usage limits
+ * @param entitlementCtxResolver - Optional function that returns entitlement context including resourceId and optionally amount for usage limits.
+ *                                 If not provided, the default resolver from module configuration will be used.
  *
  * @example
  * Basic usage with path parameter:
@@ -22,6 +23,25 @@ import type { EntitlementType } from '@blimu/types';
  * @Entitlement('brand:read', (req) => ({ resourceId: req.params.resourceId }))
  * async getBrand(@Param('resourceId') resourceId: string) {
  *   // User is guaranteed to have 'brand:read' entitlement on this resource
+ * }
+ * ```
+ *
+ * @example
+ * Using default resolver from module configuration:
+ * ```typescript
+ * // In module configuration:
+ * BlimuModule.forRoot({
+ *   // ... other config
+ *   defaultEntitlementCtxResolver: ({ entitlement, resourceType }, req) => ({
+ *     resourceId: req.params.resourceId,
+ *   }),
+ * })
+ *
+ * // In controller (no resolver needed):
+ * @Get('/:resourceId')
+ * @Entitlement('brand:read')
+ * async getBrand(@Param('resourceId') resourceId: string) {
+ *   // Uses default resolver from config
  * }
  * ```
  *
@@ -63,7 +83,7 @@ import type { EntitlementType } from '@blimu/types';
  * ```
  *
  * @example
- * Async entitlement info extraction (e.g., from database):
+ * Async resource context extraction (e.g., from database):
  * ```typescript
  * @Delete('/items/:itemId')
  * @Entitlement('workspace:delete_item', async (req) => {
@@ -94,12 +114,13 @@ import type { EntitlementType } from '@blimu/types';
  * }
  * ```
  */
-export const Entitlement = <TRequest = unknown>(
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const Entitlement = <TRequest = any>(
   entitlementKey: EntitlementType,
-  getEntitlementInfo: (request: TRequest) => EntitlementInfo | Promise<EntitlementInfo>,
+  entitlementCtxResolver?: (request: TRequest) => EntitlementCtx | Promise<EntitlementCtx>,
 ): MethodDecorator => {
   return applyDecorators(
-    SetEntitlementMetadata<TRequest>(entitlementKey, getEntitlementInfo),
+    SetEntitlementMetadata<TRequest>(entitlementKey, entitlementCtxResolver),
     UseGuards(EntitlementGuard),
   );
 };

@@ -457,6 +457,7 @@ __metadata:
     "@blimu/types": "workspace:*"
     "@nestjs/common": "npm:^11.1.12"
     "@nestjs/core": "npm:^11.1.12"
+    "@nestjs/testing": "npm:^11.1.12"
     "@types/node": "npm:^25.0.9"
     reflect-metadata: "npm:^0.2.2"
     rxjs: "npm:^7.8.2"
@@ -1520,6 +1521,25 @@ __metadata:
     "@nestjs/websockets":
       optional: true
   checksum: 10/44f122101f411abb2b83cd6bab865006c4a74552d3903ca47a58b396608453b36b59cd6461f8689cd31c3d91b81960cea190d654448921ae0efedbd20ff52284
+  languageName: node
+  linkType: hard
+
+"@nestjs/testing@npm:^11.1.12":
+  version: 11.1.12
+  resolution: "@nestjs/testing@npm:11.1.12"
+  dependencies:
+    tslib: "npm:2.8.1"
+  peerDependencies:
+    "@nestjs/common": ^11.0.0
+    "@nestjs/core": ^11.0.0
+    "@nestjs/microservices": ^11.0.0
+    "@nestjs/platform-express": ^11.0.0
+  peerDependenciesMeta:
+    "@nestjs/microservices":
+      optional: true
+    "@nestjs/platform-express":
+      optional: true
+  checksum: 10/db6fa43284163f3131c849a5c3876c24164eb2bb189f5b1ddcf96ff47115d044e69839bf1348956b82d45a969beb6d6803f0d10058f98e0cfc708d1ad4caf70b
   languageName: node
   linkType: hard
 

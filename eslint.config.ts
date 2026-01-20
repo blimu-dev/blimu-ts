@@ -2,8 +2,12 @@ import eslint from '@eslint/js';
 import { defineConfig } from 'eslint/config';
 import tseslint from 'typescript-eslint';
 import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended';
+import prettierConfig from 'eslint-config-prettier';
+import unusedImports from 'eslint-plugin-unused-imports';
+import prettier from 'eslint-plugin-prettier';
 
 export default defineConfig(
+  prettierConfig,
   {
     ignores: ['**/dist/**', '**/node_modules/**', '**/.changeset/**', '**/*.config.ts'],
   },
@@ -19,7 +23,13 @@ export default defineConfig(
       sourceType: 'module',
       parserOptions: {
         projectService: true,
+        tsconfigRootDir: import.meta.dirname,
       },
+    },
+    plugins: {
+      '@typescript-eslint': tseslint.plugin,
+      'unused-imports': unusedImports,
+      prettier,
     },
     rules: {
       '@typescript-eslint/no-explicit-any': 'error',
@@ -32,6 +42,24 @@ export default defineConfig(
         },
       ],
       '@typescript-eslint/explicit-module-boundary-types': 'error',
+      '@typescript-eslint/consistent-type-imports': [
+        'error',
+        {
+          prefer: 'type-imports',
+          fixStyle: 'separate-type-imports',
+        },
+      ],
+      'prettier/prettier': 'error',
+      'unused-imports/no-unused-imports': 'error',
+      'unused-imports/no-unused-vars': [
+        'warn',
+        {
+          vars: 'all',
+          varsIgnorePattern: '^_',
+          args: 'after-used',
+          argsIgnorePattern: '^_',
+        },
+      ],
     },
   },
   {
