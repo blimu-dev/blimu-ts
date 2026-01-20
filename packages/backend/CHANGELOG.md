@@ -1,5 +1,16 @@
 # @blimu/backend
 
+## 1.2.0
+
+### Minor Changes
+
+- 4969dbf: Enhanced NestJS integration with improved entitlement decorator and guard functionality, added comprehensive test coverage, and updated build configurations.
+
+### Patch Changes
+
+- Updated dependencies [4969dbf]
+  - @blimu/types@1.2.0
+
 ## 1.1.4
 
 ### Patch Changes

@@ -36,6 +36,7 @@
     "link:packages": "node scripts/link-packages.js",
     "unlink:packages": "node scripts/link-packages.js reset",
     "check:portals": "node scripts/check-portals.js",
+    "check:changesets": "node scripts/check-changesets.js",
     "prepare": "husky"
   },
   "devDependencies": {

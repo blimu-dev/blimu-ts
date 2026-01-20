@@ -1,6 +1,9 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
+# Check for major bumps in changesets (must be first to catch before commit)
+node scripts/check-changesets.js
+
 # Run lint-staged for staged files
 yarn lint-staged
 

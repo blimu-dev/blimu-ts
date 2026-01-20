@@ -13,9 +13,10 @@
     "sourceMap": true,
     "incremental": true,
     "skipLibCheck": true,
+    "allowJs": true,
+    "noEmit": true,
     "forceConsistentCasingInFileNames": true,
     "useDefineForClassFields": false,
-    "composite": true,
     "strict": true,
     "noUncheckedIndexedAccess": true,
     "noImplicitOverride": true,
@@ -26,13 +27,5 @@
     "noUnusedParameters": true,
     "verbatimModuleSyntax": true
   },
-  "files": [],
-  "references": [
-    {
-      "path": "./packages/backend"
-    },
-    {
-      "path": "./packages/nestjs"
-    }
-  ]
+  "include": ["scripts/**/*.js"]
 }

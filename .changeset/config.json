@@ -4,17 +4,13 @@
   "commit": false,
   "fixed": [],
   "linked": [
-    [
-      "@blimu/backend",
-      "@blimu/client",
-      "@blimu/nestjs",
-      "@blimu/react",
-      "@blimu/types",
-      "blimu"
-    ]
+    ["@blimu/backend", "@blimu/client", "@blimu/nestjs", "@blimu/react", "@blimu/types", "blimu"]
   ],
   "access": "public",
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
-  "ignore": []
+  "ignore": [],
+  "___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH": {
+    "onlyUpdatePeerDependentsWhenOutOfRange": true
+  }
 }

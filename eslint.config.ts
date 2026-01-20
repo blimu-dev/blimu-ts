@@ -9,7 +9,13 @@ import prettier from 'eslint-plugin-prettier';
 export default defineConfig(
   prettierConfig,
   {
-    ignores: ['**/dist/**', '**/node_modules/**', '**/.changeset/**', '**/*.config.ts'],
+    ignores: [
+      '**/dist/**',
+      '**/node_modules/**',
+      '**/.changeset/**',
+      '**/*.config.ts',
+      '**/scripts/**',
+    ],
   },
   eslintPluginPrettierRecommended,
   eslint.configs.recommended,
@@ -70,6 +76,21 @@ export default defineConfig(
       '@typescript-eslint/no-unsafe-assignment': 'off',
       '@typescript-eslint/no-unsafe-member-access': 'off',
       '@typescript-eslint/no-unsafe-call': 'off',
+    },
+  },
+  {
+    // Scripts directory - no type checking
+    files: ['scripts/**/*.{js,mjs}'],
+    languageOptions: {
+      parserOptions: {
+        projectService: false,
+      },
+    },
+    rules: {
+      '@typescript-eslint/no-unsafe-assignment': 'off',
+      '@typescript-eslint/no-unsafe-member-access': 'off',
+      '@typescript-eslint/no-unsafe-call': 'off',
+      '@typescript-eslint/explicit-module-boundary-types': 'off',
     },
   },
 );
