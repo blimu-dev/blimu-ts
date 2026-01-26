@@ -1,0 +1,611 @@
+---
+description: Logging Best Practices Guide
+globs:
+  - 'apps/runtime-api/src/**/*.ts'
+  - 'apps/platform-api/src/**/*.ts'
+alwaysApply: false
+---
+
+# Logging Best Practices Guide
+
+This guide outlines best practices for logging in Blimu applications, covering when to log, how to log, and what to include in your log messages.
+
+## Table of Contents
+
+- [Log Levels](#log-levels)
+- [When to Log](#when-to-log)
+- [How to Log](#how-to-log)
+- [Structured Logging](#structured-logging)
+- [Error Logging](#error-logging)
+- [Performance Logging](#performance-logging)
+- [Security Considerations](#security-considerations)
+- [Examples](#examples)
+
+## Log Levels
+
+Our logging system uses the following severity levels, compatible with GCP Cloud Logging:
+
+### ERROR
+
+Use for errors that require immediate attention and may impact functionality.
+
+**When to use:**
+
+- Unhandled exceptions
+- Failed critical operations (database writes, external API calls)
+- Authentication/authorization failures
+- Data validation errors that prevent operation
+- System errors that affect user experience
+
+**Example:**
+
+```typescript
+this.logger.error('Failed to create resource', {
+  resourceType: 'workspace',
+  resourceId: workspaceId,
+  userId: user.id,
+  error: {
+    name: error.name,
+    message: error.message,
+  },
+});
+```
+
+### WARN
+
+Use for potentially harmful situations that don't prevent operation.
+
+**When to use:**
+
+- Deprecated API usage
+- Rate limit approaching
+- Retry attempts
+- Configuration issues that have fallbacks
+- Performance degradation warnings
+
+**Example:**
+
+```typescript
+this.logger.warn('Rate limit approaching', {
+  userId: user.id,
+  currentUsage: 950,
+  limit: 1000,
+  endpoint: '/v1/resources',
+});
+```
+
+### INFO (log)
+
+Use for general informational messages about application flow.
+
+**When to use:**
+
+- Successful completion of important operations
+- Application startup/shutdown
+- Significant state changes
+- Business logic milestones
+- User actions that should be audited
+
+**Example:**
+
+```typescript
+this.logger.log('Resource created successfully', {
+  resourceType: 'workspace',
+  resourceId: workspaceId,
+  userId: user.id,
+  timestamp: new Date().toISOString(),
+});
+```
+
+### DEBUG
+
+Use for detailed information useful for debugging in development.
+
+**When to use:**
+
+- Function entry/exit points
+- Variable values during execution
+- Conditional branch decisions
+- Detailed step-by-step operations
+
+**Example:**
+
+```typescript
+this.logger.debug('Processing entitlement check', {
+  userId: user.id,
+  entitlement: 'workspace:create',
+  resourceType: 'organization',
+  resourceId: orgId,
+  roles: userRoles,
+});
+```
+
+### VERBOSE
+
+Use for very detailed diagnostic information, typically only in development.
+
+**When to use:**
+
+- Detailed trace of execution flow
+- Low-level system information
+- Detailed data structures
+
+## When to Log
+
+### Always Log
+
+1. **Application Lifecycle Events**
+   - Application startup and shutdown
+   - Configuration loading
+   - Health check results
+
+2. **Critical Business Operations**
+   - Resource creation, updates, deletion
+   - User authentication and authorization
+   - Plan assignments and changes
+   - Entitlement checks and grants
+
+3. **External Service Interactions**
+   - API calls to external services (with request/response summaries)
+   - Database operations (queries, transactions)
+   - Third-party service failures
+
+4. **Security Events**
+   - Authentication failures
+   - Authorization denials
+   - Suspicious activity
+   - API key usage
+
+5. **Errors and Exceptions**
+   - All caught exceptions
+   - Unhandled errors
+   - Validation failures
+
+### Don't Log
+
+1. **Sensitive Information**
+   - Passwords, tokens, API keys
+   - Personal Identifiable Information (PII) unless required for compliance
+   - Credit card numbers, SSNs
+   - Full request/response bodies with sensitive data
+
+2. **High-Frequency, Low-Value Events**
+   - Every HTTP request (use middleware for this)
+   - Every database query (use query logging separately)
+   - Loop iterations
+   - Cache hits/misses (unless debugging)
+
+3. **Redundant Information**
+   - Information already captured by infrastructure (request IDs, timestamps)
+   - Information that can be derived from other logs
+
+## How to Log
+
+### Using NestJS Logger (Recommended)
+
+The NestJS logger automatically includes trace context and module information:
+
+```typescript
+import { Logger } from '@nestjs/common';
+
+export class WorkspaceService {
+  private readonly logger = new Logger(WorkspaceService.name);
+
+  async createWorkspace(data: CreateWorkspaceDto) {
+    this.logger.log('Creating workspace', { userId: data.userId });
+
+    try {
+      const workspace = await this.repository.create(data);
+      this.logger.log('Workspace created', { workspaceId: workspace.id });
+      return workspace;
+    } catch (error) {
+      this.logger.error('Failed to create workspace', {
+        userId: data.userId,
+        error: error.message,
+      });
+      throw error;
+    }
+  }
+}
+```
+
+### Using Pino Logger Directly (For Advanced Use Cases)
+
+For more control over structured logging:
+
+```typescript
+import { PinoLoggerService } from '@blimu/nestjs-logging';
+
+export class WorkspaceService {
+  constructor(private readonly pinoLogger: PinoLoggerService) {}
+
+  async createWorkspace(data: CreateWorkspaceDto) {
+    this.pinoLogger.log('Creating workspace', {
+      module: WorkspaceService.name,
+      userId: data.userId,
+      workspaceName: data.name,
+    });
+  }
+}
+```
+
+## Structured Logging
+
+Always use structured logging with context objects. This enables:
+
+- Better searchability in GCP Cloud Logging
+- Trace correlation
+- Analytics and monitoring
+- Debugging with full context
+
+### Good: Structured Logging
+
+```typescript
+this.logger.log('User authenticated', {
+  userId: user.id,
+  method: 'oauth',
+  provider: 'google',
+  timestamp: new Date().toISOString(),
+});
+```
+
+### Bad: String Concatenation
+
+```typescript
+this.logger.log(`User ${user.id} authenticated via ${method} at ${new Date()}`);
+```
+
+### Context Object Guidelines
+
+1. **Include Relevant Identifiers**
+   - `userId`, `workspaceId`, `resourceId`, `environmentId`
+   - Request IDs, correlation IDs
+   - Trace and span IDs (automatically included)
+
+2. **Include Operation Context**
+   - HTTP method and path
+   - Operation type (create, update, delete)
+   - Resource types
+
+3. **Include Performance Metrics** (when relevant)
+   - Duration in milliseconds
+   - Request/response sizes
+   - Database query times
+
+4. **Include Error Details** (for errors)
+   - Error name, message, stack
+   - Error codes
+   - Retry attempts
+
+## Error Logging
+
+### Exception Filters
+
+Exception filters automatically log errors with full context. Ensure they include:
+
+```typescript
+// In catch-everything.filter.ts
+this.pinoLogger.error(exception.message, {
+  module: CatchEverythingFilter.name,
+  httpStatus,
+  method: request.method,
+  path: request.url,
+  userId: request.user?.id,
+  error: {
+    name: exception.name,
+    message: exception.message,
+    stack: exception.stack,
+  },
+});
+```
+
+### Manual Error Logging
+
+When catching and handling errors:
+
+```typescript
+try {
+  await this.performOperation();
+} catch (error) {
+  this.logger.error('Operation failed', {
+    operation: 'performOperation',
+    userId: user.id,
+    error: {
+      name: error.name,
+      message: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined,
+    },
+  });
+  throw error; // Re-throw if needed
+}
+```
+
+### Don't Log and Re-throw Without Adding Value
+
+```typescript
+// Bad: Logging without additional context
+try {
+  await this.operation();
+} catch (error) {
+  this.logger.error(error.message); // No additional context
+  throw error;
+}
+
+// Good: Logging with context
+try {
+  await this.operation();
+} catch (error) {
+  this.logger.error('Operation failed', {
+    operation: 'operation',
+    context: {
+      /* relevant context */
+    },
+    error: { name: error.name, message: error.message },
+  });
+  throw error;
+}
+```
+
+## Performance Logging
+
+Log performance metrics for operations that might be slow:
+
+```typescript
+async function processLargeDataset(data: Data[]) {
+  const startTime = Date.now();
+
+  try {
+    const result = await this.expensiveOperation(data);
+    const duration = Date.now() - startTime;
+
+    this.logger.log('Dataset processed', {
+      datasetSize: data.length,
+      durationMs: duration,
+      resultCount: result.length,
+    });
+
+    return result;
+  } catch (error) {
+    const duration = Date.now() - startTime;
+    this.logger.error('Dataset processing failed', {
+      datasetSize: data.length,
+      durationMs: duration,
+      error: error.message,
+    });
+    throw error;
+  }
+}
+```
+
+## Security Considerations
+
+### Never Log Sensitive Data
+
+```typescript
+// Bad: Logging sensitive information
+this.logger.log('User login', {
+  email: user.email,
+  password: user.password, // NEVER DO THIS
+  apiKey: user.apiKey, // NEVER DO THIS
+});
+
+// Good: Logging without sensitive data
+this.logger.log('User login', {
+  userId: user.id,
+  method: 'password',
+  timestamp: new Date().toISOString(),
+});
+```
+
+### Sanitize Data Before Logging
+
+```typescript
+function sanitizeForLogging(data: any): any {
+  const sensitiveFields = ['password', 'token', 'apiKey', 'secret', 'authorization'];
+  const sanitized = { ...data };
+
+  for (const field of sensitiveFields) {
+    if (field in sanitized) {
+      sanitized[field] = '[REDACTED]';
+    }
+  }
+
+  return sanitized;
+}
+
+this.logger.log('Request received', sanitizeForLogging(request.body));
+```
+
+### Log Security Events
+
+Always log security-relevant events:
+
+```typescript
+// Authentication failures
+this.logger.warn('Authentication failed', {
+  email: userEmail, // Email is okay to log
+  reason: 'invalid_password',
+  ipAddress: request.ip,
+  userAgent: request.headers['user-agent'],
+});
+
+// Authorization denials
+this.logger.warn('Authorization denied', {
+  userId: user.id,
+  resourceType: 'workspace',
+  resourceId: workspaceId,
+  requiredRole: 'admin',
+  userRoles: userRoles,
+});
+```
+
+## Examples
+
+### Service Method with Comprehensive Logging
+
+```typescript
+import { Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
+
+@Injectable()
+export class ResourceService {
+  private readonly logger = new Logger(ResourceService.name);
+
+  async createResource(
+    userId: string,
+    resourceType: string,
+    data: CreateResourceDto,
+  ): Promise<Resource> {
+    this.logger.debug('Creating resource', {
+      userId,
+      resourceType,
+      dataKeys: Object.keys(data),
+    });
+
+    try {
+      // Validate
+      await this.validateResource(data);
+      this.logger.debug('Resource validation passed');
+
+      // Create
+      const resource = await this.repository.create({
+        ...data,
+        createdBy: userId,
+      });
+
+      this.logger.log('Resource created successfully', {
+        resourceId: resource.id,
+        resourceType,
+        userId,
+      });
+
+      return resource;
+    } catch (error) {
+      this.logger.error('Failed to create resource', {
+        userId,
+        resourceType,
+        error: {
+          name: error.name,
+          message: error.message,
+        },
+      });
+      throw error;
+    }
+  }
+}
+```
+
+### HTTP Request Logging Middleware
+
+For automatic HTTP request logging, use the shared `HttpLoggingMiddleware` from `@blimu/nestjs-common`:
+
+**1. Import the middleware in your app module:**
+
+```typescript
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import { HttpLoggingMiddleware } from '@blimu/nestjs-common';
+import { LoggingModule } from '@blimu/nestjs-logging';
+
+@Module({
+  imports: [
+    LoggingModule.forRoot(), // Required for structured logging
+    // ... other modules
+  ],
+  // ... other configuration
+})
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(HttpLoggingMiddleware).forRoutes('*');
+  }
+}
+```
+
+**Features:**
+
+- Automatically logs all HTTP requests with method, URL, status code, duration, IP, and user agent
+- Uses structured logging via `NestJSPinoLoggerService` when `LoggingModule` is imported
+- Falls back to console logging if Pino logger is not available
+- Special handling for `/health` endpoints (simplified logging)
+- Log levels: `error` (5xx), `warn` (4xx), `log` (2xx/3xx)
+
+**Note:** The middleware is already configured in `runtime-api`, `platform-api`, and `billing-api`. No need to create your own implementation.
+
+### Database Operation Logging
+
+```typescript
+async function findResources(filters: ResourceFilters): Promise<Resource[]> {
+  const startTime = Date.now();
+
+  this.logger.debug('Querying resources', {
+    filters: Object.keys(filters),
+    filterCount: Object.keys(filters).length,
+  });
+
+  try {
+    const resources = await this.repository.findMany(filters);
+    const duration = Date.now() - startTime;
+
+    this.logger.debug('Resources queried', {
+      resultCount: resources.length,
+      durationMs: duration,
+      filters,
+    });
+
+    return resources;
+  } catch (error) {
+    const duration = Date.now() - startTime;
+    this.logger.error('Resource query failed', {
+      durationMs: duration,
+      filters,
+      error: {
+        name: error.name,
+        message: error.message,
+      },
+    });
+    throw error;
+  }
+}
+```
+
+## Log Format in Production
+
+In production, logs are automatically formatted as JSON with the following structure:
+
+```json
+{
+  "severity": "ERROR",
+  "timestamp": "2024-01-15T10:30:00.000Z",
+  "message": "Failed to create resource",
+  "trace": "abc123def456",
+  "spanId": "789xyz",
+  "context": {
+    "module": "ResourceService",
+    "userId": "user_123",
+    "resourceType": "workspace",
+    "error": {
+      "name": "ValidationError",
+      "message": "Invalid resource data"
+    }
+  }
+}
+```
+
+## Best Practices Summary
+
+1. ✅ **Use structured logging** with context objects
+2. ✅ **Include relevant identifiers** (userId, resourceId, etc.)
+3. ✅ **Log at appropriate levels** (ERROR for errors, INFO for important events)
+4. ✅ **Never log sensitive information** (passwords, tokens, PII)
+5. ✅ **Log security events** (auth failures, authorization denials)
+6. ✅ **Include performance metrics** for slow operations
+7. ✅ **Use trace context** (automatically included)
+8. ✅ **Log errors with full context** (error name, message, relevant data)
+9. ✅ **Don't log high-frequency, low-value events**
+10. ✅ **Sanitize data** before logging user input
+
+## Additional Resources
+
+- [GCP Cloud Logging Documentation](https://cloud.google.com/logging/docs)
+- [OpenTelemetry Documentation](https://opentelemetry.io/docs/)
+- [Pino Documentation](https://getpino.io/)
+- [NestJS Logging](https://docs.nestjs.com/techniques/logger)

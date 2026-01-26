@@ -1,5 +1,6 @@
-import { FetchClient } from '@blimu/fetch';
-import * as Schema from '../schema';
+import type { FetchClient } from '@blimu/fetch';
+import type * as Schema from '../schema';
+import type { ResourceType } from '@blimu/types';
 
 export class EntitlementsService {
   constructor(private core: FetchClient) {}
@@ -25,7 +26,7 @@ export class EntitlementsService {
    * @summary List entitlements for a specific resource*
    * @description Returns entitlements for a specific resource and user. Only evaluates roles and plans (excludes limits). Provides detailed information about why entitlements are allowed or denied, including current roles, allowed roles, current plan, and allowed plans. Results are cached per resource for performance.*/
   listForResource(
-    resourceType: string,
+    resourceType: ResourceType,
     resourceId: string,
     query?: Schema.EntitlementsListForResourceQuery,
     init?: Omit<RequestInit, 'method' | 'body'>

@@ -58,11 +58,11 @@
   },
   "dependencies": {
     "@blimu/types": "workspace:*",
-    "zod": "^4.3.5"
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "tsup": "^8.5.1",
-    "vitest": "^4.0.17"
+    "vitest": "^4.0.18"
   },
   "publishConfig": {
     "access": "public"

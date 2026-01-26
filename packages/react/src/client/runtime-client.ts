@@ -8,7 +8,7 @@ import { ExternalStore } from './external-store';
 export class BlimuRuntimeClientWrapper {
   private client: Blimu;
   private authDomain: string | null = null;
-  private initialized: boolean = false;
+  private initialized = false;
   private readonly session: AuthSessionService;
 
   public config: BlimuConfig;
@@ -125,8 +125,8 @@ export class BlimuRuntimeClientWrapper {
    * Note: The auth worker should extract the __bli_client cookie and include it in the request body
    * This method is idempotent - if a refresh is already in progress, it will wait for that refresh to complete
    */
-  public scheduleRefresh() {
-    return this.session.scheduleRefresh();
+  public scheduleRefresh(): void {
+    this.session.scheduleRefresh();
   }
 
   /**
@@ -134,7 +134,7 @@ export class BlimuRuntimeClientWrapper {
    * Uses the auth domain derived from the publishable key
    */
   public redirectToAuth = (returnUrl?: string): void => {
-    const redirectUrl = returnUrl || window.location.href;
+    const redirectUrl = returnUrl ?? window.location.href;
 
     // Build auth URL on the auth domain
     const authUrl = new URL(`${this.authDomain}/login`);
@@ -150,15 +150,10 @@ export class BlimuRuntimeClientWrapper {
    */
   public logout = async (): Promise<void> => {
     try {
-      const sessionToken = this.session.getSessionToken();
+      const sessionToken = await this.session.getSessionToken();
 
       if (sessionToken) {
-        await this.client.auth.logout({
-          headers: {
-            'x-blimu-publishable-key': this.config.publishableKey,
-            Authorization: `Bearer ${sessionToken}`,
-          },
-        });
+        await this.client.auth.logout();
       }
     } catch (error) {
       console.error('Logout error:', error);

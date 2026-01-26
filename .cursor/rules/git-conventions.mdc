@@ -1,0 +1,158 @@
+---
+alwaysApply: true
+---
+
+# Git Conventions
+
+This guide defines the Git workflow conventions for the Blimu project.
+
+## Branch Naming
+
+Branch names follow this pattern:
+
+```
+{devname}/{task-title-trimmed}/{BLI-000}
+```
+
+### Components
+
+1. **devname**: Developer's first name, lowercase
+   - Infer from `git log -1 --format='%an'` and extract first name
+   - Example: "Vinicius Dacal" → `vinicius`
+
+2. **task-title-trimmed**: Task title from Linear, lowercased and kebab-cased
+   - Trim to reasonable length (max ~50 chars)
+   - Remove special characters
+   - Example: "Remove all Clerk-related code from platform-api" → `remove-clerk-code-from-platform-api`
+
+3. **BLI-000**: Linear ticket identifier
+   - Always uppercase
+   - Example: `BLI-58`
+
+### Examples
+
+```bash
+# Good branch names
+vinicius/remove-clerk-code-from-platform-api/BLI-58
+vinicius/implement-personal-access-tokens/BLI-59
+vinicius/oauth2-apps-device-auth-flow/BLI-60
+
+# Bad branch names
+feature/remove-clerk          # Missing dev name and ticket
+BLI-58                        # Missing context
+vinicius/BLI-58               # Missing task title
+```
+
+## Commit Messages
+
+Follow [Conventional Commits](https://www.conventionalcommits.org/) with Linear ticket reference.
+
+### Format
+
+```
+<type>(<scope>): <description> (BLI-000)
+
+[optional body]
+
+[optional footer(s)]
+```
+
+### Types
+
+- `feat`: New feature
+- `fix`: Bug fix
+- `refactor`: Code change that neither fixes a bug nor adds a feature
+- `chore`: Changes to build process, dependencies, or auxiliary tools
+- `docs`: Documentation only changes
+- `style`: Code style changes (formatting, missing semicolons, etc.)
+- `test`: Adding or updating tests
+- `perf`: Performance improvements
+- `ci`: CI/CD configuration changes
+
+### Scope (optional)
+
+The scope should be the module or area affected:
+- `platform-api`
+- `runtime-api`
+- `cli`
+- `database`
+- `auth`
+- etc.
+
+### Examples
+
+```bash
+# Good commit messages
+feat(platform-api): add personal access token model (BLI-59)
+fix(cli): handle token refresh on expiry (BLI-60)
+refactor(platform-api): remove Clerk OAuth2 code (BLI-58)
+chore(platform-api): remove @clerk/backend dependency (BLI-58)
+docs(cli): update authentication documentation (BLI-59)
+
+# Bad commit messages
+fixed stuff                           # No type, no ticket
+feat: add PATs                        # Missing ticket reference
+BLI-58: remove clerk                  # Wrong format
+feat(platform-api): add PATs          # Missing ticket at end
+```
+
+### Multi-line Commits
+
+For complex changes, use a body to explain the "why":
+
+```bash
+git commit -m "$(cat <<'EOF'
+refactor(platform-api): remove all Clerk authentication code (BLI-58)
+
+Clerk is no longer used for authentication. This commit removes:
+- OAuth module and endpoints
+- Clerk webhook handlers
+- ClerkClientProvider
+- All Clerk environment variables
+
+BREAKING CHANGE: Clerk OAuth tokens are no longer accepted.
+EOF
+)"
+```
+
+## Workflow Commands
+
+### Creating a Branch for a Linear Ticket
+
+```bash
+# Get developer name (first name, lowercase)
+DEV_NAME=$(git log -1 --format='%an' | awk '{print tolower($1)}')
+
+# Create branch (replace with actual ticket info)
+git checkout -b "${DEV_NAME}/task-title-here/BLI-XX"
+```
+
+### Committing Changes
+
+```bash
+# Single line commit
+git commit -m "feat(scope): description here (BLI-XX)"
+
+# Multi-line commit with HEREDOC
+git commit -m "$(cat <<'EOF'
+feat(scope): description here (BLI-XX)
+
+Additional context about the change.
+EOF
+)"
+```
+
+## What Cursor Should Do
+
+When working on a Linear ticket:
+
+1. **Creating branches**: Use the pattern `{devname}/{task-title}/{BLI-XXX}`
+   - Get dev name: `git log -1 --format='%an' | awk '{print tolower($1)}'`
+   - Get ticket info from Linear or user context
+
+2. **Committing**: Always include `(BLI-XXX)` at the end of the commit title
+   - Use conventional commit format
+   - Reference the current ticket being worked on
+
+3. **Multiple tickets**: If a commit spans multiple tickets, use the primary ticket
+   - Or list multiple: `(BLI-58, BLI-59)`

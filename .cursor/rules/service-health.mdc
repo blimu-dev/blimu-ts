@@ -1,0 +1,122 @@
+---
+description: Service Health and Error Monitoring
+alwaysApply: true
+---
+
+# Service Health and Error Monitoring
+
+This guide explains how Cursor can access and understand service logs to help diagnose issues.
+
+## Service Logs Location
+
+All service logs are written to the `logs/` directory of their respective service:
+
+- `apps/platform-api/logs/platform-api.log` - Platform API service logs
+- `apps/runtime-api/logs/runtime-api.log` - Runtime API service logs
+- Other services will create their own log files when `SERVICE_NAME` environment variable is set
+
+## Log Format
+
+- **Development**: Logs are written in JSON format to files, while still showing pretty-printed output in the terminal
+- **Production**: Logs are in JSON format optimized for GCP Cloud Logging
+
+## How Cursor Should Check Service Health
+
+### Reading Logs Directly
+
+**Cursor should read log files directly from the `logs/` directory** when asked about:
+
+- Service errors or issues
+- Service health status
+- Recent warnings or exceptions
+- Debugging service problems
+
+### Log File Structure
+
+Log files contain JSON-formatted entries. Look for:
+
+- `"level": 50` or `"severity": "ERROR"` for errors
+- `"level": 40` or `"severity": "WARN"` for warnings
+- `"msg"` or `"message"` fields for log messages
+- `"error"` objects with error details
+
+### Quick Status Check
+
+For a quick overview, Cursor can suggest running:
+
+```bash
+./scripts/check-logs.sh
+```
+
+This provides a summary without reading full log files.
+
+### Viewing Live Logs
+
+To follow logs in real-time:
+
+```bash
+# Follow all logs
+tail -f logs/*.log
+
+# Follow specific service
+tail -f logs/runtime-api.log
+```
+
+## What Cursor Should Do
+
+### ✅ When User Asks About Service Health
+
+1. **Read log files directly** from `logs/` directory
+2. **Parse JSON log entries** to find errors and warnings
+3. **Provide recent error summaries** from the last N log entries
+4. **Suggest relevant fixes** based on error patterns found
+
+### ✅ When User Reports Errors
+
+1. **Check relevant service log file** in `logs/`
+2. **Search for error patterns** matching the reported issue
+3. **Extract error context** (stack traces, error messages, timestamps)
+4. **Suggest solutions** based on error analysis
+
+### ❌ What Cursor Should NOT Do
+
+- **Do NOT** update this rule file with log data
+- **Do NOT** commit log data to git
+- **Do NOT** rely on cached/stale log information
+
+## Example Queries Cursor Should Handle
+
+- "Are there any errors in the runtime-api logs?"
+  → Read `logs/runtime-api.log` and search for error-level entries
+
+- "What's the latest error in platform-api?"
+  → Read `logs/platform-api.log`, find most recent error entry
+
+- "Check if services are healthy"
+  → Read all log files in `logs/`, summarize error/warning counts
+
+- "Why is authentication failing?"
+  → Search `logs/runtime-api.log` for authentication-related errors
+
+## Log File Patterns
+
+When reading logs, look for these patterns:
+
+```json
+{
+  "level": 50,
+  "msg": "Error message",
+  "error": {
+    "name": "ErrorType",
+    "message": "Error details",
+    "stack": "Stack trace..."
+  }
+}
+```
+
+## Important Notes
+
+- **Logs are gitignored**: The `logs/` directory is in `.gitignore`, so logs are local only
+- **Read directly**: Always read current log files, don't cache or store log data in rule files
+- **JSON format**: Logs are in JSON format, parse accordingly
+- **Recent entries**: Focus on recent log entries (last 100-1000 lines) for current issues

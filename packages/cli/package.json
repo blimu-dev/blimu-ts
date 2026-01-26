@@ -25,23 +25,28 @@
     "d:build": "npm run build && npm run typecheck",
     "build": "tsup",
     "dev": "tsx watch src/main.ts",
+    "cli": "tsx src/main.ts",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
     "prepublishOnly": "yarn build"
   },
   "dependencies": {
-    "@blimu/fetch": "^0.4.0",
+    "@blimu/backend": "workspace:*",
+    "@blimu/fetch": "^0.4.1",
     "@clack/prompts": "^0.11.0",
+    "@napi-rs/keyring": "^1.2.0",
     "commander": "^14.0.2",
-    "zod": "^4.3.5"
+    "undici": "^7.19.0",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
-    "@types/node": "^25.0.9",
+    "@types/node": "^25.0.10",
+    "msw": "^2.12.7",
     "tsup": "^8.5.1",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3",
-    "vitest": "^4.0.17"
+    "vitest": "^4.0.18"
   },
   "repository": {
     "type": "git",

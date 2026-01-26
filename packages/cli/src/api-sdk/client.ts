@@ -10,6 +10,7 @@ import { DefinitionsService } from './services/definitions';
 import { DnsService } from './services/dns';
 import { EnvironmentsService } from './services/environments';
 import { MeService } from './services/me';
+import { OauthAppsService } from './services/oauth_apps';
 import { ResourcesService } from './services/resources';
 import { SslService } from './services/ssl';
 import { UsersService } from './services/users';
@@ -27,6 +28,7 @@ export class BlimuCli {
   readonly dns: DnsService;
   readonly environments: EnvironmentsService;
   readonly me: MeService;
+  readonly oauthApps: OauthAppsService;
   readonly resources: ResourcesService;
   readonly ssl: SslService;
   readonly users: UsersService;
@@ -51,6 +53,7 @@ export class BlimuCli {
     this.dns = new DnsService(core);
     this.environments = new EnvironmentsService(core);
     this.me = new MeService(core);
+    this.oauthApps = new OauthAppsService(core);
     this.resources = new ResourcesService(core);
     this.ssl = new SslService(core);
     this.users = new UsersService(core);

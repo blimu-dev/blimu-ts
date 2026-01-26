@@ -1,8 +1,17 @@
-import { Command } from 'commander';
+import type { Command } from 'commander';
 import * as clack from '@clack/prompts';
-import { BlimuCli } from '../api-sdk/client';
 import { BlimuConfigSchema } from '../config/schema';
 import { findDefaultConfig, loadConfig } from '../utils/config-loader';
+import { createPlatformApiClient } from '../utils/api-client';
+
+interface PushCommandOptions {
+  config?: string;
+  workspaceId?: string;
+  environmentId?: string;
+  platformApiUrl?: string;
+  apiKey?: string;
+  bearer?: string;
+}
 
 /**
  * Register the push command
@@ -17,10 +26,8 @@ export function pushCommand(program: Command): void {
     )
     .option('--workspace-id <id>', 'Workspace ID (required)')
     .option('--environment-id <id>', 'Environment ID (required)')
-    .option('--api-key <key>', 'API key for authentication')
-    .option('--bearer <token>', 'Bearer token for authentication')
-    .option('--base-url <url>', 'Base URL for the API', 'https://runtime.blimu.dev')
-    .action(async (options) => {
+    .option('--platform-api-url <url>', 'Override Platform API base URL')
+    .action(async (options: PushCommandOptions) => {
       const spinner = clack.spinner();
 
       try {
@@ -35,16 +42,26 @@ export function pushCommand(program: Command): void {
           process.exit(1);
         }
 
-        // Check authentication
-        if (!options.apiKey && !options.bearer) {
-          clack.cancel(
-            'Authentication required. Provide either --api-key <key> or --bearer <token>'
-          );
+        // Create authenticated API client
+        let client;
+        try {
+          spinner.start('Connecting to Blimu API...');
+          client = await createPlatformApiClient({
+            ...(options.apiKey ? { apiKey: options.apiKey } : {}),
+            ...(options.bearer ? { bearer: options.bearer } : {}),
+            ...(options.platformApiUrl ? { platformApiUrl: options.platformApiUrl } : {}),
+            requireAuth: true,
+            spinner,
+          });
+          spinner.stop('✓ Connected');
+        } catch (error) {
+          spinner.stop('❌ Failed to connect');
+          clack.cancel(error instanceof Error ? error.message : String(error));
           process.exit(1);
         }
 
         // Find and load config file
-        const configPath = options.config || findDefaultConfig();
+        const configPath = options.config ?? findDefaultConfig();
         if (!configPath) {
           clack.cancel(
             'No config file found. Please provide --config or ensure blimu.config.ts exists in project root.'
@@ -71,15 +88,6 @@ export function pushCommand(program: Command): void {
         }
         const config = validationResult.data;
         spinner.stop('✓ Config validated');
-
-        // Create API client
-        spinner.start('Connecting to Blimu API...');
-        const client = new BlimuCli({
-          baseURL: options.baseUrl,
-          ...(options.apiKey ? { apiKey: options.apiKey } : {}),
-          ...(options.bearer ? { bearer: options.bearer } : {}),
-        });
-        spinner.stop('✓ Connected');
 
         // Push definitions
         spinner.start('Pushing definitions to Blimu...');

@@ -24,3 +24,4 @@ tsconfig.tsbuildinfo
 
 # Link state (stores original package versions when linking)
 .link-state.json
+*.log

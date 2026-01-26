@@ -19,7 +19,8 @@ export default [
       js: '#!/usr/bin/env node',
     },
     // No externals - bundle all dependencies for self-contained CLI
-    external: [],
+    // Except undici which is built into Node.js 18+
+    external: ['undici'],
   }),
   // Library exports (index.ts)
   defineConfig({

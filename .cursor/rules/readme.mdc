@@ -1,0 +1,436 @@
+---
+alwaysApply: true
+---
+
+Our saas aim to be a all-in-one access control and tracking. We want to deliver all tools required by all startups that are building saas.
+
+- Authentication: Our customers should be able to quickly implement signup, login (password and social media) and sso in their apps.
+- Authorization and RBAC: Our customers should be able to add resources and resource roles for the users. Each user can be associated with multiple resources. Those role can grant different permissions to the users. Roles, resources and permissions should be configurable by our customers.
+- Feature flags: Our customers should be able to configure feature flags, enable those feature flags for specific resources or specific users.
+- Billing entitlements: Our customers should be able to enable specific features for specific plans or even specific resources.
+- Billing mettered entitlements. Our customers should be able create mettered entitlements, and grant specific amount of those entitlements for specific plans or specific resources
+- Billing entitlements tracking. Our customers should be able to track the consumption of those entitlements.
+- Gating: Our customers should be able to gate features of their apps, based on permissions, entitlements and feature flags.
+
+## Blimu Authorization System - Architecture Summary
+
+### Core Concept
+
+Blimu provides "authorization-as-a-service" for seed and Series A startups, consolidating permissions and feature flags into unified "entitlements." This eliminates scattered authorization logic across codebases and serves as the single source of truth for roles and resources.
+
+### Target Market
+
+- Seed and Series A startups (like Resend, AI wrapper companies)
+- Developer tools, API services, multi-tenant SaaS applications
+- Teams that have outgrown simple RBAC but don't need full Zanzibar complexity
+
+### Key Design Decisions
+
+#### 1. Unified Entitlement Model
+
+Instead of separate permission/feature flag checks, everything is an "entitlement":
+
+```javascript
+// Instead of scattered logic
+const canCreate = hasRole('admin') && featureEnabled('brands');
+
+// Unified entitlement check
+const createBrand = useEntitlement('organization:create_brand');
+```
+
+#### 2. Four-File Configuration System
+
+Developers define authorization using four YAML files stored in a `.blimu/` directory:
+
+- `resources.yml` (required)
+- `entitlements.yml` (optional)
+- `features.yml` (optional)
+- `plans.yml` (optional)
+- `config.yml` (optional, for SDK generation configuration)
+
+**resources.yml** - Define entities, roles, hierarchical relations, and role inheritance
+
+```yaml
+organization:
+  roles: [guest, viewer, editor, billing, admin]
+
+workspace:
+  roles: [admin, editor, viewer]
+  roles_inheritance:
+    editor: [organization->admin, organization->editor]
+    viewer: [organization->billing]
+
+  parents:
+    organization:
+      required: true
+
+brand:
+  roles: [admin, editor, viewer]
+  roles_inheritance:
+    editor: [workspace->admin, workspace->editor]
+    viewer: [workspace->viewer]
+
+  parents:
+    workspace:
+      required: false
+    organization:
+      required: false
+```
+
+**entitlements.yml** - Define what actions are allowed based on roles
+
+```yaml
+entitlements:
+  organization:create_workspace:
+    roles: [admin]
+    plans: ['pro']
+    limit: 'workspace_count' # Optional: reference to usage-based limit
+
+  workspace:delete:
+    roles: [admin] # Only direct workspace admins (inheritance handled in resources)
+
+  project:deploy:
+    roles: [owner]
+```
+
+**features.yml** - Define features with metadata, plan scoping, and linked entitlements
+
+```yaml
+features:
+  workspace_management:
+    name: 'Workspace Management'
+    summary: 'Create and manage multiple workspaces'
+    entitlements:
+      - organization:create_workspace
+      - workspace:delete
+
+  advanced_analytics:
+    name: 'Advanced Analytics'
+    summary: 'Access to detailed analytics and reporting'
+    # No entitlements - checked directly via useFeature()
+```
+
+Note: Features can optionally include `default_enabled` (CLI) or `plans` (API) for plan-based gating.
+
+**plans.yml** - Define available billing plans with metadata and limits
+
+```yaml
+plans:
+  free:
+    name: 'Free Plan'
+    summary: 'Perfect for getting started'
+    resource_limits:
+      workspace_count: 1
+    usage_based_limits:
+      api_calls:
+        value: 1000
+        period: monthly
+
+  premium:
+    name: 'Premium Plan'
+    summary: 'For growing teams'
+    resource_limits:
+      workspace_count: 10
+    usage_based_limits:
+      api_calls:
+        value: 10000
+        period: monthly
+
+  enterprise:
+    name: 'Enterprise Plan'
+    summary: 'For large organizations'
+    # No limits = unlimited
+```
+
+Note: CLI version uses `description` field, while API version uses `summary` and supports advanced limit configurations.
+
+#### 3. Plan Management System
+
+Plans serve as the foundation for feature gating and access control:
+
+**Plan Definition:**
+
+- **Metadata**: Human-readable names and descriptions for UI display
+- **Validation**: Features can only reference plans defined in plans.yml
+- **Extensibility**: Ready for future pricing, limits, and billing integration
+
+**Plan-Feature Integration:**
+
+```yaml
+# features.yml references plans.yml
+features:
+  workspace_management:
+    plans: [premium, enterprise] # Must exist in plans.yml
+```
+
+**CLI Commands:**
+
+```bash
+# Validate configuration
+blimu validate ./blimu/
+# ✓ All plans referenced in features.yml exist in plans.yml
+# ✗ Error: Feature 'advanced_analytics' references unknown plan 'professional'
+
+# Push configuration to environment
+blimu push ./blimu/ --workspace-id <workspace-id> --environment-id <environment-id>
+
+# Pull configuration from environment
+blimu pull ./blimu/ --workspace-id <workspace-id> --environment-id <environment-id>
+```
+
+**SDK Usage:**
+
+```javascript
+// Automatically checks both feature flag and user's plan
+const canUseWorkspaces = useFeature('workspace_management');
+// Returns: { enabled: false, reason: 'plan_restriction', allowedPlans: ['premium', 'enterprise'] }
+```
+
+#### 4. Enhanced Role Inheritance System
+
+The new `roles_inheritance` configuration allows sophisticated permission cascading:
+
+- **Direct inheritance**: `parent->admin` inherits admin role from parent resource
+- **Cross-resource inheritance**: `organization->admin` inherits from specific resource types
+- **Multiple inheritance**: Array of inherited roles for complex hierarchies
+
+#### 5. Feature Management with Plan Integration
+
+Features now serve dual purposes:
+
+- **Feature flagging**: Traditional on/off toggles
+- **Plan gating**: Automatic plan-based access control via UI
+- **Entitlement grouping**: Logical grouping of related permissions
+
+#### 6. Single Source of Truth for Roles
+
+Customers don't store roles in their database - Blimu is the authoritative source:
+
+```javascript
+// Only call Blimu - no local role storage needed
+await blimu.roles.assign('user_123', 'admin', 'organization', 'org_456');
+await blimu.resources.create('workspace', 'ws_789', { parent: 'org_456' });
+```
+
+#### 7. Multi-Tenant Architecture
+
+Blimu uses a three-level hierarchy for multi-tenancy:
+
+- **Workspace**: Represents YOUR CUSTOMERS (companies using Blimu)
+- **Environment**: Represents a specific environment (development, production) within a workspace
+- **Resources**: Belong to environments and represent customer's application entities (organizations, workspaces, projects, etc.)
+
+All resources and roles are scoped to a specific environment, enabling isolated configurations per environment.
+
+#### 8. Event-Driven Resource Management
+
+Customers push resource lifecycle and role assignment events to Blimu:
+
+```javascript
+// Resource lifecycle
+await blimu.resources.create('organization', 'org_123', { environmentId: 'env_456' });
+await blimu.resources.delete('workspace', 'ws_456', { environmentId: 'env_456' });
+
+// Role management
+await blimu.roles.create('user_789', 'admin', 'organization', 'org_123', {
+  environmentId: 'env_456',
+});
+await blimu.roles.delete('user_456', 'workspace', 'ws_456', { environmentId: 'env_456' });
+```
+
+#### 9. Deployment via "Authorization as Code"
+
+- CLI-driven workflow: `blimu push ./blimu/` (pushes to environment)
+- Schema validation: `blimu validate ./blimu/`
+- Version-controlled schema changes stored in `EnvironmentDefinition` table
+- Git-based rollbacks and change tracking
+- Configuration stored as JSON in database per environment
+
+#### 10. Database Schema
+
+The system uses a PostgreSQL database with the following key models:
+
+- **Workspace**: Top-level tenant (your customers)
+- **Environment**: Scoped within workspace (dev, staging, prod)
+- **Resource**: Customer's application entities (organizations, workspaces, projects, etc.)
+- **Role**: User-role assignments on resources
+- **ResourceEdge**: DAG edges for multi-parent resource hierarchies
+- **ResourceClosure**: Transitive closure for fast ancestry queries
+- **RoleInheritanceRule**: Flattened inheritance rules from resources.yml
+- **ResourcePlan**: Plan assignments to tenant resources
+- **UsageWallet**: Wallet-based usage tracking (credits/consumptions)
+- **EnvironmentDefinition**: Stores JSON configuration (resources, entitlements, features, plans)
+- **ApiKey**: Environment-scoped API keys for authentication
+- **User**: Customer's end-users (managed by customers, referenced by Blimu)
+
+### Configuration Schema Validation
+
+**Resources Schema (TypeScript/Zod):**
+
+```typescript
+export const ResourceDefinitionSchema = z.object({
+  is_tenant: z.boolean().optional(), // Marks resource as tenant-level (for plan assignment)
+  roles: z.array(z.string()).min(1, 'At least one role must be defined'),
+  parents: z.record(z.string(), z.object({ required: z.boolean() })).optional(),
+  roles_inheritance: z
+    .record(
+      z.string().min(1), // local role
+      // Allow tokens containing letters, numbers, underscores or dashes
+      // Examples: parent->editor, organization->admin, workspace_v2->viewer
+      z.array(z.string().regex(/^([a-z0-9_-]+->)*[a-z0-9_-]+$/i)).min(1),
+    )
+    .optional(),
+});
+```
+
+**Entitlements Schema:**
+
+```typescript
+export const EntitlementDefinitionSchema = z.object({
+  roles: z.array(z.string()).min(1).optional(),
+  plans: z.array(z.string()).optional(),
+  limit: z.string().optional(), // Reference to usage-based limit
+});
+```
+
+**Features Schema:**
+
+```typescript
+export const FeatureDefinitionSchema = z.object({
+  name: z.string(),
+  summary: z.string().optional(),
+  entitlements: z.array(z.string()).optional(),
+  // CLI version also supports:
+  // plans: z.array(z.string()).optional(),
+  // default_enabled: z.boolean().optional(),
+});
+```
+
+**Plans Schema:**
+
+```typescript
+export const PlanDefinitionSchema = z.object({
+  name: z.string().min(1, 'Plan name is required'),
+  summary: z.string().optional(), // API version
+  description: z.string().min(1, 'Plan description is required'), // CLI version
+  resource_limits: z.record(z.string(), z.number().int().min(0)).optional(),
+  usage_based_limits: z
+    .record(
+      z.string(),
+      z.object({
+        value: z.number().int().min(0),
+        period: z.enum(['monthly', 'yearly', 'lifetime']),
+      }),
+    )
+    .optional(),
+});
+```
+
+### MVP Scope
+
+**Core Features:**
+
+1. Four-file config system (resources.yml, entitlements.yml, features.yml, plans.yml)
+2. CLI for schema management (`blimu auth push`, `blimu auth validate`)
+3. REST API for role/resource management and entitlement checks
+4. Basic React SDK with `useEntitlement()` and `useFeature()` hooks
+5. Feature management UI with plan scoping capabilities
+
+**API Endpoints:**
+
+```javascript
+// Resource management
+GET /v1/resources/{resourceType} - List resources
+POST /v1/resources/{resourceType} - Create a resource
+GET /v1/resources/{resourceType}/{resourceId} - Read a resource
+PUT /v1/resources/{resourceType}/{resourceId} - Update a resource
+DELETE /v1/resources/{resourceType}/{resourceId} - Delete a resource
+POST /v1/resources/{resourceType}/bulk - Bulk create resources
+
+// Role management
+GET /v1/users/{userId}/roles - List user roles
+POST /v1/users/{userId}/roles - Create a role (assign role to user on resource)
+DELETE /v1/users/{userId}/roles/{resourceType}/{resourceId} - Delete a role
+POST /v1/users/roles/bulk - Bulk create roles
+
+// Authorization checks
+POST /v1/entitlements/check - Check if a user has a specific entitlement on a resource
+
+// Plan management
+GET /v1/resources/{resourceType}/{resourceId}/plan - Get the plan assigned to a tenant resource
+POST /v1/resources/{resourceType}/{resourceId}/plan - Assign a plan to a tenant resource
+DELETE /v1/resources/{resourceType}/{resourceId}/plan - Remove plan assignment
+
+// Usage tracking
+GET /v1/usage/balance/{resourceType}/{resourceId}/{limitType} - Get wallet balance
+POST /v1/usage/check - Check if consumption is allowed
+POST /v1/usage/consume - Record consumption (inserts negative amount)
+POST /v1/usage/credit - Add credits to wallet (inserts positive amount)
+GET /v1/usage/transactions/{resourceType}/{resourceId}/{limitType} - Get transaction history
+
+// Definition management (platform-api)
+POST /v1/workspace/{workspaceId}/environments/{environmentId}/definitions/validate - Validate Blimu configuration
+POST /v1/workspace/{workspaceId}/environments/{environmentId}/definitions/openapi - Generate custom OpenAPI spec
+```
+
+**MVP React SDK:**
+
+```javascript
+const { allowed, reason } = useEntitlement('organization:create_workspace');
+const { enabled, reason, allowedPlans } = useFeature('workspace_management'); // Checks both feature flag and plan
+```
+
+**Current Features:**
+
+- ✅ Usage limits and metering (wallet-based system with credits/consumptions)
+- ✅ Authentication flows (signup, signin, OAuth, social providers)
+- ✅ API key management with scopes (environment-scoped)
+- ✅ Advanced plan management with resource limits and usage-based limits
+- ✅ Comprehensive dashboard and admin UI
+- ✅ OAuth 2.0 provider support
+- ✅ Environment branding and custom domains
+- ✅ SDK generation from OpenAPI specs
+
+**Future Features:**
+
+- Advanced analytics and reporting
+- Webhook system for authorization events
+- Audit logging and compliance features
+- Advanced rate limiting and throttling
+
+### Technical Boundaries
+
+#### What Blimu Handles:
+
+- Role-based access control with sophisticated inheritance
+- Feature management with plan integration
+- Plan definition and validation
+- Cross-service authorization consistency
+- Resource and role lifecycle management
+
+#### What Blimu Does NOT Handle:
+
+- Complex business logic ("can't delete last workspace")
+- Application-specific validation rules
+- Billing and subscription management (plan assignment only)
+- Plan pricing and payment processing
+- User identity storage (customers manage their own user database)
+
+### Architecture Principles
+
+1. **Single source of truth** - Blimu stores all roles and resources, customers don't duplicate
+2. **Simplicity over flexibility** - Cover 90% of startup auth needs extremely well
+3. **Developer-first** - Fits naturally into existing development workflows
+4. **Performance-critical** - Authorization checks must be sub-10ms
+5. **Statically analyzable** - Schema validation and type generation from config files
+6. **Eventual consistency acceptable** - No need for global consistency like Google's Zanzibar
+
+### SDK Design
+
+- Single `useEntitlement(key)` method for all authorization checks
+- Single `useFeature(key)` method for feature flag and plan-based access
+- Rich return objects with context for UI decisions
+- Framework-agnostic with React hooks as primary interface
+- Auto-generated TypeScript types from schema definitions
+
+This architecture provides a middle ground between basic RBAC and full Zanzibar complexity, specifically designed for the scale and needs of early-stage startups, with sophisticated role inheritance and integrated feature/plan management.
