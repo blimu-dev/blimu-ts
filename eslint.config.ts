@@ -9,7 +9,13 @@ import prettier from 'eslint-plugin-prettier';
 export default defineConfig(
   prettierConfig,
   {
-    ignores: ['**/dist/**', '**/node_modules/**', '**/.changeset/**', '**/*.config.ts'],
+    ignores: [
+      '**/dist/**',
+      '**/node_modules/**',
+      '**/.changeset/**',
+      '**/*.config.ts',
+      '**/scripts/**',
+    ],
   },
   eslintPluginPrettierRecommended,
   eslint.configs.recommended,
@@ -47,6 +53,10 @@ export default defineConfig(
         {
           prefer: 'type-imports',
           fixStyle: 'separate-type-imports',
+          // Allow regular imports for classes used in constructor parameters
+          // This is necessary for NestJS dependency injection which requires
+          // runtime class references for decorator metadata
+          disallowTypeAnnotations: false,
         },
       ],
       'prettier/prettier': 'error',
@@ -70,6 +80,39 @@ export default defineConfig(
       '@typescript-eslint/no-unsafe-assignment': 'off',
       '@typescript-eslint/no-unsafe-member-access': 'off',
       '@typescript-eslint/no-unsafe-call': 'off',
+    },
+  },
+  {
+    // Scripts directory - no type checking
+    files: ['scripts/**/*.{js,mjs}'],
+    languageOptions: {
+      parserOptions: {
+        projectService: false,
+      },
+    },
+    rules: {
+      '@typescript-eslint/no-unsafe-assignment': 'off',
+      '@typescript-eslint/no-unsafe-member-access': 'off',
+      '@typescript-eslint/no-unsafe-call': 'off',
+      '@typescript-eslint/explicit-module-boundary-types': 'off',
+    },
+  },
+  {
+    // Disable consistent-type-imports for NestJS services and controllers
+    // These files need regular imports for constructor dependency injection
+    // to work properly with decorator metadata
+    files: [
+      '**/*.controller.ts',
+      '**/*.decorator.ts',
+      '**/*.service.ts',
+      '**/*.module.ts',
+      '**/*.guard.ts',
+      '**/*.interceptor.ts',
+      '**/*.filter.ts',
+      '**/*.command.ts',
+    ],
+    rules: {
+      '@typescript-eslint/consistent-type-imports': 'off',
     },
   },
 );
