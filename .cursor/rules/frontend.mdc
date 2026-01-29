@@ -1,0 +1,706 @@
+---
+description: Frontend Development Guidelines
+globs:
+  - 'apps/platform-ui/src/**/*.tsx'
+  - 'apps/platform-ui/src/**/*.ts'
+  - 'apps/auth-ui/src/**/*.tsx'
+  - 'apps/auth-ui/src/**/*.ts'
+alwaysApply: false
+---
+
+# Frontend Development Guidelines
+
+## UI Component Library
+
+### Use @blimu/ui (shadcn-based)
+
+We use **shadcn/ui** as our component library, which is available through the `@blimu/ui` package. Always prefer using components from this library over creating custom components or using other UI libraries.
+
+**Component Import Pattern:**
+
+```typescript
+// ✅ Correct - Import from @blimu/ui/components
+import { Button } from '@blimu/ui/components/button';
+import { Input } from '@blimu/ui/components/input';
+import {
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormMessage,
+  FormDescription,
+} from '@blimu/ui/components/form';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@blimu/ui/components/select';
+
+// ❌ Incorrect - Don't create custom components when shadcn equivalents exist
+// Don't use other UI libraries (Material-UI, Ant Design, etc.)
+```
+
+**Available Components:**
+
+The `@blimu/ui` library includes shadcn components such as:
+
+- `alert`, `alert-description`
+- `avatar`
+- `badge`
+- `button`
+- `checkbox`
+- `command`
+- `dialog`
+- `form` (FormField, FormItem, FormLabel, FormControl, FormMessage, FormDescription)
+- `input`
+- `label`
+- `popover`
+- `select` (Select, SelectContent, SelectItem, SelectTrigger, SelectValue)
+- `separator`
+- `skeleton`
+- `sonner` (toast notifications)
+- `tabs`
+- `textarea`
+
+**When to Add New Components:**
+
+If you need a component that doesn't exist in `@blimu/ui`:
+
+1. Check if a shadcn/ui component exists for your use case
+2. Add it to `libs/ui/src/components/` following shadcn patterns
+3. Export it from `libs/ui/src/components/index.ts`
+4. Use it from `@blimu/ui/components/[component-name]`
+
+## API Requests - Use SDKs
+
+### Always Use SDKs for API Calls
+
+**Never make direct `fetch()` calls to our APIs.** Always use the auto-generated SDKs:
+
+- `@blimu/platform-sdk` - For platform-api endpoints
+- `@blimu/auth-sdk` - For auth-api endpoints
+- `@blimu/internal-sdk` - For internal-api endpoints
+
+**SDK Usage Pattern:**
+
+```typescript
+// ✅ Correct - Use SDK via useSDK hook
+import { useSDK } from '@/lib/sdk/sdk.hook';
+import { useQuery, useMutation } from '@tanstack/react-query';
+
+function MyComponent() {
+  const sdk = useSDK();
+  const workspaceId = useWorkspaceId();
+  const environmentId = useEnvironmentId();
+
+  // For queries
+  const { data, isLoading, error } = useQuery({
+    queryKey: sdk.environments.getAuthConfig__queryKeys(workspaceId, environmentId),
+    queryFn: () => sdk.environments.getAuthConfig(workspaceId, environmentId),
+  });
+
+  // For mutations
+  const mutation = useMutation({
+    mutationFn: (payload: MyPayload) =>
+      sdk.environments.updateAuthConfig(workspaceId, environmentId, payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: sdk.environments.getAuthConfig__queryKeys(workspaceId, environmentId),
+      });
+    },
+  });
+
+  // ...
+}
+
+// ❌ Incorrect - Don't use fetch directly
+const response = await fetch('/api/v1/workspace/...', {
+  method: 'PUT',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify(data),
+});
+```
+
+**SDK Query Keys:**
+
+Always use the SDK's `__queryKeys` methods for React Query cache keys:
+
+```typescript
+// ✅ Correct
+queryKey: sdk.environments.getAuthConfig__queryKeys(workspaceId, environmentId);
+
+// ❌ Incorrect - Don't manually construct query keys
+queryKey: ['environments', 'auth-config', workspaceId, environmentId];
+```
+
+**SDK Method Signatures:**
+
+If an SDK method appears to be missing a parameter (like a body parameter), this is likely an SDK generation issue. The SDKs are auto-generated from OpenAPI specs. Options:
+
+1. **Check the OpenAPI spec** - Ensure the endpoint definition includes all parameters
+2. **Regenerate the SDK** - Restart the API service to trigger SDK regeneration
+3. **Temporary workaround** - If needed, access the core client directly (document the workaround):
+
+```typescript
+// Temporary workaround for SDK generation issue
+// TODO: Fix SDK generation to include body parameter
+const coreClient = (sdk.environments as any).core;
+return coreClient.request({
+  method: 'PUT',
+  path: `/v1/workspace/${workspaceId}/environments/${environmentId}/auth-config`,
+  headers: { 'content-type': 'application/json' },
+  body: JSON.stringify(payload),
+});
+```
+
+**SDK Services:**
+
+SDKs are organized by service. Common services:
+
+- `sdk.environments.*` - Environment management
+- `sdk.workspaces.*` - Workspace management
+- `sdk.users.*` - User management
+- `sdk.resources.*` - Resource management
+- `sdk.apiKeys.*` - API key management
+- `sdk.definitions.*` - Definition management
+
+## Form Management
+
+### Use react-hook-form with zod
+
+Always use `react-hook-form` with `zod` for form validation:
+
+```typescript
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
+
+const formSchema = z.object({
+  name: z.string().min(1, 'Name is required'),
+  email: z.string().email('Invalid email address'),
+});
+
+type FormData = z.infer<typeof formSchema>;
+
+function MyForm() {
+  const form = useForm<FormData>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      name: '',
+      email: '',
+    },
+  });
+
+  const onSubmit = (data: FormData) => {
+    // Handle form submission
+  };
+
+  return (
+    <form onSubmit={form.handleSubmit(onSubmit)}>
+      <FormField
+        control={form.control}
+        name="name"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Name</FormLabel>
+            <FormControl>
+              <Input {...field} />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+      {/* ... */}
+    </form>
+  );
+}
+```
+
+## React Query Integration
+
+### Use React Query for Data Fetching
+
+Always use `@tanstack/react-query` for data fetching and mutations:
+
+```typescript
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+
+// Queries
+const { data, isLoading, error } = useQuery({
+  queryKey: sdk.resources.list__queryKeys(workspaceId, environmentId),
+  queryFn: () => sdk.resources.list(workspaceId, environmentId),
+});
+
+// Mutations
+const queryClient = useQueryClient();
+const mutation = useMutation({
+  mutationFn: (payload) => sdk.resources.create(workspaceId, environmentId, payload),
+  onSuccess: () => {
+    queryClient.invalidateQueries({
+      queryKey: sdk.resources.list__queryKeys(workspaceId, environmentId),
+    });
+    toast.success('Resource created successfully');
+  },
+  onError: (error) => {
+    toast.error(error instanceof Error ? error.message : 'Failed to create resource');
+  },
+});
+```
+
+## Toast Notifications
+
+### Use sonner for Toasts
+
+Use `sonner` (via `@blimu/ui/components/sonner`) for toast notifications:
+
+```typescript
+import { toast } from 'sonner';
+
+// Success
+toast.success('Operation completed successfully');
+
+// Error
+toast.error('Operation failed');
+
+// With custom message
+toast.error(error instanceof Error ? error.message : 'Unknown error');
+```
+
+## Dialogs (Modals)
+
+### Use Dialog Manager for All Dialogs
+
+**Always use the dialog manager** for dialogs/modals instead of managing dialog state manually. The dialog manager provides a centralized way to handle dialogs with proper stacking, promise-based API, and consistent behavior.
+
+**Dialog Manager Pattern:**
+
+```typescript
+// ✅ Correct - Use dialog manager
+import { useDialog } from '@/components/dialog-manager/dialog-manager.hook';
+import MyDialog from '@/features/my-feature/my-dialog';
+
+function MyComponent() {
+  const dialog = useDialog(MyDialog);
+
+  const handleOpen = async () => {
+    const result = await dialog.open({ initialData: 'some data' });
+    // Handle result when dialog closes
+    console.log('Dialog closed with result:', result);
+  };
+
+  return <Button onClick={handleOpen}>Open Dialog</Button>;
+}
+
+// ❌ Incorrect - Don't manage dialog state manually
+const [isOpen, setIsOpen] = useState(false);
+<Dialog open={isOpen} onOpenChange={setIsOpen}>
+  {/* ... */}
+</Dialog>
+```
+
+**Creating a Dialog Component:**
+
+Dialog components must accept `BaseDialogProps<Result>` where `Result` is the type of value returned when the dialog closes:
+
+```typescript
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@blimu/ui/components';
+import { BaseDialogProps } from '@/components/dialog-manager/dialog-manager.types';
+
+type MyDialogProps = BaseDialogProps<string> & {
+  // Your custom props here
+  initialData?: string;
+};
+
+export default function MyDialog({ dialog, initialData }: MyDialogProps) {
+  const handleSave = () => {
+    // Close dialog and return a result
+    dialog.onClose('saved value');
+  };
+
+  const handleCancel = () => {
+    // Close dialog without a result (or with null/undefined)
+    dialog.onClose('');
+  };
+
+  return (
+    <Dialog open={dialog.isOpen} onOpenChange={dialog.onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>My Dialog</DialogTitle>
+        </DialogHeader>
+        {/* Dialog content */}
+        <Button onClick={handleSave}>Save</Button>
+        <Button onClick={handleCancel}>Cancel</Button>
+      </DialogContent>
+    </Dialog>
+  );
+}
+```
+
+**Dialog API Methods:**
+
+The `dialog` prop provides several methods:
+
+- `dialog.onClose(result)` - Close the dialog and return a result
+- `dialog.onOpenChange(open)` - Control dialog open/close state
+- `dialog.disableClose()` - Prevent dialog from being closed
+- `dialog.enableClose()` - Allow dialog to be closed
+- `dialog.isCloseDisabled` - Check if close is disabled
+- `dialog.isOpen` - Check if dialog is open
+
+**Dialog Manager Provider:**
+
+The `DialogManagerProvider` is already set up in the app root (`_required-auth-gate.tsx`), so you don't need to add it manually. Just use `useDialog` hook in any component.
+
+**Promise-Based API:**
+
+The `dialog.open()` method returns a Promise that resolves when the dialog closes:
+
+```typescript
+const result = await dialog.open({ prop1: 'value' });
+// This code runs after dialog closes
+console.log('Dialog result:', result);
+```
+
+**Example: Full Dialog Implementation**
+
+```typescript
+// features/api-keys-management/create-dialog.tsx
+import { BaseDialogProps } from '@/components/dialog-manager/dialog-manager.types';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@blimu/ui/components';
+
+type CreateDialogProps = BaseDialogProps<string> & {
+  // Optional custom props
+};
+
+export default function CreateDialog({ dialog }: CreateDialogProps) {
+  const handleCreate = async () => {
+    // Perform creation logic
+    const result = 'created-id';
+    dialog.onClose(result);
+  };
+
+  return (
+    <Dialog open={dialog.isOpen} onOpenChange={dialog.onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Create Item</DialogTitle>
+        </DialogHeader>
+        {/* Form content */}
+        <Button onClick={handleCreate}>Create</Button>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// routes/my-page.tsx
+import { useDialog } from '@/components/dialog-manager/dialog-manager.hook';
+import CreateDialog from '@/features/api-keys-management/create-dialog';
+
+export default function MyPage() {
+  const createDialog = useDialog(CreateDialog);
+
+  const handleCreate = async () => {
+    const result = await createDialog.open();
+    if (result) {
+      // Handle successful creation
+      console.log('Created:', result);
+    }
+  };
+
+  return <Button onClick={handleCreate}>Create</Button>;
+}
+```
+
+## File Organization
+
+### Component Structure
+
+- **Routes**: `apps/platform-ui/src/routes/*.tsx` - Route components
+- **Features**: `apps/platform-ui/src/features/*/` - Feature-specific components and logic
+- **Components**: `apps/platform-ui/src/components/*` - Shared/reusable components
+- **Hooks**: `apps/platform-ui/src/hooks/*` or `apps/platform-ui/src/utils/*.hook.ts` - Custom hooks
+- **Utils**: `apps/platform-ui/src/utils/*` - Utility functions
+
+### Component & Page Organization
+
+#### When to Create Folders
+
+##### 1. **Pages/Routes - Always Use Folders**
+
+Every page should have its own folder to encourage local component creation and better organization:
+
+```
+pages/
+├── team-settings/
+│   ├── team-settings.page.tsx
+│   ├── components/
+│   │   ├── team-member-card.component.tsx
+│   │   └── team-invite-modal.component.tsx
+│   └── hooks/
+│       └── use-team-data.ts
+└── user-profile/
+    ├── user-profile.page.tsx
+    └── components/
+        └── profile-header.component.tsx
+```
+
+##### 2. **Complex Components - Use Folders When Needed**
+
+Create folders for components that need multiple files (hooks, utilities, sub-components):
+
+```
+components/
+├── data-table/
+│   ├── data-table.component.tsx
+│   ├── hooks/
+│   │   ├── use-table-data.ts
+│   │   └── use-table-sorting.ts
+│   └── components/
+│       ├── table-header.component.tsx
+│       └── table-row.component.tsx
+└── button.component.tsx  # Simple components stay as single files
+```
+
+**Guidelines:**
+
+- Start with single file for simple components
+- Create folder when component needs custom hooks or sub-components
+- Keep styles in same file initially, extract when it becomes complex
+
+### File & Folder Naming Conventions
+
+Use **kebab-case** (lowercase with hyphens) for all file and folder names:
+
+**Folders:**
+
+- `pages/overview/` ✅
+- `components/data-table/` ✅
+- `pages/Overview/` ❌ (avoid PascalCase folders)
+- `components/DataTable/` ❌
+
+**Files with descriptive suffixes:**
+
+- **Components**: `component-name.component.tsx`
+- **Pages**: `page-name.page.tsx`
+- **Routes**: `route-name.route.tsx`
+- **Hooks**: `use-hook-name.ts`
+- **Utils**: `utility-name.utils.ts`
+- **Constants**: `constants.ts`
+- **Types**: `type-name.types.ts`
+- **Context**: `context-name.context.tsx`
+- **Provider**: `provider-name.provider.tsx`
+
+**Examples:**
+
+```
+pages/
+├── overview/
+│   ├── overview.page.tsx
+│   ├── components/
+│   │   ├── environment-badge.component.tsx
+│   │   └── quick-action-card.component.tsx
+│   └── hooks/
+│       └── use-overview-data.ts
+└── team-settings/
+    ├── team-settings.page.tsx
+    └── components/
+        └── team-member-card.component.tsx
+
+components/
+├── data-table/
+│   ├── data-table.component.tsx
+│   ├── hooks/
+│   │   └── use-table-data.ts
+│   └── components/
+│       └── table-header.component.tsx
+└── button.component.tsx
+```
+
+## Module Structure (Imports/Exports)
+
+### Export Patterns
+
+#### 1. **No Barrel Exports (export \*)**
+
+```tsx
+// ❌ Avoid - impacts tree-shaking
+export * from './components';
+export * from './hooks';
+
+// ✅ Preferred - explicit exports
+export { UserCard } from './user-card.component';
+export type { UserCardProps } from './user-card.component';
+```
+
+#### 2. **Index Files for External Access**
+
+```tsx
+// components/data-table/index.ts
+export { DataTable } from './data-table.component';
+export type { DataTableProps } from './data-table.component';
+export { useTableData } from './hooks/use-table-data';
+
+// Usage from outside
+import { DataTable, type DataTableProps } from '@/components/data-table';
+```
+
+#### 3. **Import Guidelines**
+
+```tsx
+// ✅ Direct imports for better tree-shaking
+import { DataTable } from '@/components/data-table/data-table.component';
+import { useTableData } from '@/components/data-table/hooks/use-table-data';
+
+// ✅ Through index for external consumers
+import { DataTable } from '@/components/data-table';
+```
+
+## Component Standards
+
+### Props Interface Definition
+
+Always define explicit interfaces for component props:
+
+```tsx
+interface UserCardProps {
+  user: User;
+  showActions?: boolean;
+  onEdit?: (user: User) => void;
+}
+
+// ✅ Preferred - using React.FC provides better type inference
+export const UserCard: React.FC<UserCardProps> = ({ user, showActions, onEdit }) => {
+  // component logic
+};
+
+// ✅ Alternative - direct props typing
+export const UserCard = ({ user, showActions, onEdit }: UserCardProps) => {
+  // component logic
+};
+```
+
+### Component Structure Order
+
+Organize component internals consistently:
+
+```tsx
+export const MyComponent = ({ prop1, prop2 }: MyComponentProps) => {
+  // 1. Hooks (useState, useEffect, custom hooks)
+  const [state, setState] = useState();
+  const { data, loading } = useCustomHook();
+
+  // 2. Computed values and derived state
+  const computedValue = useMemo(() => calculateSomething(data), [data]);
+
+  // 3. Event handlers
+  const handleClick = useCallback(() => {
+    setState(newValue);
+  }, []);
+
+  // 4. Early returns/conditional logic
+  if (loading) return <LoadingSpinner />;
+
+  // 5. Render
+  return <div>{/* JSX content */}</div>;
+};
+```
+
+## TypeScript
+
+### Type Safety
+
+- Always use TypeScript types from SDKs when available
+- Use `z.infer<typeof schema>` for form data types
+- Avoid `any` types - use proper types or `unknown` with type guards
+
+## Best Practices
+
+### General Guidelines
+
+1. **Component Composition**: Prefer composition over complex prop drilling
+2. **Error Handling**: Always handle loading and error states
+3. **Accessibility**: Use semantic HTML and ARIA attributes (shadcn components handle this)
+4. **Performance**: Use React Query's caching and invalidation properly
+5. **Code Reuse**: Extract common patterns into hooks or utility functions
+6. **Consistency**: Follow existing patterns in the codebase
+
+### Avoid Props Complexity
+
+- **Props Hell**: Too many props (>5-7 props is a red flag)
+- **Props Drilling**: Passing props through multiple component levels
+
+```tsx
+// ❌ Props hell
+<UserCard
+  name={user.name}
+  email={user.email}
+  avatar={user.avatar}
+  isActive={user.isActive}
+  role={user.role}
+  department={user.department}
+  manager={user.manager}
+  startDate={user.startDate}
+/>
+
+// ✅ Better - pass object
+<UserCard user={user} />
+
+// ❌ Props drilling
+<Page>
+  <Section user={user}>
+    <Card user={user}>
+      <UserDetails user={user} />
+    </Card>
+  </Section>
+</Page>
+
+// ✅ Better - use context or composition
+<UserProvider user={user}>
+  <Page>
+    <Section>
+      <Card>
+        <UserDetails />
+      </Card>
+    </Section>
+  </Page>
+</UserProvider>
+```
+
+### When to Extract Logic
+
+Extract custom hooks when:
+
+- Component has complex state logic (>3 useState calls)
+- Logic could be reused in other components
+- Component file exceeds ~100-150 lines
+
+### Shared vs Local Code
+
+**Rule**: Code stays local until it's used in 2+ different contexts
+
+- **Local**: Keep in page/component folder
+- **Shared**: Move to root-level folders (components/, hooks/, utils/)
+
+### Implementation Approach
+
+**Start simple, evolve when needed:**
+
+1. Begin with single files for new components (for pages start with folders)
+2. Create folders when complexity increases
+3. Extract hooks when logic becomes complex
+4. Move to shared locations only when truly reused
+
+## What NOT to Do
+
+❌ **Don't** create custom UI components when shadcn equivalents exist  
+❌ **Don't** use `fetch()` directly for API calls - always use SDKs  
+❌ **Don't** manually construct React Query keys - use SDK `__queryKeys` methods  
+❌ **Don't** use other UI libraries (Material-UI, Ant Design, Chakra UI, etc.)  
+❌ **Don't** bypass SDKs even if they seem incomplete - fix the SDK generation instead  
+❌ **Don't** use `any` types without good reason - prefer proper typing  
+❌ **Don't** manage dialog state manually with `useState` - always use the dialog manager
+
+> > > > > > > 5dcb304 (feat: add cursor rules)

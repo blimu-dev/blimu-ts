@@ -1,4 +1,4 @@
-import type { EntitlementType } from '@blimu/types';
+import type { EntitlementType, ResourceType } from '@blimu/types';
 /**
  * Configuration interface for Blimu NestJS integration
  */
@@ -88,9 +88,12 @@ export interface BlimuConfig<TRequest = unknown> {
    * ```
    */
   defaultEntitlementCtxResolver?: (
-    context: { entitlement: EntitlementType; resourceType: string },
+    context: { entitlement: EntitlementType; resourceType: ResourceType },
     request: TRequest,
-  ) => { resourceId: string; amount?: number } | Promise<{ resourceId: string; amount?: number }> | undefined;
+  ) =>
+    | { resourceId: string; amount?: number }
+    | Promise<{ resourceId: string; amount?: number }>
+    | undefined;
 }
 
 /**

@@ -19,7 +19,12 @@ import { BlimuClient } from '@blimu/client';
 const client = new BlimuClient({
   baseURL: 'https://api.blimu.dev',
   timeoutMs: 10000,
-  retry: { retries: 2, strategy: 'exponential', backoffMs: 300, retryOn: [429, 500, 502, 503, 504] },
+  retry: {
+    retries: 2,
+    strategy: 'exponential',
+    backoffMs: 300,
+    retryOn: [429, 500, 502, 503, 504],
+  },
   // Auth configuration
   authStrategies: [
     {
@@ -31,11 +36,7 @@ const client = new BlimuClient({
 
 // Example: Logout and invalidate session
 try {
-  const result = await client.auth.logout(
-    
-    
-    
-  );
+  const result = await client.auth.logout({});
   console.log('Result:', result);
 } catch (error) {
   // FetchError with structured data
@@ -43,11 +44,7 @@ try {
 }
 // Example: List entitlements for a tenant and all its sub-resources
 try {
-  const result = await client.entitlements.listForTenant(
-    'tenantResourceId'
-    
-    
-  );
+  const result = await client.entitlements.listForTenant('tenantResourceId');
   console.log('Result:', result);
 } catch (error) {
   // FetchError with structured data
@@ -62,11 +59,13 @@ This SDK is written in TypeScript and provides full type safety:
 ```typescript
 import { BlimuClient, Schema } from '@blimu/client';
 
-const client = new BlimuClient({ /* config */ });
+const client = new BlimuClient({
+  /* config */
+});
 
 // All methods are fully typed
 // Schema types are available
-const data: Schema.EntitlementsListResult = {
+const data: Schema.EntitlementType = {
   // Fully typed object
 };
 ```
@@ -93,8 +92,11 @@ const client = new BlimuClient({
 
 The SDK includes the following TypeScript interfaces:
 
+- **EntitlementType**: Entitlement identifier
 - **EntitlementsListResult**
+- **PlanType**: Plan type identifier
 - **RefreshResponse**
+- **ResourceType**: Resource type identifier
 - **SessionResponse**
 
 All types are available under the `Schema` namespace:
@@ -103,12 +105,14 @@ All types are available under the `Schema` namespace:
 import { Schema } from '@blimu/client';
 
 // Use any model type
-const user: Schema.User = { /* ... */ };
+const user: Schema.User = {
+  /* ... */
+};
 ```
 
 ## Contributing
 
-This SDK is auto-generated. Please do not edit the generated files directly. 
+This SDK is auto-generated. Please do not edit the generated files directly.
 If you find issues, please report them in the main project repository.
 
 ## License

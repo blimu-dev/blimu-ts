@@ -1,0 +1,127 @@
+---
+description: Database Migrations - Do Not Edit
+alwaysApply: true
+---
+
+# Database Migrations
+
+**⚠️ CRITICAL: Never edit migration files directly. They represent historical database changes.**
+
+## Migration Files Location
+
+**`libs/database/migrations/`** - Prisma database migration files
+
+Each migration is a directory containing:
+
+- `migration.sql` - The SQL migration script
+- Migration metadata (managed by Prisma)
+
+## Why Migrations Should Not Be Edited
+
+1. **Historical Record**: Migrations represent the evolution of your database schema
+2. **Reproducibility**: Editing migrations breaks the ability to recreate database state
+3. **Team Consistency**: Edited migrations will cause conflicts for other developers
+4. **Production Safety**: Edited migrations can cause deployment failures
+
+## What Cursor Should Do
+
+### ✅ Allowed Actions
+
+- Read migration files to understand schema changes
+- Help create NEW migrations
+- Suggest migration commands to run
+- Explain migration history
+
+### ❌ Forbidden Actions
+
+- **NEVER edit** existing migration files in `libs/database/migrations/`
+- **NEVER suggest** modifying `migration.sql` files
+- **NEVER suggest** deleting migration directories
+
+### 🔄 When Schema Changes Are Needed
+
+If the user needs to change the database schema:
+
+1. **Create a NEW migration** (do not edit existing ones):
+
+   ```bash
+   yarn workspace @blimu/database prisma:migrate:dev --name your_migration_name
+   ```
+
+2. **If you made a mistake in the current migration** (before committing):
+   - Delete the migration directory
+   - Create a new migration with the correct changes
+
+3. **If you need to modify an existing committed migration**:
+   - This is a complex scenario - consult with the team
+   - Options include: creating a new migration to fix issues, or resetting the database (dev only)
+
+## Migration Workflow
+
+### Creating a New Migration
+
+When schema changes are needed:
+
+1. **Edit the Prisma schema**: `libs/database/schema.prisma`
+2. **Create migration**:
+
+   ```bash
+   yarn workspace @blimu/database prisma:migrate:dev --name descriptive_name
+   ```
+
+   Or use the root command:
+
+   ```bash
+   yarn prisma:migrate
+   ```
+
+   (This will prompt for a migration name)
+
+3. **Review the generated migration** in `libs/database/migrations/YYYYMMDDHHMMSS_migration_name/migration.sql`
+
+4. **Test the migration** (it runs automatically in dev mode)
+
+5. **Commit both**:
+   - The schema change (`schema.prisma`)
+   - The new migration directory
+
+### Running Migrations
+
+- **Development**: `yarn workspace @blimu/database prisma:migrate:dev`
+- **Production**: `yarn workspace @blimu/database prisma:migrate` (deploy mode)
+
+## Migration Best Practices
+
+1. **Descriptive names**: Use clear migration names (e.g., `add_user_email_index`)
+2. **One change per migration**: Keep migrations focused and atomic
+3. **Test locally**: Always test migrations in development before committing
+4. **Review SQL**: Check the generated SQL before committing
+5. **Never edit committed migrations**: Once committed, migrations are immutable
+
+## Common Migration Commands
+
+```bash
+# Create a new migration (dev mode - interactive)
+yarn workspace @blimu/database prisma:migrate:dev
+
+# Create a new migration with a specific name
+yarn workspace @blimu/database prisma:migrate:dev --name migration_name
+
+# Apply migrations (production/deploy mode)
+yarn workspace @blimu/database prisma:migrate
+
+# Reset database and reapply all migrations (⚠️ deletes all data)
+yarn workspace @blimu/database prisma:migrate:reset
+
+# View migration status
+yarn workspace @blimu/database prisma migrate status
+```
+
+## When User Asks About Migrations
+
+If the user asks to:
+
+- **"Edit a migration"**: Explain why this is not allowed and suggest creating a new migration
+- **"Fix a migration"**: If uncommitted, delete and recreate. If committed, create a new migration to fix the issue
+- **"Delete a migration"**: Only if uncommitted and before applying. Never delete committed migrations
+- **"Create a migration"**: Guide them through the proper workflow above

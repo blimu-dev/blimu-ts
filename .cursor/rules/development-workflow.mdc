@@ -1,0 +1,242 @@
+---
+description: Development Workflow Commands
+alwaysApply: true
+---
+
+# Development Workflow Commands
+
+This guide provides Cursor with the correct commands to run for common development tasks.
+
+## Database Migrations
+
+### Creating a New Migration
+
+When schema changes are made to `libs/database/schema.prisma`:
+
+```bash
+# Option 1: Interactive (recommended for new migrations)
+yarn workspace @blimu/database prisma:migrate:dev
+
+# Option 2: With explicit name
+yarn workspace @blimu/database prisma:migrate:dev --name descriptive_migration_name
+
+# Option 3: From root (uses turbo)
+yarn prisma:migrate
+```
+
+**What this does:**
+
+- Compares current schema with database state
+- Generates migration SQL
+- Creates migration directory in `libs/database/migrations/`
+- Applies the migration to your local database
+- Regenerates Prisma Client
+
+### Applying Migrations (Production/Deploy Mode)
+
+```bash
+yarn workspace @blimu/database prisma:migrate
+```
+
+**When to use:**
+
+- Production deployments
+- CI/CD pipelines
+- Applying migrations without creating new ones
+
+### Resetting Database (⚠️ Deletes All Data)
+
+```bash
+yarn workspace @blimu/database prisma:migrate:reset
+```
+
+**When to use:**
+
+- Development only
+- When you need a clean slate
+- After major schema refactoring
+
+## Generating Prisma Client and SQL Types
+
+### Standard Prisma Generation
+
+```bash
+# Generate Prisma Client only (no database connection needed)
+yarn workspace @blimu/database prisma:generate
+
+# Or from root
+yarn prisma:generate
+```
+
+**When to use:**
+
+- After pulling changes that include schema updates
+- When Prisma Client types are out of sync
+- In CI/CD (no database connection required)
+
+### Development Generation (Includes SQL Query Types)
+
+```bash
+# Generate Prisma Client + SQL query types (requires database connection)
+yarn workspace @blimu/database prisma:generate:dev
+```
+
+**When to use:**
+
+- After creating/updating SQL queries in `libs/database/sql/`
+- When you need TypeScript types for custom SQL queries
+- Requires active database connection
+
+**What this does:**
+
+1. Runs `prisma generate --sql` to generate types from SQL files
+2. Moves generated files from `src/generated/sql/` to `src/generated-sql/`
+3. Generates Prisma Client
+
+## Building Libraries
+
+### Build All Libraries
+
+```bash
+yarn build
+```
+
+### Build Specific Library
+
+```bash
+# Build a specific library
+yarn workspace @blimu/LIBRARY_NAME build
+
+# Examples:
+yarn workspace @blimu/database build
+yarn workspace @blimu/nestjs-logging build
+yarn workspace @blimu/platform-sdk build
+```
+
+### Build Specific App
+
+```bash
+# Build specific app
+yarn workspace @blimu/APP_NAME build
+
+# Examples:
+yarn workspace @blimu/platform-api build
+yarn workspace @blimu/runtime-api build
+```
+
+### Build with Turbo (Filtered)
+
+```bash
+# Build specific package using turbo
+yarn turbo run build --filter=@blimu/database
+yarn turbo run build --filter=@blimu/platform-api
+```
+
+## SDK Regeneration
+
+SDKs are **automatically regenerated** when services restart in development mode. However, you can manually trigger regeneration:
+
+### Automatic Regeneration
+
+SDKs regenerate automatically via `SdkRegeneratorService` when:
+
+- Services start in development mode
+- OpenAPI specs change (detected via hash)
+- Services restart
+
+**No manual action needed** - just restart the service.
+
+### Manual SDK Generation (if needed)
+
+If you need to manually regenerate SDKs:
+
+1. **Ensure the API service is running** (to serve OpenAPI spec)
+2. **Restart the service** - SDK regenerator runs on bootstrap
+3. **Or trigger via API** - SDKs are generated from OpenAPI endpoints
+
+## Common Workflows
+
+### After Updating Database Schema
+
+```bash
+# 1. Edit libs/database/schema.prisma
+# 2. Create and apply migration
+yarn workspace @blimu/database prisma:migrate:dev --name your_change
+
+# 3. Generate Prisma Client (if not auto-generated)
+yarn workspace @blimu/database prisma:generate
+
+# 4. Build database library
+yarn workspace @blimu/database build
+```
+
+### After Creating/Updating SQL Queries
+
+```bash
+# 1. Edit/create SQL file in libs/database/sql/
+# 2. Generate types from SQL (requires database)
+yarn workspace @blimu/database prisma:generate:dev
+
+# 3. Build database library
+yarn workspace @blimu/database build
+```
+
+### After Updating a Library
+
+```bash
+# 1. Make changes to library code
+# 2. Build the library
+yarn workspace @blimu/LIBRARY_NAME build
+
+# 3. If library is used by apps, apps may need restart
+# (Tilt will auto-rebuild if watching)
+```
+
+### After Updating OpenAPI Spec (SDK Changes)
+
+```bash
+# 1. Update API code (which updates OpenAPI spec)
+# 2. Restart the API service
+# 3. SDKs will auto-regenerate on service start
+# 4. No manual build needed for SDKs
+```
+
+## When to Suggest Commands
+
+Cursor should suggest these commands when:
+
+1. **User edits `schema.prisma`**:
+   - Suggest: `yarn workspace @blimu/database prisma:migrate:dev --name descriptive_name`
+
+2. **User edits SQL files in `libs/database/sql/`**:
+   - Suggest: `yarn workspace @blimu/database prisma:generate:dev`
+
+3. **User edits library code**:
+   - Suggest: `yarn workspace @blimu/LIBRARY_NAME build`
+
+4. **User asks about SDK changes**:
+   - Explain that SDKs auto-regenerate on service restart
+   - Suggest restarting the service
+
+5. **User asks about migration issues**:
+   - Suggest: `yarn workspace @blimu/database prisma:migrate:dev` for new migrations
+   - Suggest: `yarn workspace @blimu/database prisma:migrate:reset` only if dev and data loss is acceptable
+
+## Command Reference
+
+| Task                   | Command                                               |
+| ---------------------- | ----------------------------------------------------- |
+| Create migration       | `yarn workspace @blimu/database prisma:migrate:dev`   |
+| Apply migrations       | `yarn workspace @blimu/database prisma:migrate`       |
+| Generate Prisma Client | `yarn workspace @blimu/database prisma:generate`      |
+| Generate SQL types     | `yarn workspace @blimu/database prisma:generate:dev`  |
+| Build library          | `yarn workspace @blimu/LIBRARY_NAME build`            |
+| Build all              | `yarn build`                                          |
+| Reset database         | `yarn workspace @blimu/database prisma:migrate:reset` |
+
+## Important Notes
+
+- **Migrations**: Always create new migrations, never edit existing ones
+- **SDKs**: Auto-regenerate on service restart, no manual build needed
+- **SQL Types**: Require database connection, use `prisma:generate:dev`
+- **Builds**: Libraries need to be built after code changes for TypeScript compilation

@@ -1,5 +1,6 @@
-import { FetchClient } from '@blimu/fetch';
-import * as Schema from '../schema';
+import type { FetchClient } from '@blimu/fetch';
+import type * as Schema from '../schema';
+import type { ResourceType } from '@blimu/types';
 
 export class PlansService {
   constructor(private core: FetchClient) {}
@@ -9,7 +10,7 @@ export class PlansService {
    * @summary Remove plan assignment from a tenant resource*
    * @description Removes the billing plan assignment from a tenant resource. After removal, the resource will have no plan and will be subject to default limits.*/
   delete(
-    resourceType: string,
+    resourceType: ResourceType,
     resourceId: string,
     init?: Omit<RequestInit, 'method' | 'body'>
   ): Promise<Schema.PlanDeleteResponse> {
@@ -25,7 +26,7 @@ export class PlansService {
    * @summary Get the plan assigned to a tenant resource*
    * @description Retrieves the billing plan currently assigned to a tenant resource, if any.*/
   read(
-    resourceType: string,
+    resourceType: ResourceType,
     resourceId: string,
     init?: Omit<RequestInit, 'method' | 'body'>
   ): Promise<Schema.PlanResponse> {
@@ -41,7 +42,7 @@ export class PlansService {
    * @summary Assign a plan to a tenant resource*
    * @description Assigns a billing plan to a tenant resource. Plans control feature access and usage limits based on your plan definitions. The resource must be marked as a tenant in your resource definitions.*/
   assign(
-    resourceType: string,
+    resourceType: ResourceType,
     resourceId: string,
     body: Schema.PlanAssignBody,
     init?: Omit<RequestInit, 'method' | 'body'>

@@ -44,12 +44,12 @@
     "@nestjs/common": "^11.1.12",
     "@nestjs/core": "^11.1.12",
     "@nestjs/testing": "^11.1.12",
-    "@types/node": "^25.0.9",
+    "@types/node": "^25.1.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2",
     "tsup": "^8.5.1",
     "typescript": "^5.9.3",
-    "vitest": "^4.0.17"
+    "vitest": "^4.0.18"
   },
   "packageManager": "yarn@4.12.0",
   "exports": {

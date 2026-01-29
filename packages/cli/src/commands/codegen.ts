@@ -1,12 +1,15 @@
-import { Command } from 'commander';
+import type { Command } from 'commander';
 import * as path from 'path';
 import * as fs from 'fs';
 import * as clack from '@clack/prompts';
 import { generateTypeAugmentationFile } from '../utils/type-augmentation-generator';
-import {
-  findDefaultConfig,
-  getRelativeImportPath,
-} from '../utils/config-loader';
+import { log } from '../utils/logger';
+import { findDefaultConfig, getRelativeImportPath } from '../utils/config-loader';
+
+interface CodegenCommandOptions {
+  config: string;
+  output: string;
+}
 
 /**
  * Register the codegen command
@@ -23,7 +26,7 @@ export function codegenCommand(program: Command): void {
       '--output <path>',
       'Output path for generated type augmentation file (defaults to blimu-types.d.ts in project root)'
     )
-    .action(async (options) => {
+    .action((options: CodegenCommandOptions) => {
       const spinner = clack.spinner();
 
       try {
@@ -46,7 +49,7 @@ export function codegenCommand(program: Command): void {
           process.exit(1);
         }
 
-        clack.log.step(`Using config file: ${absoluteConfigPath}`);
+        log.step(`Using config file: ${absoluteConfigPath}`);
 
         // Determine output path
         const outputPath = options.output
@@ -55,19 +58,14 @@ export function codegenCommand(program: Command): void {
             : path.resolve(process.cwd(), options.output)
           : path.join(process.cwd(), 'blimu-types.d.ts');
 
-        clack.log.step(`Output: ${outputPath}`);
+        log.step(`Output: ${outputPath}`);
 
         // Calculate relative path from output to config for import statement
         const outputDir = path.dirname(outputPath);
-        const relativeConfigPath = getRelativeImportPath(
-          outputDir,
-          absoluteConfigPath
-        );
+        const relativeConfigPath = getRelativeImportPath(outputDir, absoluteConfigPath);
 
         // Generate type augmentation file
-        spinner.start(
-          'Generating type augmentation file with type inference...'
-        );
+        spinner.start('Generating type augmentation file with type inference...');
 
         generateTypeAugmentationFile({
           configPath: relativeConfigPath,
@@ -78,20 +76,16 @@ export function codegenCommand(program: Command): void {
 
         spinner.stop('⚡️ Successfully generated type augmentation file');
 
-        clack.log.success(`Generated at: ${outputPath}`);
-        clack.log.info(
-          '💡 Tip: Types are automatically inferred from your config.'
-        );
-        clack.log.info(
-          '   No regeneration needed when you update blimu.config.ts!'
-        );
+        log.success(`Generated at: ${outputPath}`);
+        log.info('💡 Tip: Types are automatically inferred from your config.');
+        log.info('   No regeneration needed when you update blimu.config.ts!');
       } catch (error) {
         spinner.stop('❌ Failed to generate type augmentation');
-        clack.log.error(
+        log.error(
           `Failed to generate type augmentation: ${error instanceof Error ? error.message : String(error)}`
         );
         if (error instanceof Error && error.stack) {
-          clack.log.error(error.stack);
+          log.error(error.stack);
         }
         process.exit(1);
       }

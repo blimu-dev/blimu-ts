@@ -1,6 +1,9 @@
 import { Command } from 'commander';
 import { codegenCommand } from './commands/codegen';
 import { pushCommand } from './commands/push';
+import { loginCommand } from './commands/login';
+import { logoutCommand } from './commands/logout';
+import { whoamiCommand } from './commands/whoami';
 
 const program = new Command();
 
@@ -12,6 +15,9 @@ program
 // Register commands
 codegenCommand(program);
 pushCommand(program);
+loginCommand(program);
+logoutCommand(program);
+whoamiCommand(program);
 
 // Parse arguments
 program.parse();

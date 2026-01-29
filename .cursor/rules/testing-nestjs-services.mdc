@@ -1,0 +1,544 @@
+# Testing NestJS Services
+
+This guide defines our testing approach for NestJS services in the Blimu project.
+
+## Testing Framework
+
+We use **Vitest** with **vitest-mock-extended** for unit testing NestJS services.
+
+### Why vitest-mock-extended?
+
+- ✅ **Type-safe mocking**: `MockProxy<T>` and `mockDeep<T>()` provide full TypeScript type safety
+- ✅ **No `any` types**: Eliminates the need for type assertions
+- ✅ **Explicit control**: Clear, direct control over mock setup without magic
+- ✅ **Lightweight**: No additional framework overhead
+- ✅ **Maintainable**: Easy to understand what's being mocked and how
+
+### Alternatives NOT Used
+
+**Suites (@suites/unit)**: While recommended by NestJS docs, we found it:
+- ❌ Requires complex setup for dependency injection
+- ❌ Has dependency resolution issues with custom providers
+- ❌ Adds unnecessary abstraction for unit tests
+- ❌ Better suited for integration tests, not unit tests
+
+**@golevelup/ts-jest**: Unmaintained and replaced by Suites.
+
+## Service Testing Pattern
+
+### Basic Test Structure
+
+```typescript
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { mock, mockDeep, MockProxy } from 'vitest-mock-extended';
+import { YourService } from './your.service';
+import { PrismaService } from '@blimu/database';
+import type { PrismaClient } from '@blimu/database';
+
+describe('YourService', () => {
+  let service: YourService;
+  let mockPrismaService: MockProxy<PrismaService>;
+  let mockPrismaClient: MockProxy<PrismaClient>;
+
+  beforeEach(() => {
+    // 1. Create a deep mock of PrismaClient
+    mockPrismaClient = mockDeep<PrismaClient>();
+    
+    // 2. Create a mock of PrismaService with the mocked PrismaClient
+    mockPrismaService = mock<PrismaService>({
+      ...mockPrismaClient,
+      generateId: vi.fn(() => 'test-id'),
+    });
+
+    // 3. Instantiate the service with mocks
+    service = new YourService(mockPrismaService);
+  });
+
+  it('should do something', async () => {
+    // Arrange: Set up mock behavior
+    vi.mocked(mockPrismaClient.yourModel.findUnique).mockResolvedValue({
+      id: 'test-id',
+      name: 'Test',
+    });
+
+    // Act: Call the service method
+    const result = await service.yourMethod('test-id');
+
+    // Assert: Verify THREE things
+    // 1. What was returned
+    expect(result).toEqual({ id: 'test-id', name: 'Test' });
+    
+    // 2. What was called
+    expect(mockPrismaClient.yourModel.findUnique).toHaveBeenCalled();
+    
+    // 3. How it was called (CRITICAL!)
+    expect(mockPrismaClient.yourModel.findUnique).toHaveBeenCalledWith({
+      where: { id: 'test-id' }, // ✅ Verifies correct parameter usage
+    });
+  });
+});
+```
+
+### Key Patterns
+
+#### 1. Verify Mock Call Parameters (Critical!)
+
+**ALWAYS verify that mocked methods are called with the correct parameters**, not just that they return the right value. This catches bugs where the wrong value is passed.
+
+```typescript
+// ❌ BAD: Only checks the outcome
+it('should validate app with correct secret', async () => {
+  vi.mocked(mockPrismaClient.oAuth2App.findUnique).mockResolvedValue(mockApp);
+  
+  const result = await service.validateAppAndSecret('client-abc', 'secret');
+  
+  expect(result).toEqual(mockApp); // ✅ Checks result
+  // ❌ MISSING: Doesn't verify findUnique was called with 'client-abc'
+});
+
+// ✅ GOOD: Verifies both outcome AND interactions
+it('should validate app with correct secret', async () => {
+  vi.mocked(mockPrismaClient.oAuth2App.findUnique).mockResolvedValue(mockApp);
+  
+  const result = await service.validateAppAndSecret('client-abc', 'secret');
+  
+  expect(result).toEqual(mockApp); // ✅ Checks result
+  expect(mockPrismaClient.oAuth2App.findUnique).toHaveBeenCalledWith({
+    where: { clientId: 'client-abc' }, // ✅ Verifies correct parameter
+  });
+});
+```
+
+**Why this matters**: Without parameter verification, tests can pass even if the service uses wrong values:
+
+```typescript
+// BUG: Using empty string instead of clientId parameter
+async validateAppAndSecret(clientId: string, clientSecret?: string) {
+  const app = await this.findByClientId(''); // 🐛 BUG!
+  // ... rest of logic
+}
+```
+
+This test would PASS without parameter verification but FAIL with it:
+
+```typescript
+// Without parameter check: ✅ Passes (but code is broken!)
+expect(result).toEqual(mockApp); // Mock returns mockApp regardless of input
+
+// With parameter check: ❌ Fails (correctly catches the bug!)
+expect(mockPrismaClient.oAuth2App.findUnique).toHaveBeenCalledWith({
+  where: { clientId: 'client-abc' }, // Expected 'client-abc', got ''
+});
+```
+
+**When to verify parameters**:
+- ✅ Always for database queries (where clauses, IDs, filters)
+- ✅ Always for service method calls (ensure correct values passed through)
+- ✅ Always for external library calls (bcrypt, jwt, etc.)
+- ✅ Always when testing method orchestration (one method calling another)
+
+**What to verify**:
+```typescript
+// Verify exact values
+expect(bcrypt.hash).toHaveBeenCalledWith('password123', 10);
+
+// Verify object structure
+expect(prisma.user.create).toHaveBeenCalledWith({
+  data: {
+    id: 'user-123',
+    email: 'test@example.com',
+  },
+});
+
+// Verify with partial matching
+expect(prisma.user.create).toHaveBeenCalledWith({
+  data: expect.objectContaining({
+    email: 'test@example.com',
+  }),
+});
+
+// Verify with type matchers
+expect(prisma.user.create).toHaveBeenCalledWith({
+  data: {
+    id: expect.any(String),
+    createdAt: expect.any(Date),
+  },
+});
+```
+
+#### 2. Use `beforeEach`, not `beforeAll`
+
+```typescript
+// ✅ Good: Fresh mocks for each test
+beforeEach(() => {
+  mockPrismaClient = mockDeep<PrismaClient>();
+  mockPrismaService = mock<PrismaService>({ ...mockPrismaClient });
+  service = new YourService(mockPrismaService);
+});
+
+// ❌ Bad: Shared state between tests
+beforeAll(async () => {
+  // Tests can interfere with each other
+});
+```
+
+#### 2. Mock External Modules Explicitly
+
+```typescript
+// Mock external dependencies like bcrypt, jsonwebtoken, etc.
+vi.mock('bcrypt', () => ({
+  default: {
+    hash: vi.fn(),
+    compare: vi.fn(),
+  },
+  hash: vi.fn(),
+  compare: vi.fn(),
+}));
+
+describe('YourService', () => {
+  beforeEach(() => {
+    // Reset mocks in each test
+    vi.mocked(bcrypt.hash).mockReset();
+    vi.mocked(bcrypt.compare).mockReset();
+  });
+
+  it('should hash password', async () => {
+    vi.mocked(bcrypt.hash).mockResolvedValue('$2b$10$hashedvalue' as never);
+    
+    const result = await service.hashPassword('password123');
+    
+    expect(bcrypt.hash).toHaveBeenCalledWith('password123', 10);
+  });
+});
+```
+
+#### 3. Type-Safe Mock Setup
+
+```typescript
+// ✅ Good: Full type safety
+mockPrismaClient.user.create.mockResolvedValue({
+  id: 'user-123',
+  email: 'test@example.com',
+  createdAt: new Date(),
+});
+
+// ❌ Bad: Using 'as any' (forbidden)
+mockPrismaClient.user.create.mockResolvedValue({
+  id: 'user-123',
+} as any);
+```
+
+#### 4. Testing Invalid Inputs
+
+For tests that intentionally pass invalid types to test error handling:
+
+```typescript
+it('should reject invalid input', () => {
+  expect(() => {
+    // @ts-expect-error Testing invalid input
+    service.validateInput(undefined);
+  }).toThrow('Input is required');
+});
+```
+
+**Use `@ts-expect-error`**, not `as any`, to explicitly mark intentional type violations.
+
+#### 5. Mock Environment Variables
+
+```typescript
+describe('ServiceWithEnvVars', () => {
+  beforeEach(() => {
+    // Set environment variables before instantiating service
+    process.env.JWT_SECRET = 'test-secret';
+    process.env.API_KEY = 'test-key';
+
+    mockPrismaService = mock<PrismaService>({ ...mockPrismaClient });
+    service = new ServiceWithEnvVars(mockPrismaService);
+  });
+
+  afterEach(() => {
+    // Clean up if needed
+    delete process.env.JWT_SECRET;
+  });
+});
+```
+
+## Common Test Scenarios
+
+### Testing Database Operations
+
+```typescript
+describe('findById', () => {
+  it('should find record by ID', async () => {
+    const mockUser = {
+      id: 'user-123',
+      email: 'test@example.com',
+      createdAt: new Date(),
+    };
+
+    vi.mocked(mockPrismaClient.user.findUnique).mockResolvedValue(mockUser);
+
+    const result = await service.findById('user-123');
+
+    // Verify the outcome
+    expect(result).toEqual(mockUser);
+    
+    // Verify the interaction (CRITICAL: prevents bugs!)
+    expect(mockPrismaClient.user.findUnique).toHaveBeenCalledWith({
+      where: { id: 'user-123' }, // ✅ Ensures correct ID is used
+    });
+  });
+
+  it('should return null if not found', async () => {
+    vi.mocked(mockPrismaClient.user.findUnique).mockResolvedValue(null);
+
+    const result = await service.findById('nonexistent');
+
+    expect(result).toBeNull();
+    
+    // Verify correct parameter even for null case
+    expect(mockPrismaClient.user.findUnique).toHaveBeenCalledWith({
+      where: { id: 'nonexistent' },
+    });
+  });
+});
+```
+
+### Testing Error Handling
+
+```typescript
+import { UnauthorizedException } from '@nestjs/common';
+
+describe('authenticate', () => {
+  it('should throw UnauthorizedException for invalid credentials', async () => {
+    mockPrismaClient.user.findUnique.mockResolvedValue(null);
+
+    await expect(
+      service.authenticate('user@example.com', 'password')
+    ).rejects.toThrow(UnauthorizedException);
+    
+    await expect(
+      service.authenticate('user@example.com', 'password')
+    ).rejects.toThrow('Invalid credentials');
+  });
+});
+```
+
+### Testing Methods with Side Effects
+
+```typescript
+describe('createUser', () => {
+  it('should create user and hash password', async () => {
+    vi.mocked(bcrypt.hash).mockResolvedValue('$2b$10$hashed' as never);
+    
+    vi.mocked(mockPrismaClient.user.create).mockResolvedValue({
+      id: 'user-123',
+      email: 'test@example.com',
+      passwordHash: '$2b$10$hashed',
+    });
+
+    await service.createUser('test@example.com', 'password123');
+
+    // ✅ Verify bcrypt.hash called with correct password and cost
+    expect(bcrypt.hash).toHaveBeenCalledWith('password123', 10);
+    
+    // ✅ Verify database called with correct data
+    expect(mockPrismaClient.user.create).toHaveBeenCalledWith({
+      data: {
+        id: expect.any(String),
+        email: 'test@example.com', // ✅ Correct email passed through
+        passwordHash: '$2b$10$hashed', // ✅ Hashed password used
+      },
+    });
+  });
+});
+```
+
+### Testing Time-Dependent Logic
+
+```typescript
+describe('isExpired', () => {
+  it('should return true if token is expired', () => {
+    const expiredToken = {
+      id: 'token-123',
+      expiresAt: new Date(Date.now() - 1000), // 1 second ago
+    };
+
+    const result = service.isExpired(expiredToken);
+
+    expect(result).toBe(true);
+  });
+
+  it('should return false if token is not expired', () => {
+    const validToken = {
+      id: 'token-123',
+      expiresAt: new Date(Date.now() + 60000), // 1 minute from now
+    };
+
+    const result = service.isExpired(validToken);
+
+    expect(result).toBe(false);
+  });
+});
+```
+
+## What Cursor Should Do
+
+### ✅ When Writing Tests
+
+1. **Verify mock call parameters**: ALWAYS check that mocks are called with correct parameters (see Key Pattern #1)
+2. **Use type-safe mocks**: Always use `mockDeep<T>()` and `mock<T>()`
+3. **No `any` types**: Use `MockProxy<T>` for type safety
+4. **Reset mocks**: Call `mockReset()` in `beforeEach` for external modules
+5. **Test three things**: What was called, How it was called (parameters), What was returned
+6. **Test edge cases**: Include null/undefined checks, error cases, and boundary conditions
+7. **Follow AAA pattern**: Arrange, Act, Assert structure
+8. **Use descriptive names**: Test names should explain what is being tested and expected outcome
+
+### ❌ What NOT to Do
+
+1. **NEVER use `as any`**: Use `@ts-expect-error` for intentional type violations only
+2. **NEVER use `beforeAll`**: Use `beforeEach` to avoid shared state
+3. **NEVER skip mock setup**: Every external dependency must be explicitly mocked
+4. **NEVER test implementation details**: Test behavior, not internals
+5. **NEVER use NestJS TestingModule for unit tests**: Direct instantiation with mocks is clearer
+
+## Test Organization
+
+### File Structure
+
+```
+src/
+├── services/
+│   ├── user.service.ts
+│   ├── user.service.spec.ts          # Unit tests for UserService
+│   ├── oauth2-app.service.ts
+│   └── oauth2-app.service.spec.ts    # Unit tests for OAuth2AppService
+```
+
+### Test File Naming
+
+- Unit tests: `*.service.spec.ts`
+- Integration tests: `*.service.integration.spec.ts` (if needed)
+
+### Test Suite Organization
+
+```typescript
+describe('ServiceName', () => {
+  // Setup
+  let service: ServiceName;
+  let mockDependency: MockProxy<Dependency>;
+
+  beforeEach(() => {
+    // Mock setup
+  });
+
+  // Group related tests
+  describe('methodName', () => {
+    it('should handle normal case', () => {});
+    it('should handle edge case', () => {});
+    it('should throw error for invalid input', () => {});
+  });
+
+  describe('anotherMethod', () => {
+    it('should ...', () => {});
+  });
+});
+```
+
+## Running Tests
+
+```bash
+# Run all tests
+yarn test
+
+# Run specific service tests
+yarn workspace @blimu/runtime-api test src/oauth/services
+
+# Run tests in watch mode
+yarn test --watch
+
+# Run with coverage
+yarn test --coverage
+```
+
+## TDD Workflow
+
+When implementing new services, follow Test-Driven Development:
+
+1. **Write the test first** (it will fail)
+2. **Implement the minimum code** to make it pass
+3. **Refactor** while keeping tests green
+4. **Repeat** for next feature
+
+Example TDD cycle:
+
+```typescript
+// 1. Write failing test
+it('should hash client secret', async () => {
+  vi.mocked(bcrypt.hash).mockResolvedValue('$2b$10$hash' as never);
+  
+  const result = await service.hashClientSecret('secret123');
+  
+  expect(result).toBe('$2b$10$hash');
+  expect(bcrypt.hash).toHaveBeenCalledWith('secret123', 10);
+});
+
+// 2. Implement minimal code
+async hashClientSecret(secret: string): Promise<string> {
+  return await bcrypt.hash(secret, this.BCRYPT_COST);
+}
+
+// 3. Test passes ✅
+
+// 4. Add edge case test
+it('should handle empty secret', async () => {
+  vi.mocked(bcrypt.hash).mockResolvedValue('$2b$10$empty' as never);
+  
+  const result = await service.hashClientSecret('');
+  
+  expect(result).toBe('$2b$10$empty');
+});
+
+// 5. Code already handles it ✅
+```
+
+## Integration vs Unit Tests
+
+### Unit Tests (Current Focus)
+
+- Test individual service methods in isolation
+- Mock all dependencies
+- Fast execution (< 1 second for all tests)
+- Run on every file save
+
+### Integration Tests (Future)
+
+- Test full OAuth2 flows end-to-end
+- Use real database (test database)
+- Slower execution
+- Run in CI/CD pipeline
+
+**Current guideline**: Focus on unit tests for services. Integration tests will be added later for full flow testing.
+
+## Examples from Codebase
+
+See these files for reference implementations:
+
+- `apps/runtime-api/src/oauth/services/oauth2-app.service.spec.ts` - Basic service with bcrypt
+- `apps/runtime-api/src/oauth/services/oauth2-token.service.spec.ts` - JWT and complex mocking
+- `apps/runtime-api/src/oauth/services/oauth2-device-code.service.spec.ts` - Database operations
+- `apps/runtime-api/src/oauth/services/oauth2-consent.service.spec.ts` - Business logic testing
+- `apps/runtime-api/src/oauth/services/oauth2-pkce.service.spec.ts` - Pure logic (no mocking needed)
+
+## Summary
+
+Our testing approach prioritizes:
+
+1. **Type Safety**: Full TypeScript type checking with no `any` types
+2. **Clarity**: Explicit mock setup over magic dependency injection
+3. **Speed**: Fast unit tests that run on every change
+4. **Maintainability**: Clear patterns that are easy to understand and modify
+5. **Reliability**: Fresh mocks for each test to prevent interference
+
+When in doubt, follow the patterns in existing service tests.

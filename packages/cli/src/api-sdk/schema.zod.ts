@@ -6,7 +6,7 @@ import { z } from 'zod';
 /**
  * Zod schema for ApiKeyCreateDto
  */
-export const ApiKeyCreateDtoSchema = z.object({ environmentId: z.string(), name: z.string() });
+export const ApiKeyCreateDtoSchema = z.object({ name: z.string() });
 
 /**
  * Zod schema for ApiKeyDto_Output
@@ -374,6 +374,7 @@ export const EnvironmentDto_OutputSchema = z.object({
   isAccessible: z.boolean().optional(),
   lookupKey: z.string().nullable(),
   name: z.string(),
+  publishableKey: z.string(),
   sslStatus: z
     .enum(['PENDING', 'PROVISIONING', 'ACTIVE', 'RENEWING', 'FAILED', 'EXPIRED'])
     .optional(),
@@ -397,6 +398,7 @@ export const EnvironmentListDto_OutputSchema = z.object({
       isAccessible: z.boolean().optional(),
       lookupKey: z.string().nullable(),
       name: z.string(),
+      publishableKey: z.string(),
       sslStatus: z
         .enum(['PENDING', 'PROVISIONING', 'ACTIVE', 'RENEWING', 'FAILED', 'EXPIRED'])
         .optional(),
@@ -520,6 +522,7 @@ export const EnvironmentWithDefinitionDto_OutputSchema = z.object({
   isAccessible: z.boolean().optional(),
   lookupKey: z.string().nullable(),
   name: z.string(),
+  publishableKey: z.string(),
   sslStatus: z
     .enum(['PENDING', 'PROVISIONING', 'ACTIVE', 'RENEWING', 'FAILED', 'EXPIRED'])
     .optional(),
@@ -561,6 +564,90 @@ export const MemberListResponseDto_OutputSchema = z.object({
   limit: z.number(),
   page: z.number(),
   total: z.number(),
+});
+
+/**
+ * Zod schema for OAuthAppCreateBodyDto
+ */
+export const OAuthAppCreateBodyDtoSchema = z.object({
+  grantTypes: z.enum(['authorization_code', 'device_code']).array(),
+  name: z.string(),
+  pkceRequired: z.boolean().optional(),
+  redirectUris: z.url().array().optional(),
+  requireConsent: z.boolean().optional(),
+  scopes: z.string().array().optional(),
+});
+
+/**
+ * Zod schema for OAuthAppCreateResponse_Output
+ */
+export const OAuthAppCreateResponse_OutputSchema = z.object({
+  clientId: z.string(),
+  clientSecret: z.string().nullable(),
+  createdAt: z.iso.datetime(),
+  environmentId: z.string(),
+  grantTypes: z.string().array(),
+  id: z.string(),
+  isActive: z.boolean(),
+  name: z.string(),
+  pkceRequired: z.boolean(),
+  redirectUris: z.string().array(),
+  requireConsent: z.boolean(),
+  scopes: z.string().array(),
+  updatedAt: z.iso.datetime(),
+});
+
+/**
+ * Zod schema for OAuthAppRotateSecretResponse_Output
+ */
+export const OAuthAppRotateSecretResponse_OutputSchema = z.object({ clientSecret: z.string() });
+
+/**
+ * Zod schema for OAuthAppTokenList_Output
+ */
+export const OAuthAppTokenList_OutputSchema = z.object({
+  data: z
+    .object({
+      createdAt: z.iso.datetime(),
+      expiresAt: z.iso.datetime(),
+      id: z.string(),
+      revokedAt: z.iso.datetime().nullable(),
+      scopes: z.string().array(),
+      tokenType: z.string(),
+      userId: z.string(),
+    })
+    .array(),
+  total: z.number(),
+});
+
+/**
+ * Zod schema for OAuthAppUpdateBodyDto
+ */
+export const OAuthAppUpdateBodyDtoSchema = z.object({
+  isActive: z.boolean().optional(),
+  name: z.string().optional(),
+  pkceRequired: z.boolean().optional(),
+  redirectUris: z.url().array().optional(),
+  requireConsent: z.boolean().optional(),
+  scopes: z.string().array().optional(),
+});
+
+/**
+ * Zod schema for OAuthApp_Output
+ */
+export const OAuthApp_OutputSchema = z.object({
+  clientId: z.string(),
+  createdAt: z.iso.datetime(),
+  environmentId: z.string(),
+  grantTypes: z.string().array(),
+  id: z.string(),
+  isActive: z.boolean(),
+  name: z.string(),
+  pkceRequired: z.boolean(),
+  redirectUris: z.string().array(),
+  requireConsent: z.boolean(),
+  scopes: z.string().array(),
+  updatedAt: z.iso.datetime(),
 });
 
 /**
@@ -781,6 +868,7 @@ export const WorkspaceCreateResponseDto_OutputSchema = z.object({
       isAccessible: z.boolean().optional(),
       lookupKey: z.string().nullable(),
       name: z.string(),
+      publishableKey: z.string(),
       sslStatus: z
         .enum(['PENDING', 'PROVISIONING', 'ACTIVE', 'RENEWING', 'FAILED', 'EXPIRED'])
         .optional(),
@@ -824,6 +912,16 @@ export const WorkspaceListDto_OutputSchema = z.object({
  */
 export const WorkspaceUpdateDtoSchema = z.object({ name: z.string() });
 
+/**
+ * Zod schema for OAuthAppList_Output
+ */
+export const OAuthAppList_OutputSchema = z.object({
+  data: OAuthApp_OutputSchema.array(),
+  limit: z.number(),
+  page: z.number(),
+  total: z.number(),
+});
+
 // Operation query parameter schemas
 
 /**
@@ -833,6 +931,32 @@ export const EnvironmentsListQuerySchema = z.object({
   limit: z.number().int().optional(),
   page: z.number().int().optional(),
   search: z.string().optional(),
+});
+
+/**
+ * Schema for query params of Oauth Apps.List
+ * Retrieves a paginated list of OAuth apps for the environment. Supports filtering by grant type and active status.
+ */
+export const OauthAppsListQuerySchema = z.object({
+  /** Filter by grant type */
+  grantType: z.string().optional(),
+  /** Filter by active status */
+  isActive: z.boolean().optional(),
+  /** Number of items per page (minimum: 1, maximum: 100) */
+  limit: z.number().optional(),
+  /** Page number for pagination */
+  page: z.number().optional(),
+});
+
+/**
+ * Schema for query params of Oauth Apps.ListTokens
+ * Retrieves a list of tokens (refresh tokens) associated with an OAuth app. Supports filtering by token type and active status. Token values are never returned.
+ */
+export const OauthAppsListTokensQuerySchema = z.object({
+  /** Only return active (non-revoked) tokens */
+  activeOnly: z.boolean().optional(),
+  /** Filter by token type */
+  tokenType: z.string().optional(),
 });
 
 /**

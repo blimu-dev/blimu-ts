@@ -1,0 +1,110 @@
+---
+description: NestJS API
+globs:
+  - 'apps/runtime-api/src/**/*.ts'
+  - 'apps/platform-api/src/**/*.ts'
+  - 'apps/billing-api/src/**/*.ts'
+alwaysApply: false
+---
+
+## Schemas.
+
+Define all the schemas in the `dtos` folder, inside each domain folder. For example, for src/workspace, all dtos should be in `src/workspace/dtos` folder, having a file for each Dto.
+Each schema should be declared as a zod schema, named with a suffix `Schema`, then, create a class that extends `createZodDto` from `nestjs-zod`, using the schema as the type. Keep the dto name only as the entity name. Unless it's supposed to be used in request body. Request body can be suffixed at.
+
+Dtos names should start with the domain name, followed by the action, and the part of the request they refer to (body, query, response, param for path params):
+
+For example
+
+- resource-create-body.dto.ts, which defines a ResourceCreateBodySchema and a ResourceCreateBodyDto.
+- resource-list-query.dto.ts, which defines a ResourceListQuerySchema and a ResourceListQueryDto.
+
+## Controllers
+
+When writing NestJS Controllers, all the following decorators should be imported from `@/core/rest/decorators`:
+
+- @Controller
+- @Get
+- @Post
+- @Put
+- @Delete
+- @Patch
+- @Param
+- @Query
+- @Body
+
+Whevener we have a response, use `@ZodResponse` to validate the response. For example:
+
+```ts
+@Get('/')
+@ZodResponse({ type: ResourceTypeList, status: 200 })
+list(@Query() query: ResourceTypeListQuery) {
+  return this.service.list(query);
+}
+```
+
+Use `@ApiOperation` to properly describe each method operation, with summary and description, For example:
+
+```
+@Post('/')
+  @ApiOperation({ summary: 'Create workspace', description: 'long detailed description with anything useful for who shall be consuming this endpoint' })
+  @ZodResponse({ type: Workspace, status: 201, description: 'Workspace created' })
+  create(@Body() createDto: WorkspaceCreateDto) {
+    return this.service.create(createDto);
+  }
+```
+
+Use @Param() combined with a zod dto, without naming the parameter:
+
+```ts
+@Get('/me')
+
+async getMe(@Param() { environmentId }: EnvironmentIdParamDto, @Req() req: Request) {
+
+}
+```
+
+Use @ApiQuery, @ApiParam and @ApiResponse, but omiting the response status that were defined with @ZodResponse already.
+
+DO NOT USE OTHER NESTJS ZOD DECORATORS. THEY DONT EXIST IN THIS CURRENT VERSION.
+
+FOR LISTS, DEFINE A List DTO reusing their respective item schema, because isArray is NOT an accepted parameter in ZodResponse anymore
+
+Crud methods should follow the following names
+
+- `list` for GET /
+- `get` for GET /:id
+- `create` for POST /
+- `update` for PUT /:id
+- `delete` for DELETE /:id
+
+Follow RESTfull standards and be idiomatic.
+
+If you are operating a sub entity inside a controller, there's a good chance you should create a controller and a whole module/domain for that specific entity.
+
+## Services
+
+Services methods should use short crud names when possible: `list`, `get`, `create`, `update`, `delete`.
+
+## Error handling.
+
+Use `.catch` with promises, log the error and convert them to respective status code nestjs Exception classes.
+
+## Env variables
+
+Env variables should be consumed using inject token ENVIRONMENT_VARIABLES and importing the EnvironmentVariables schema/type for each api.
+
+eg:
+
+```ts
+// blimu/apps/runtime-api/src/app.module.ts
+import { EnvironmentVariables } from './config/config';
+import { ENVIRONMENT_VARIABLES } from '@blimu/nestjs-env';
+
+DatabaseModule.forRootAsync({
+  useFactory: (env: EnvironmentVariables) => ({
+    dbUrl: env.DATABASE_URL,
+  }),
+  inject: [ENVIRONMENT_VARIABLES],
+});
+```

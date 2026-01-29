@@ -4,6 +4,7 @@ import { buildAuthStrategies } from './auth-strategies';
 import { BulkResourcesService } from './services/bulk_resources';
 import { BulkRolesService } from './services/bulk_roles';
 import { EntitlementsService } from './services/entitlements';
+import { OauthService } from './services/oauth';
 import { PlansService } from './services/plans';
 import { ResourceMembersService } from './services/resource_members';
 import { ResourcesService } from './services/resources';
@@ -19,6 +20,7 @@ export class Blimu {
   readonly bulkResources: BulkResourcesService;
   readonly bulkRoles: BulkRolesService;
   readonly entitlements: EntitlementsService;
+  readonly oauth: OauthService;
   readonly plans: PlansService;
   readonly resourceMembers: ResourceMembersService;
   readonly resources: ResourcesService;
@@ -41,6 +43,7 @@ export class Blimu {
     this.bulkResources = new BulkResourcesService(core);
     this.bulkRoles = new BulkRolesService(core);
     this.entitlements = new EntitlementsService(core);
+    this.oauth = new OauthService(core);
     this.plans = new PlansService(core);
     this.resourceMembers = new ResourceMembersService(core);
     this.resources = new ResourcesService(core);

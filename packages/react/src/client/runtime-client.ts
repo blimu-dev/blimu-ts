@@ -1,14 +1,15 @@
 import { Blimu } from '@blimu/client';
+import Cookies from 'js-cookie';
 
 import type { AuthState, BlimuConfig } from '../types';
 import { getAuthApiUrl, getAuthDomainFromPublishableKey } from '../utils/publishable-key';
-import { AuthSessionService } from './auth.service';
+import { AuthSessionService, LOCALHOST_JWT_COOKIE_NAME, SESSION_COOKIE_NAME } from './auth.service';
 import { ExternalStore } from './external-store';
 
 export class BlimuRuntimeClientWrapper {
   private client: Blimu;
   private authDomain: string | null = null;
-  private initialized: boolean = false;
+  private initialized = false;
   private readonly session: AuthSessionService;
 
   public config: BlimuConfig;
@@ -44,6 +45,7 @@ export class BlimuRuntimeClientWrapper {
       baseURL: authApiUrl,
       bearer: () => this.session.getSessionToken(),
       headers: { 'x-blimu-publishable-key': config.publishableKey },
+      credentials: 'include', // Required to send httpOnly cookies (like __bli_client) in cross-origin requests
     });
 
     this.session = new AuthSessionService(
@@ -125,8 +127,8 @@ export class BlimuRuntimeClientWrapper {
    * Note: The auth worker should extract the __bli_client cookie and include it in the request body
    * This method is idempotent - if a refresh is already in progress, it will wait for that refresh to complete
    */
-  public scheduleRefresh() {
-    return this.session.scheduleRefresh();
+  public scheduleRefresh(): void {
+    this.session.scheduleRefresh();
   }
 
   /**
@@ -134,7 +136,7 @@ export class BlimuRuntimeClientWrapper {
    * Uses the auth domain derived from the publishable key
    */
   public redirectToAuth = (returnUrl?: string): void => {
-    const redirectUrl = returnUrl || window.location.href;
+    const redirectUrl = returnUrl ?? window.location.href;
 
     // Build auth URL on the auth domain
     const authUrl = new URL(`${this.authDomain}/login`);
@@ -147,27 +149,53 @@ export class BlimuRuntimeClientWrapper {
   /**
    * Logout user
    * Calls the logout endpoint on the API domain using this.client
+   * For TEST environments: sends __lh_jwt query parameter from cookie
+   * For LIVE environments: uses __bli_client cookie automatically
    */
   public logout = async (): Promise<void> => {
+    console.log('[logout] Starting logout...');
+    console.log('[logout] Cookies before logout:', document.cookie);
     try {
-      const sessionToken = this.session.getSessionToken();
+      const sessionToken = await this.session.getSessionToken();
 
       if (sessionToken) {
+        // For TEST environments: Get localhostJwt from cookie and pass as query parameter
+        const localhostJWT = this.isLive ? undefined : Cookies.get(LOCALHOST_JWT_COOKIE_NAME);
+
+        console.log('[logout] Calling logout API...');
         await this.client.auth.logout({
-          headers: {
-            'x-blimu-publishable-key': this.config.publishableKey,
-            Authorization: `Bearer ${sessionToken}`,
-          },
+          // Build query parameters - only include __lh_jwt for non-live environments when cookie exists
+          ...(localhostJWT ? { __lh_jwt: localhostJWT } : {}),
         });
+        console.log('[logout] Logout API call successful');
+
+        // Clear localhostJwt cookie for TEST environments after logout
+        if (!this.isLive && localhostJWT) {
+          Cookies.remove(LOCALHOST_JWT_COOKIE_NAME, { path: '/' });
+        }
       }
     } catch (error) {
-      console.error('Logout error:', error);
+      console.error('[logout] Logout error:', error);
     } finally {
+      // Clear session cookie manually (server Set-Cookie may not work cross-origin)
+      // For LIVE environments, cookie has domain attribute (e.g., .dev-blimu.dev)
+      // Extract base domain from auth domain (e.g., id.dev-blimu.dev -> .dev-blimu.dev)
+      console.log('[logout] Clearing session cookie...');
+      if (this.isLive && this.authDomain) {
+        const baseDomain = this.authDomain.replace(/^https?:\/\//, '').replace(/^id\./, '');
+        console.log('[logout] Removing cookie with domain:', `.${baseDomain}`);
+        Cookies.remove(SESSION_COOKIE_NAME, { path: '/', domain: `.${baseDomain}` });
+      } else {
+        Cookies.remove(SESSION_COOKIE_NAME, { path: '/' });
+      }
+      console.log('[logout] Cookies after clearing:', document.cookie);
+
       this.store.setState({
         user: null,
         error: null,
         status: 'unauthenticated',
       });
+      console.log('[logout] Logout complete, state set to unauthenticated');
     }
   };
 

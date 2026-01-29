@@ -1,5 +1,5 @@
-import { FetchClient } from '@blimu/fetch';
-import * as Schema from '../schema';
+import type { FetchClient } from '@blimu/fetch';
+import type * as Schema from '../schema';
 
 export class BulkRolesService {
   constructor(private core: FetchClient) {}

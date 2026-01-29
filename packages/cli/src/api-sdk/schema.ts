@@ -3,7 +3,6 @@
 export type Enum<T> = T[keyof T];
 
 export interface ApiKeyCreateDto {
-  environmentId: string;
   name: string;
 }
 
@@ -125,6 +124,7 @@ export interface EnvironmentDto_Output {
   isAccessible?: boolean;
   lookupKey: string | null;
   name: string;
+  publishableKey: string;
   sslStatus?: 'PENDING' | 'PROVISIONING' | 'ACTIVE' | 'RENEWING' | 'FAILED' | 'EXPIRED';
   updatedAt: string;
   variant: 'TEST' | 'LIVE';
@@ -140,6 +140,7 @@ export interface EnvironmentListDto_Output {
     isAccessible?: boolean;
     lookupKey: string | null;
     name: string;
+    publishableKey: string;
     sslStatus?: 'PENDING' | 'PROVISIONING' | 'ACTIVE' | 'RENEWING' | 'FAILED' | 'EXPIRED';
     updatedAt: string;
     variant: 'TEST' | 'LIVE';
@@ -167,6 +168,7 @@ export interface EnvironmentWithDefinitionDto_Output {
   isAccessible?: boolean;
   lookupKey: string | null;
   name: string;
+  publishableKey: string;
   sslStatus?: 'PENDING' | 'PROVISIONING' | 'ACTIVE' | 'RENEWING' | 'FAILED' | 'EXPIRED';
   updatedAt: string;
   variant: 'TEST' | 'LIVE';
@@ -197,6 +199,79 @@ export interface MemberListResponseDto_Output {
   limit: number;
   page: number;
   total: number;
+}
+
+export interface OAuthAppCreateBodyDto {
+  grantTypes: ('authorization_code' | 'device_code')[];
+  name: string;
+  pkceRequired?: boolean;
+  redirectUris?: string[];
+  requireConsent?: boolean;
+  scopes?: string[];
+}
+
+export interface OAuthAppCreateResponse_Output {
+  clientId: string;
+  clientSecret: string | null;
+  createdAt: string;
+  environmentId: string;
+  grantTypes: string[];
+  id: string;
+  isActive: boolean;
+  name: string;
+  pkceRequired: boolean;
+  redirectUris: string[];
+  requireConsent: boolean;
+  scopes: string[];
+  updatedAt: string;
+}
+
+export interface OAuthAppList_Output {
+  data: OAuthApp_Output[];
+  limit: number;
+  page: number;
+  total: number;
+}
+
+export interface OAuthAppRotateSecretResponse_Output {
+  clientSecret: string;
+}
+
+export interface OAuthAppTokenList_Output {
+  data: {
+    createdAt: string;
+    expiresAt: string;
+    id: string;
+    revokedAt: string | null;
+    scopes: string[];
+    tokenType: string;
+    userId: string;
+  }[];
+  total: number;
+}
+
+export interface OAuthAppUpdateBodyDto {
+  isActive?: boolean;
+  name?: string;
+  pkceRequired?: boolean;
+  redirectUris?: string[];
+  requireConsent?: boolean;
+  scopes?: string[];
+}
+
+export interface OAuthApp_Output {
+  clientId: string;
+  createdAt: string;
+  environmentId: string;
+  grantTypes: string[];
+  id: string;
+  isActive: boolean;
+  name: string;
+  pkceRequired: boolean;
+  redirectUris: string[];
+  requireConsent: boolean;
+  scopes: string[];
+  updatedAt: string;
 }
 
 export interface ResourceCreateDto {
@@ -339,6 +414,7 @@ export interface WorkspaceCreateResponseDto_Output {
     isAccessible?: boolean;
     lookupKey: string | null;
     name: string;
+    publishableKey: string;
     sslStatus?: 'PENDING' | 'PROVISIONING' | 'ACTIVE' | 'RENEWING' | 'FAILED' | 'EXPIRED';
     updatedAt: string;
     variant: 'TEST' | 'LIVE';
@@ -373,6 +449,30 @@ export interface EnvironmentsListQuery {
   limit?: number;
   page?: number;
   search?: string;
+}
+
+/**
+ * Query params for Oauth Apps.List*
+ * Retrieves a paginated list of OAuth apps for the environment. Supports filtering by grant type and active status.*/
+export interface OauthAppsListQuery {
+  /** Filter by grant type */
+  grantType?: string;
+  /** Filter by active status */
+  isActive?: boolean;
+  /** Number of items per page (minimum: 1, maximum: 100) */
+  limit?: number;
+  /** Page number for pagination */
+  page?: number;
+}
+
+/**
+ * Query params for Oauth Apps.ListTokens*
+ * Retrieves a list of tokens (refresh tokens) associated with an OAuth app. Supports filtering by token type and active status. Token values are never returned.*/
+export interface OauthAppsListTokensQuery {
+  /** Only return active (non-revoked) tokens */
+  activeOnly?: boolean;
+  /** Filter by token type */
+  tokenType?: string;
 }
 
 /**
