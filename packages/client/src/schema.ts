@@ -22,7 +22,7 @@ export interface EntitlementsListResult {
 }
 
 export interface RefreshResponse {
-  sessionToken: string;
+  sessionToken?: string;
 }
 
 export interface SessionResponse {
@@ -37,6 +37,12 @@ export interface SessionResponse {
 }
 
 // Operation query parameter interfaces
+
+/**
+ * Query params for Auth.Logout*/
+export interface AuthLogoutQuery {
+  __lh_jwt?: string;
+}
 
 /**
  * Query params for Auth.Refresh*/

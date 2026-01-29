@@ -62,9 +62,9 @@ export const isExpiredIn = (expiration: number, buffer: number): boolean => {
 };
 
 export class AuthSessionService {
-  private pendingRefresher: (() => void) | null = null;
+  private pendingRefresher: (() => void | Promise<void>) | null = null;
   private refreshPromise: Promise<RefreshResponse | { error: string; user: null }> | null = null;
-  private refreshingSignals: Set<AbortSignal> = new Set();
+  private refreshingSignals = new Set<AbortSignal>();
   private refreshingSignalAbortController: AbortController | null = null;
   // A local client that doesn't call getSessionToken() which calls refreshSession().
   private localClient: Blimu;
@@ -148,7 +148,7 @@ export class AuthSessionService {
     return Cookies.get(SESSION_COOKIE_NAME);
   }
 
-  async handleRequestError(error: unknown): Promise<{ error: string; user: null }> {
+  handleRequestError = (error: unknown): { error: string; user: null } => {
     if (error instanceof BlimuError && [401, 500].includes(error.status)) {
       Cookies.remove(SESSION_COOKIE_NAME);
       Cookies.remove(LOCALHOST_JWT_COOKIE_NAME);
@@ -176,7 +176,7 @@ export class AuthSessionService {
       error: 'unknown error',
       user: null,
     };
-  }
+  };
 
   async initialize({ signal }: { signal?: AbortSignal } = {}): Promise<{
     error: string | null;
@@ -237,7 +237,7 @@ export class AuthSessionService {
     const onlineHandler = () => {
       isOnline = true;
       if (this.pendingRefresher) {
-        this.pendingRefresher();
+        void this.pendingRefresher();
         this.pendingRefresher = null;
       }
     };
@@ -271,7 +271,7 @@ export class AuthSessionService {
       }
 
       // Having this function outside timeout, allows us to call refresh immediately when back online
-      const refresher = async () => {
+      const refresher = async (): Promise<void> => {
         // Clear timeoutId since we're executing now
         timeoutId = null;
 
@@ -302,12 +302,12 @@ export class AuthSessionService {
         }
       };
 
-      timeoutId = window.setTimeout(refresher, timeoutDelayMS);
+      timeoutId = window.setTimeout(() => void refresher(), timeoutDelayMS);
     };
 
     refresh();
 
-    return () => {
+    return (): void => {
       if (timeoutId) {
         window.clearTimeout(timeoutId);
       }
@@ -364,7 +364,7 @@ export class AuthSessionService {
       .then((response) => {
         // Update cookie with new session token from response body
         // Server also sets it via Set-Cookie header on auth domain, but we set it manually on customer domain
-        if (!this.isLive) {
+        if (!this.isLive && response.sessionToken) {
           this.setCookie(SESSION_COOKIE_NAME, response.sessionToken, {
             maxAge: 30 * 24 * 60 * 60, // 30 days
           });

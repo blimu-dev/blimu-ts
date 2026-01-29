@@ -73,11 +73,11 @@ export default defineConfig(
     },
   },
   {
-    // Relaxed rules for test files
+    // Relaxed rules for test files – disable type-aware linting (projectService off) and all type-checked rules
     files: ['**/*.test.{ts,tsx}', '**/*.spec.{ts,tsx}', '**/__tests__/**/*.{ts,tsx}'],
     languageOptions: {
       parserOptions: {
-        projectService: false, // Disable project service for test files as they may be excluded from tsconfig
+        projectService: false, // Test files may be excluded from tsconfig in some packages
       },
     },
     rules: {
@@ -85,7 +85,21 @@ export default defineConfig(
       '@typescript-eslint/no-unsafe-assignment': 'off',
       '@typescript-eslint/no-unsafe-member-access': 'off',
       '@typescript-eslint/no-unsafe-call': 'off',
+      '@typescript-eslint/no-unsafe-return': 'off',
+      '@typescript-eslint/no-unsafe-argument': 'off',
+      '@typescript-eslint/await-thenable': 'off',
+      '@typescript-eslint/no-floating-promises': 'off',
+      '@typescript-eslint/no-misused-promises': 'off',
+      '@typescript-eslint/require-await': 'off',
+      '@typescript-eslint/restrict-template-expressions': 'off',
+      '@typescript-eslint/unbound-method': 'off',
+      '@typescript-eslint/no-unnecessary-type-assertion': 'off',
     },
+  },
+  // Disable all type-aware rules for test files (must be separate so rules are not overwritten)
+  {
+    files: ['**/*.test.{ts,tsx}', '**/*.spec.{ts,tsx}', '**/__tests__/**/*.{ts,tsx}'],
+    ...tseslint.configs.disableTypeChecked,
   },
   {
     // Scripts directory - no type checking

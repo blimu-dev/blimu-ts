@@ -1,6 +1,7 @@
 import type { Command } from 'commander';
 import * as clack from '@clack/prompts';
 import { BlimuConfigSchema } from '../config/schema';
+import { log } from '../utils/logger';
 import { findDefaultConfig, loadConfig } from '../utils/config-loader';
 import { createPlatformApiClient } from '../utils/api-client';
 
@@ -69,7 +70,7 @@ export function pushCommand(program: Command): void {
           process.exit(1);
         }
 
-        clack.log.step(`Loading config from: ${configPath}`);
+        log.step(`Loading config from: ${configPath}`);
 
         spinner.start('Loading and validating config file...');
         const rawConfig = await loadConfig(configPath);
@@ -80,9 +81,9 @@ export function pushCommand(program: Command): void {
         const validationResult = BlimuConfigSchema.safeParse(rawConfig);
         if (!validationResult.success) {
           spinner.stop('❌ Config validation failed');
-          clack.log.error('Config validation errors:');
+          log.error('Config validation errors:');
           validationResult.error.issues.forEach((err) => {
-            clack.log.error(`  - ${err.path.join('.')}: ${err.message}`);
+            log.error(`  - ${err.path.join('.')}: ${err.message}`);
           });
           process.exit(1);
         }
@@ -99,16 +100,16 @@ export function pushCommand(program: Command): void {
         });
         spinner.stop('✓ Definitions pushed successfully');
 
-        clack.log.success(
+        log.success(
           `Successfully pushed definitions to workspace ${options.workspaceId}, environment ${options.environmentId}`
         );
       } catch (error) {
         spinner.stop('❌ Failed to push definitions');
-        clack.log.error(
+        log.error(
           `Failed to push definitions: ${error instanceof Error ? error.message : String(error)}`
         );
         if (error instanceof Error && error.stack) {
-          clack.log.error(error.stack);
+          log.error(error.stack);
         }
         process.exit(1);
       }

@@ -8,19 +8,24 @@ export class AuthService {
   /**
    * POST /v1/auth/logout*
    * @summary Logout and invalidate session*/
-  logout(init?: Omit<RequestInit, 'method' | 'body'>): Promise<unknown> {
+  logout(
+    query?: Schema.AuthLogoutQuery,
+    init?: Omit<RequestInit, 'method' | 'body'>
+  ): Promise<unknown> {
     return this.core.request({
       method: 'POST',
       path: `/v1/auth/logout`,
+      query,
       ...(init ?? {}),
     });
   }
   /**
    * @summary Get query keys for logout
-   * @returns ['v1/auth/logout']
+   * @returns ['v1/auth/logout', query]
    */
-  logout__queryKeys(): readonly ['v1/auth/logout'] {
-    return ['v1/auth/logout'] as const;
+  logout__queryKeys(query?: Schema.AuthLogoutQuery): readonly string[] {
+    const keys = ['v1/auth/logout', query] as const;
+    return isNotUndefined(keys) as readonly string[];
   }
 
   /**

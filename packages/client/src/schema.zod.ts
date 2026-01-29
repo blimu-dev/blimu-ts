@@ -24,7 +24,7 @@ export const ResourceTypeSchema = z.string();
 /**
  * Zod schema for RefreshResponse
  */
-export const RefreshResponseSchema = z.object({ sessionToken: z.string() });
+export const RefreshResponseSchema = z.object({ sessionToken: z.string().optional() });
 
 /**
  * Zod schema for SessionResponse
@@ -67,6 +67,13 @@ export const EntitlementsListResultSchema = z.object({
 });
 
 // Operation query parameter schemas
+
+/**
+ * Schema for query params of Auth.Logout
+ */
+export const AuthLogoutQuerySchema = z.object({
+  __lh_jwt: z.string().optional(),
+});
 
 /**
  * Schema for query params of Auth.Refresh

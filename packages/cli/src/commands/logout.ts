@@ -1,6 +1,7 @@
 import type { Command } from 'commander';
 import * as clack from '@clack/prompts';
 import { deleteCredentials, deleteRefreshToken, readCredentials } from '../auth/credentials';
+import { log } from '../utils/logger';
 import type { BlimuInternalEnvironment } from '../config/client-ids';
 
 /**
@@ -21,7 +22,7 @@ export function logoutCommand(program: Command): void {
           environment = creds.environment;
         } catch {
           // No credentials found, nothing to do
-          clack.log.info('No credentials found. Already logged out.');
+          log.info('No credentials found. Already logged out.');
           return;
         }
 
@@ -37,12 +38,10 @@ export function logoutCommand(program: Command): void {
 
         spinner.stop('✓ Credentials removed');
 
-        clack.log.success('Successfully logged out!');
+        log.success('Successfully logged out!');
       } catch (error) {
         spinner.stop('❌ Logout failed');
-        clack.log.error(
-          `Failed to logout: ${error instanceof Error ? error.message : String(error)}`
-        );
+        log.error(`Failed to logout: ${error instanceof Error ? error.message : String(error)}`);
         process.exit(1);
       }
     });

@@ -1,5 +1,7 @@
 import type { Command } from 'commander';
-import { spinner as clackSpinner, log } from '@clack/prompts';
+import { spinner as clackSpinner } from '@clack/prompts';
+import open from 'open';
+import { log } from '../utils/logger';
 import { OAuth2Client } from '../auth/oauth-client';
 import {
   writeCredentials,
@@ -84,6 +86,13 @@ export function loginCommand(program: Command): void {
         log.info('To complete authentication, please visit:');
         log.info(`  ${deviceCodeResponse.verification_uri_complete}`);
         log.info(`Or enter this code: ${deviceCodeResponse.user_code}`);
+
+        // Open the URL in the default browser
+        try {
+          await open(deviceCodeResponse.verification_uri_complete);
+        } catch {
+          // Ignore errors (e.g. headless/CI); user can still copy the URL above
+        }
 
         // Store code verifier (for PKCE)
         await setCodeVerifier(environment, codeVerifier);

@@ -36,7 +36,7 @@ const client = new BlimuClient({
 
 // Example: Logout and invalidate session
 try {
-  const result = await client.auth.logout();
+  const result = await client.auth.logout({});
   console.log('Result:', result);
 } catch (error) {
   // FetchError with structured data
