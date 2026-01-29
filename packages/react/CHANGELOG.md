@@ -1,5 +1,54 @@
 # @blimu/react
 
+## 1.2.1
+
+### Patch Changes
+
+- 1985a86: Fix logout and auto-login authentication issues
+
+  **Logout Fixes:**
+  - Added `credentials: 'include'` to SDK client to ensure cookies are sent with logout requests
+  - Fixed session cookie clearing for LIVE environments with correct domain (`.dev-blimu.dev`)
+  - Session is now properly deleted from database on logout, preventing auto-login
+  - Cookies are cleared even when logout API call fails
+
+  **Auto-login Fixes:**
+  - Fixed double-encoded redirect URL handling in auth flow
+  - Users are now properly redirected after auto-login with encoded `redirect_url` parameters
+
+  **Tests Added:**
+  - Added comprehensive unit tests for logout cookie clearing
+  - Added tests for SDK credentials configuration
+  - Added unit tests for redirect URL decoding (double-encoded, single-encoded, invalid URLs)
+
+- cad47dc: Authentication improvements and type safety updates
+
+  **Client Package (@blimu/client):**
+  - Added support for `__lh_jwt` query parameter in logout endpoint
+  - Made `sessionToken` optional in `RefreshResponse` type for better type safety
+  - Updated auth service to handle query parameters in logout calls
+
+  **React Package (@blimu/react):**
+  - Added guard to check `sessionToken` exists before setting cookie in refresh flow
+  - Prevents runtime errors when session token is not returned
+
+  **CLI Package (blimu):**
+  - Added new utility modules for formatting, JWT handling, and logging
+  - Improved command implementations for codegen, login, logout, push, and whoami
+  - Better error handling and user feedback
+
+  **Backend & NestJS Packages:**
+  - Updated dependencies and configurations for better type compatibility
+  - README documentation improvements
+
+  **Other:**
+  - Disabled TypeScript project service and type-checked rules for test files in ESLint config
+  - Updated various dependencies to latest versions
+
+- Updated dependencies [c60cf4f]
+- Updated dependencies [cad47dc]
+  - @blimu/client@1.2.1
+
 ## 1.2.0
 
 ### Minor Changes
