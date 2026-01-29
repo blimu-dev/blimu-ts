@@ -75,6 +75,11 @@ export default defineConfig(
   {
     // Relaxed rules for test files
     files: ['**/*.test.{ts,tsx}', '**/*.spec.{ts,tsx}', '**/__tests__/**/*.{ts,tsx}'],
+    languageOptions: {
+      parserOptions: {
+        projectService: false, // Disable project service for test files as they may be excluded from tsconfig
+      },
+    },
     rules: {
       '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/no-unsafe-assignment': 'off',
