@@ -13,7 +13,7 @@ export interface RcConfig {
 
 /**
  * Load RC config from file
- * Checks both ~/.blimurc.json and ~/.config/blimu/config.json (XDG)
+ * Checks both ~/.config/blimu/config.json (XDG, preferred) and ~/.blimurc.json (legacy)
  * @returns Config object or null if file doesn't exist
  */
 export function loadRcConfig(): RcConfig | null {

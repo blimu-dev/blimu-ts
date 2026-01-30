@@ -181,6 +181,10 @@ export interface IntrospectionResponse {
   username?: string;
 }
 
+export interface JWK {
+  keys: { alg: string; e: string; kid: string; kty: string; n: string; use: string }[];
+}
+
 export interface PlanAssignBody {
   planKey: PlanType;
 }
@@ -474,6 +478,14 @@ export interface UserUpdateBody {
 }
 
 // Operation query parameter interfaces
+
+/**
+ * Query params for AuthJwks.GetOAuthAppJwks*
+ * Returns the public key for a specific OAuth app to verify JWT tokens. This is a public endpoint following OAuth2/OIDC standards. Provide client_id to get keys for a specific OAuth app, or use authenticated endpoint for environment keys.*/
+export interface AuthJwksGetOAuthAppJwksQuery {
+  /** OAuth app client ID to get public keys for */
+  client_id?: string;
+}
 
 /**
  * Query params for Entitlements.ListForResource*

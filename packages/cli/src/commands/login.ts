@@ -1,5 +1,4 @@
 import type { Command } from 'commander';
-import { spinner as clackSpinner } from '@clack/prompts';
 import open from 'open';
 import { log } from '../utils/logger';
 import { OAuth2Client } from '../auth/oauth-client';
@@ -9,8 +8,12 @@ import {
   setCodeVerifier,
   isKeychainAvailable,
 } from '../auth/credentials';
+import { setDefaultWorkspaceId } from '../auth/preferences';
 import { getClientId, type BlimuInternalEnvironment } from '../config/client-ids';
 import { loadRcConfig, getEnvironment, getRuntimeApiBaseUrl } from '../config/rc-config';
+import { createTaskRunner } from '../ui/task-runner.js';
+import { promptSelect, type SelectOption } from '../ui/prompts.js';
+import { createPlatformApiClient } from '../utils/api-client';
 
 interface LoginCommandOptions {
   execEnv: BlimuInternalEnvironment;
@@ -32,10 +35,11 @@ export function loginCommand(program: Command): void {
     .option('--runtime-api-url <url>', 'Override Runtime API base URL')
     .option('--verbose', 'Show detailed output', false)
     .action(async (options: LoginCommandOptions) => {
-      const spin = clackSpinner();
       const verbose = options.verbose;
 
       try {
+        const runner = await createTaskRunner();
+
         // Load RC config
         const rcConfig = loadRcConfig();
 
@@ -53,20 +57,23 @@ export function loginCommand(program: Command): void {
         );
 
         if (verbose) {
-          log.info(`Runtime API: ${runtimeApiBaseUrl}`);
+          runner.info(`Runtime API: ${runtimeApiBaseUrl}`);
         }
 
         // Get client ID
         const clientId = getClientId(environment);
 
-        log.step(`Authenticating to ${environment} environment...`);
+        // Format environment name for display
+        const envDisplay =
+          environment === 'cloud-prod' ? 'Blimu platform' : `${environment} environment`;
 
-        // Check keychain availability (silent unless warning needed)
+        const authGroup = runner.group(`Authenticating to ${envDisplay}`);
+
+        // Check keychain availability
         const keychainAvailable = await isKeychainAvailable();
-
         if (!keychainAvailable) {
-          log.warn(
-            'System keychain not available. Refresh token will be stored in plaintext at ~/.blimu/credentials.json'
+          authGroup.warn(
+            'System keychain not available. Refresh token will be stored in plaintext at ~/.config/blimu/credentials.json'
           );
         }
 
@@ -74,18 +81,16 @@ export function loginCommand(program: Command): void {
         const oauthClient = new OAuth2Client(runtimeApiBaseUrl, clientId, environment);
 
         // Request device code
-        if (verbose) {
-          spin.start('Requesting device code...');
-        }
         const { deviceCodeResponse, codeVerifier } = await oauthClient.requestDeviceCode();
-        if (verbose) {
-          spin.stop('Device code received');
-        }
 
-        // Display user instructions
-        log.info('To complete authentication, please visit:');
-        log.info(`  ${deviceCodeResponse.verification_uri_complete}`);
-        log.info(`Or enter this code: ${deviceCodeResponse.user_code}`);
+        // Display user instructions (clearable - will be removed on success)
+        authGroup.info("Browser didn't open? Use the url below to sign in (c to copy)", {
+          clearable: true,
+        });
+        authGroup.copyableText(deviceCodeResponse.verification_uri_complete, {
+          clearable: true,
+          dimmed: true,
+        });
 
         // Open the URL in the default browser
         try {
@@ -98,18 +103,16 @@ export function loginCommand(program: Command): void {
         await setCodeVerifier(environment, codeVerifier);
 
         // Poll for tokens
-        spin.start('Waiting for authorization...');
         const tokenResponse = await oauthClient.pollForTokens(
           deviceCodeResponse.device_code,
           codeVerifier,
           deviceCodeResponse.interval
         );
-        spin.stop();
 
         // Calculate expiry timestamp
         const expiresAt = Math.floor(Date.now() / 1000) + tokenResponse.expires_in;
 
-        // Store credentials (silent)
+        // Store credentials
         writeCredentials({
           access_token: tokenResponse.access_token,
           token_type: tokenResponse.token_type as 'Bearer',
@@ -120,15 +123,34 @@ export function loginCommand(program: Command): void {
         // Store refresh token (keychain preferred, fallback to file)
         const { usedKeychain } = await setRefreshToken(environment, tokenResponse.refresh_token);
 
-        // Success message
-        log.success('Successfully authenticated!');
+        // Success message (this will clear all clearable items first)
+        authGroup.success('Login successful');
+
         if (verbose) {
           if (usedKeychain) {
-            log.info('Refresh token stored in system keychain');
+            runner.info('Refresh token stored in system keychain');
           } else {
-            log.info('Refresh token stored in credentials file');
+            runner.info('Refresh token stored in credentials file');
           }
         }
+
+        // Close the Ink UI by waiting for it to finish
+        // We need to do this WITHOUT calling wait() as it seems to break HTTP requests
+        // Get the render instance and manually cleanup
+        const inkRunner = runner as {
+          renderInstance?: { cleanup(): void };
+          isRendering?: boolean;
+        };
+        if (inkRunner.renderInstance) {
+          inkRunner.renderInstance.cleanup();
+          inkRunner.isRendering = false;
+        }
+
+        // Small delay to let Ink fully cleanup
+        await new Promise((resolve) => setTimeout(resolve, 100));
+
+        // Fetch workspaces and prompt for default selection if multiple exist
+        await promptForDefaultWorkspace();
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
         log.error(`Authentication failed: ${formatUserFriendlyError(errorMessage)}`);
@@ -140,6 +162,73 @@ export function loginCommand(program: Command): void {
         process.exit(1);
       }
     });
+}
+
+/**
+ * Prompt user to select a default workspace if they have multiple workspaces
+ */
+async function promptForDefaultWorkspace(): Promise<void> {
+  try {
+    log.info('Fetching workspaces...');
+
+    // Create API client using stored credentials
+    const client = await createPlatformApiClient({
+      requireAuth: true,
+    });
+
+    // Fetch workspaces
+    const { data: workspaces } = await client.workspaces.list();
+
+    log.info(`Found ${workspaces.length} workspace(s)`);
+
+    // If only one workspace, set it as default automatically
+    if (workspaces.length === 1) {
+      const workspace = workspaces[0];
+      if (workspace) {
+        setDefaultWorkspaceId(workspace.id);
+        log.info(`Default workspace set to: ${workspace.name}`);
+      }
+      return;
+    }
+
+    // If no workspaces, skip
+    if (workspaces.length === 0) {
+      return;
+    }
+
+    // Multiple workspaces - prompt for selection
+    const options: SelectOption[] = workspaces.map((ws) => ({
+      label: ws.name,
+      value: ws.id,
+      description: `ID: ${ws.id}`,
+    }));
+
+    const selected = await promptSelect({
+      title: 'Select a default workspace:',
+      choices: options,
+    });
+
+    if (selected) {
+      setDefaultWorkspaceId(selected);
+      const selectedWorkspace = workspaces.find((ws) => ws.id === selected);
+      log.success(`Default workspace set to: ${selectedWorkspace?.name}`);
+    }
+  } catch (error) {
+    // Silently fail workspace selection - not critical for login
+    log.warn('Could not fetch workspaces for default selection');
+    if (error instanceof Error) {
+      log.info(`Reason: ${error.message}`);
+      // Log full error details for debugging
+      const err = error as Error & { status?: number; data?: unknown };
+      console.error('Full error details:', error);
+      if (err.status !== undefined) {
+        console.error('HTTP Status:', err.status);
+      }
+      if (err.data !== undefined) {
+        console.error('Response data:', err.data);
+      }
+    }
+  }
 }
 
 /**

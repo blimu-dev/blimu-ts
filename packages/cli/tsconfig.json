@@ -9,6 +9,7 @@
     "outDir": "./dist",
     "rootDir": "./src",
     "removeComments": true,
+    "jsx": "react-jsx",
     "strict": true,
     "noUncheckedIndexedAccess": true,
     "noImplicitOverride": true,

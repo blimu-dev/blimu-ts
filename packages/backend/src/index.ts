@@ -17,6 +17,8 @@ export * as ZodSchema from './schema.zod';
 export { BulkResourcesService } from './services/bulk_resources';
 export { BulkRolesService } from './services/bulk_roles';
 export { EntitlementsService } from './services/entitlements';
+export { AuthJwksService } from './services/auth_jwks';
+export type { JWK, JWKSet } from './token-verifier';
 export { PlansService } from './services/plans';
 export { ResourceMembersService } from './services/resource_members';
 export { ResourcesService } from './services/resources';

@@ -135,7 +135,7 @@ export async function deleteRefreshToken(environment: BlimuInternalEnvironment):
     const Entry = await getKeyringEntry();
     const entry = new Entry(KEYCHAIN_SERVICE, account);
     entry.deletePassword();
-  } catch (_error: unknown) {
+  } catch {
     // Ignore errors (keychain might not be available or token might not exist)
   }
 

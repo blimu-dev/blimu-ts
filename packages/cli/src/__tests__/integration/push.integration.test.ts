@@ -2,20 +2,52 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { Command } from 'commander';
 import { http, HttpResponse } from 'msw';
 import { server } from '../setup';
-import { pushCommand } from '../../commands/push';
 import {
   createTempDir,
   cleanupTempDir,
   createMockCredentials,
   createMockConfig,
   mockProcessExit,
-  mockClackPrompts,
 } from '../test-utils';
 import * as configLoader from '../../utils/config-loader';
 import * as rcConfig from '../../config/rc-config';
 import * as clientIds from '../../config/client-ids';
 import * as credentials from '../../auth/credentials';
 import type { CredentialsWithRefreshToken } from '../../auth/credentials';
+
+// Mock task runner so we don't use Ink in tests (Ink's patchConsole fails with "console.Console is not a constructor" in Vitest)
+vi.mock('../../ui/task-runner.js', () => ({
+  createTaskRunner: () => {
+    const noop = () => {
+      return;
+    };
+    const mockTask = { update: noop, succeed: noop, fail: noop };
+    return Promise.resolve({
+      group: () => ({
+        task: (
+          _name: string,
+          fn: (task: {
+            update: () => void;
+            succeed: () => void;
+            fail: () => void;
+          }) => Promise<void> | void
+        ) => Promise.resolve(fn(mockTask)),
+        info: noop,
+        warn: noop,
+        error: noop,
+        success: noop,
+        copyableText: noop,
+      }),
+      info: noop,
+      warn: noop,
+      error: noop,
+      success: noop,
+      wait: () => Promise.resolve(),
+    });
+  },
+}));
+
+import { pushCommand } from '../../commands/push';
 
 describe('push command integration', () => {
   let tempDir: string;
@@ -30,9 +62,6 @@ describe('push command integration', () => {
     const exitMock = mockProcessExit();
     mockExit = exitMock.mockExit;
     restoreExit = exitMock.restore;
-
-    // Mock clack prompts
-    mockClackPrompts();
   });
 
   afterEach(() => {

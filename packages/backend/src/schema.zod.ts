@@ -163,6 +163,22 @@ export const IntrospectionResponseSchema = z.object({
 });
 
 /**
+ * Zod schema for JWK
+ */
+export const JWKSchema = z.object({
+  keys: z
+    .object({
+      alg: z.string(),
+      e: z.string(),
+      kid: z.string(),
+      kty: z.string(),
+      n: z.string(),
+      use: z.string(),
+    })
+    .array(),
+});
+
+/**
  * Zod schema for PlanDeleteResponse
  */
 export const PlanDeleteResponseSchema = z.object({ success: z.boolean() });
@@ -693,6 +709,15 @@ export const ResourceListSchema = z.object({
 });
 
 // Operation query parameter schemas
+
+/**
+ * Schema for query params of AuthJwks.GetOAuthAppJwks
+ * Returns the public key for a specific OAuth app to verify JWT tokens. This is a public endpoint following OAuth2/OIDC standards. Provide client_id to get keys for a specific OAuth app, or use authenticated endpoint for environment keys.
+ */
+export const AuthJwksGetOAuthAppJwksQuerySchema = z.object({
+  /** OAuth app client ID to get public keys for */
+  client_id: z.string().optional(),
+});
 
 /**
  * Schema for query params of Entitlements.ListForResource

@@ -1,10 +1,9 @@
 import type { Command } from 'commander';
 import * as path from 'path';
 import * as fs from 'fs';
-import * as clack from '@clack/prompts';
 import { generateTypeAugmentationFile } from '../utils/type-augmentation-generator';
-import { log } from '../utils/logger';
 import { findDefaultConfig, getRelativeImportPath } from '../utils/config-loader';
+import { createTaskRunner } from '../ui/task-runner.js';
 
 interface CodegenCommandOptions {
   config: string;
@@ -26,16 +25,16 @@ export function codegenCommand(program: Command): void {
       '--output <path>',
       'Output path for generated type augmentation file (defaults to blimu-types.d.ts in project root)'
     )
-    .action((options: CodegenCommandOptions) => {
-      const spinner = clack.spinner();
-
+    .action(async (options: CodegenCommandOptions) => {
+      const runner = await createTaskRunner();
       try {
         // Find config file
         const configPath = options.config || findDefaultConfig();
         if (!configPath) {
-          clack.cancel(
+          runner.error(
             'No config file found. Please provide --config or ensure blimu.config.ts exists in project root.'
           );
+          await runner.wait();
           process.exit(1);
         }
 
@@ -45,11 +44,12 @@ export function codegenCommand(program: Command): void {
           : path.resolve(process.cwd(), configPath);
 
         if (!fs.existsSync(absoluteConfigPath)) {
-          clack.cancel(`Config file not found: ${absoluteConfigPath}`);
+          runner.error(`Config file not found: ${absoluteConfigPath}`);
+          await runner.wait();
           process.exit(1);
         }
 
-        log.step(`Using config file: ${absoluteConfigPath}`);
+        runner.info(`Using config file: ${absoluteConfigPath}`);
 
         // Determine output path
         const outputPath = options.output
@@ -58,35 +58,40 @@ export function codegenCommand(program: Command): void {
             : path.resolve(process.cwd(), options.output)
           : path.join(process.cwd(), 'blimu-types.d.ts');
 
-        log.step(`Output: ${outputPath}`);
+        runner.info(`Output: ${outputPath}`);
 
-        // Calculate relative path from output to config for import statement
-        const outputDir = path.dirname(outputPath);
-        const relativeConfigPath = getRelativeImportPath(outputDir, absoluteConfigPath);
+        const codegenGroup = runner.group('Generating type augmentation');
 
-        // Generate type augmentation file
-        spinner.start('Generating type augmentation file with type inference...');
+        await codegenGroup.task('Generate types', (task) => {
+          // Calculate relative path from output to config for import statement
+          const outputDir = path.dirname(outputPath);
+          const relativeConfigPath = getRelativeImportPath(outputDir, absoluteConfigPath);
 
-        generateTypeAugmentationFile({
-          configPath: relativeConfigPath,
-          outputPath,
-          // Always augment both @blimu/types and @blimu/backend
-          // This is an internal implementation detail, not user-configurable
+          task.update('Generating type augmentation file with type inference...');
+
+          generateTypeAugmentationFile({
+            configPath: relativeConfigPath,
+            outputPath,
+            // Always augment both @blimu/types and @blimu/backend
+            // This is an internal implementation detail, not user-configurable
+          });
+
+          task.succeed('Type augmentation file generated');
         });
 
-        spinner.stop('⚡️ Successfully generated type augmentation file');
+        runner.success(`Generated at: ${outputPath}`);
+        runner.info('💡 Tip: Types are automatically inferred from your config.');
+        runner.info('   No regeneration needed when you update blimu.config.ts!');
 
-        log.success(`Generated at: ${outputPath}`);
-        log.info('💡 Tip: Types are automatically inferred from your config.');
-        log.info('   No regeneration needed when you update blimu.config.ts!');
+        await runner.wait();
       } catch (error) {
-        spinner.stop('❌ Failed to generate type augmentation');
-        log.error(
+        runner.error(
           `Failed to generate type augmentation: ${error instanceof Error ? error.message : String(error)}`
         );
         if (error instanceof Error && error.stack) {
-          log.error(error.stack);
+          runner.error(error.stack);
         }
+        await runner.wait();
         process.exit(1);
       }
     });

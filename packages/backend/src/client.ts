@@ -1,6 +1,7 @@
 import { FetchClient, FetchError } from '@blimu/fetch';
 import { type FetchClientConfig, type ApiKeyAuthStrategy } from '@blimu/fetch';
 import { buildAuthStrategies } from './auth-strategies';
+import { AuthJwksService } from './services/auth_jwks';
 import { BulkResourcesService } from './services/bulk_resources';
 import { BulkRolesService } from './services/bulk_roles';
 import { EntitlementsService } from './services/entitlements';
@@ -17,6 +18,7 @@ export type ClientOption = FetchClientConfig & {
 };
 
 export class Blimu {
+  readonly authJwks: AuthJwksService;
   readonly bulkResources: BulkResourcesService;
   readonly bulkRoles: BulkRolesService;
   readonly entitlements: EntitlementsService;
@@ -40,6 +42,7 @@ export class Blimu {
       ...(authStrategies.length > 0 ? { authStrategies } : {}),
     });
 
+    this.authJwks = new AuthJwksService(core);
     this.bulkResources = new BulkResourcesService(core);
     this.bulkRoles = new BulkRolesService(core);
     this.entitlements = new EntitlementsService(core);

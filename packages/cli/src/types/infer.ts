@@ -16,7 +16,7 @@
  * ```
  */
 export type InferResourceTypes<T> = T extends { resources: infer R }
-  ? R extends Record<string, any>
+  ? R extends Record<string, unknown>
     ? keyof R
     : never
   : never;
@@ -32,7 +32,7 @@ export type InferResourceTypes<T> = T extends { resources: infer R }
  * ```
  */
 export type InferEntitlementTypes<T> = T extends { entitlements: infer E }
-  ? E extends Record<string, any>
+  ? E extends Record<string, unknown>
     ? keyof E
     : never
   : never;
@@ -48,7 +48,7 @@ export type InferEntitlementTypes<T> = T extends { entitlements: infer E }
  * ```
  */
 export type InferPlanTypes<T> = T extends { plans: infer P }
-  ? P extends Record<string, any>
+  ? P extends Record<string, unknown>
     ? keyof P
     : never
   : never;
@@ -66,9 +66,9 @@ export type InferPlanTypes<T> = T extends { plans: infer P }
  * ```
  */
 export type InferLimitTypes<T> = T extends { plans: infer P }
-  ? P extends Record<string, any>
+  ? P extends Record<string, unknown>
     ? P[keyof P] extends { resource_limits?: infer RL }
-      ? RL extends Record<string, any>
+      ? RL extends Record<string, unknown>
         ? keyof RL
         : never
       : never
@@ -88,9 +88,9 @@ export type InferLimitTypes<T> = T extends { plans: infer P }
  * ```
  */
 export type InferUsageLimitTypes<T> = T extends { plans: infer P }
-  ? P extends Record<string, any>
+  ? P extends Record<string, unknown>
     ? P[keyof P] extends { usage_based_limits?: infer UL }
-      ? UL extends Record<string, any>
+      ? UL extends Record<string, unknown>
         ? keyof UL
         : never
       : never

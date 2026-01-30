@@ -98,6 +98,7 @@ export interface EnvironmentAuthConfigDto_Output {
   authMethod?: 'code' | 'password' | 'both';
   codeExpirationMinutes?: number;
   maxCodeAttempts?: number;
+  passkeyEnabled?: boolean;
   requireEmailVerification?: boolean;
 }
 
@@ -105,6 +106,7 @@ export interface EnvironmentAuthConfigUpdateDto {
   authMethod?: 'code' | 'password' | 'both';
   codeExpirationMinutes?: number;
   maxCodeAttempts?: number;
+  passkeyEnabled?: boolean;
   requireEmailVerification?: boolean;
 }
 

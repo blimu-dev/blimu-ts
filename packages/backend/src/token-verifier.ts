@@ -1,19 +1,14 @@
-import { FetchError } from './client';
 import * as crypto from 'crypto';
 import * as jwt from 'jsonwebtoken';
+import { FetchClient } from '@blimu/fetch';
+import { buildAuthStrategies } from './auth-strategies';
+import { AuthJwksService } from './services/auth_jwks';
+import type * as Schema from './schema';
 
-export interface JWK {
-  kty: string;
-  use: string;
-  kid: string;
-  alg: string;
-  n: string;
-  e: string;
-}
-
-export interface JWKSet {
-  keys: JWK[];
-}
+/** Single JWK (element of a JWK Set's keys array). */
+export type JWK = Schema.JWK['keys'][number];
+/** JWK Set as returned by Blimu auth JWKS endpoints. */
+export type JWKSet = Schema.JWK;
 
 interface CachedJWK {
   key: crypto.KeyObject;
@@ -22,10 +17,13 @@ interface CachedJWK {
 }
 
 export interface VerifyTokenOptions {
-  url?: string; // Direct URL to JWK endpoint (for custom scenarios)
-  secretKey?: string; // API key/secret key - uses runtimeApiUrl + JWK endpoint
+  /** API key/secret key – uses runtimeApiUrl + environment JWKS (authenticated). For environment/session tokens. */
+  secretKey?: string;
+  /** OAuth app client_id – uses runtimeApiUrl + public OAuth JWKS (no auth). For validating tokens issued by your OAuth2 apps. */
+  clientId?: string;
   token: string;
-  runtimeApiUrl?: string | undefined; // Optional override for runtime API URL
+  /** Optional override for runtime API URL */
+  runtimeApiUrl?: string | undefined;
 }
 
 export interface TokenVerifierOptions {
@@ -36,44 +34,11 @@ export interface TokenVerifierOptions {
 export class TokenVerifier {
   private readonly cache = new Map<string, CachedJWK>();
   private readonly cacheTTL: number;
-  private readonly runtimeApiUrl: string;
+  private readonly baseURL: string;
 
   constructor(options?: TokenVerifierOptions) {
     this.cacheTTL = options?.cacheTTL ?? 60 * 60 * 1000; // 1 hour
-
-    this.runtimeApiUrl = options?.runtimeApiUrl ?? 'https://api.blimu.dev';
-  }
-
-  /**
-   * Fetch JWK Set from runtime-api
-   */
-  private async fetchJWKSet(endpoint: string, headers?: Record<string, string>): Promise<JWKSet> {
-    console.log(`[TokenVerifier] 📡 Fetching JWK Set from: ${endpoint}`);
-    if (headers) {
-      console.log(
-        `[TokenVerifier] 📡 Request headers: ${JSON.stringify(Object.keys(headers).map((k) => `${k}: ${k === 'x-api-key' ? '***' : headers[k]}`))}`
-      );
-    }
-
-    const response = await fetch(endpoint, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        ...headers,
-      },
-    });
-
-    console.log(`[TokenVerifier] 📡 Response status: ${response.status} ${response.statusText}`);
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error(`[TokenVerifier] ❌ Failed to fetch JWKs: ${response.status} ${errorText}`);
-      throw new FetchError('Failed to fetch JWKs', response.status, errorText);
-    }
-
-    const jwkSet = (await response.json()) as JWKSet;
-    console.log(`[TokenVerifier] ✅ Successfully fetched JWK Set with ${jwkSet.keys.length} keys`);
-    return jwkSet;
+    this.baseURL = options?.runtimeApiUrl ?? 'https://api.blimu.dev';
   }
 
   /**
@@ -97,34 +62,23 @@ export class TokenVerifier {
   private async getPublicKey(
     kid: string,
     cacheKey: string,
-    endpoint: string,
-    headers?: Record<string, string>
+    fetchJwks: () => Promise<JWKSet>
   ): Promise<crypto.KeyObject> {
-    // Check cache first
     const cached = this.cache.get(cacheKey);
     if (cached && cached.expiresAt > Date.now()) {
-      console.log(`[TokenVerifier] ✅ Using cached key for kid: ${kid}`);
       return cached.key;
     }
 
-    console.log(`[TokenVerifier] 🔍 Cache miss or expired. Fetching new key for kid: ${kid}`);
-
-    // Fetch JWK Set
-    const jwkSet = await this.fetchJWKSet(endpoint, headers);
+    const jwkSet = await fetchJwks();
 
     // Find the key with matching kid
     const jwk = jwkSet.keys.find((k) => k.kid === kid);
     if (!jwk) {
       const availableKids = jwkSet.keys.map((k) => k.kid).join(', ');
-      console.error(
-        `[TokenVerifier] ❌ Key with kid '${kid}' not found in JWK Set. Available kids: ${availableKids}`
-      );
       throw new Error(
         `Key with kid '${kid}' not found in JWK Set. Available kids: ${availableKids}`
       );
     }
-
-    console.log(`[TokenVerifier] ✅ Found key with kid: ${kid}`);
 
     // Convert JWK to KeyObject
     const keyObject = this.jwkToKeyObject(jwk);
@@ -140,17 +94,18 @@ export class TokenVerifier {
   }
 
   /**
-   * Verify JWT token using JWKs from runtime-api
+   * Verify JWT token using JWKs from Blimu runtime API.
+   * Supports: environment/session tokens (secretKey) or OAuth app tokens (clientId).
    */
   async verifyToken<T = unknown>(options: VerifyTokenOptions): Promise<T> {
-    const { url, secretKey, token, runtimeApiUrl } = options;
+    const { secretKey, clientId, token, runtimeApiUrl } = options;
 
-    if (!url && !secretKey) {
-      throw new Error('Either url or secretKey must be provided');
-    }
-
-    if (url && secretKey) {
-      throw new Error('Cannot provide both url and secretKey');
+    const provided = [secretKey, clientId].filter(Boolean);
+    if (provided.length !== 1) {
+      throw new Error(
+        'Exactly one of secretKey or clientId must be provided. ' +
+          'Use secretKey for environment/session tokens, clientId for OAuth app access tokens.'
+      );
     }
 
     // Decode token header to get kid (without verification)
@@ -164,76 +119,42 @@ export class TokenVerifier {
       throw new Error('Token missing kid in header');
     }
 
-    let endpoint: string;
+    const baseURL = runtimeApiUrl ?? this.baseURL;
     let cacheKey: string;
-    let headers: Record<string, string> | undefined;
+    let fetchJwks: () => Promise<JWKSet>;
 
     if (secretKey) {
-      // Use secretKey with runtimeApiUrl
-      const apiUrl = runtimeApiUrl ?? this.runtimeApiUrl;
-      endpoint = `${apiUrl}/v1/auth/.well-known/jwks.json`;
       cacheKey = secretKey;
-      headers = {
-        'x-api-key': secretKey,
-      };
-      console.log(
-        `[TokenVerifier] 🔍 Verifying token with kid: ${header.kid}, endpoint: ${endpoint}`
-      );
+      const core = new FetchClient({
+        baseURL,
+        authStrategies: buildAuthStrategies({ apiKey: secretKey, baseURL }),
+      });
+      const authJwks = new AuthJwksService(core);
+      fetchJwks = () => authJwks.getJwks();
     } else {
-      // Use direct URL
-      endpoint = url!;
-      cacheKey = url!;
-      console.log(
-        `[TokenVerifier] 🔍 Verifying token with kid: ${header.kid}, endpoint: ${endpoint}`
-      );
+      cacheKey = `oauth:${clientId!}`;
+      const core = new FetchClient({ baseURL });
+      const authJwks = new AuthJwksService(core);
+      fetchJwks = () => authJwks.getOAuthAppJwks({ client_id: clientId! });
     }
 
-    // Get public key for this kid
     let publicKey: crypto.KeyObject;
     try {
-      publicKey = await this.getPublicKey(header.kid, cacheKey, endpoint, headers);
-      console.log(`[TokenVerifier] ✅ Successfully retrieved public key for kid: ${header.kid}`);
-    } catch (error) {
-      console.error(
-        `[TokenVerifier] ❌ Failed to get public key (first attempt): ${error instanceof Error ? error.message : String(error)}`
-      );
-      // If verification fails, clear cache and retry once (handles key rotation)
+      publicKey = await this.getPublicKey(header.kid, cacheKey, fetchJwks);
+    } catch {
       this.clearCache(cacheKey);
-      console.log(`[TokenVerifier] 🔄 Retrying after cache clear...`);
-      try {
-        publicKey = await this.getPublicKey(header.kid, cacheKey, endpoint, headers);
-        console.log(
-          `[TokenVerifier] ✅ Successfully retrieved public key for kid: ${header.kid} (retry)`
-        );
-      } catch (retryError) {
-        console.error(
-          `[TokenVerifier] ❌ Failed to get public key (retry): ${retryError instanceof Error ? retryError.message : String(retryError)}`
-        );
-        throw retryError;
-      }
+      publicKey = await this.getPublicKey(header.kid, cacheKey, fetchJwks);
     }
 
-    // Verify token
-    try {
-      const payload = jwt.verify(token, publicKey, {
-        algorithms: ['RS256'],
-      }) as T;
-      console.log(`[TokenVerifier] ✅ Token verified successfully`);
-      return payload;
-    } catch (error) {
-      console.error(
-        `[TokenVerifier] ❌ JWT verification failed: ${error instanceof Error ? error.message : String(error)}`
-      );
-      throw error;
-    }
+    return jwt.verify(token, publicKey, { algorithms: ['RS256'] }) as T;
   }
 
   /**
    * Clear cache (useful for testing or key rotation)
    */
-  clearCache(secretKeyOrUrl?: string): void {
-    if (secretKeyOrUrl) {
-      this.cache.delete(secretKeyOrUrl);
+  clearCache(cacheKey?: string): void {
+    if (cacheKey) {
+      this.cache.delete(cacheKey);
     } else {
       this.cache.clear();
     }
@@ -241,9 +162,26 @@ export class TokenVerifier {
 }
 
 /**
- * Convenience function to verify a token
+ * Convenience function to verify a token (environment or OAuth app).
  */
 export async function verifyToken<T = unknown>(options: VerifyTokenOptions): Promise<T> {
   const verifier = new TokenVerifier();
   return verifier.verifyToken<T>(options);
+}
+
+export interface VerifyOAuthTokenOptions {
+  token: string;
+  clientId: string;
+  runtimeApiUrl?: string | undefined;
+}
+
+/**
+ * Convenience function to verify an OAuth app access token using the app's client_id.
+ * Fetches the public JWKS from the runtime API (no auth required).
+ */
+export async function verifyOAuthToken<T = unknown>(options: VerifyOAuthTokenOptions): Promise<T> {
+  return verifyToken<T>({
+    ...options,
+    clientId: options.clientId,
+  });
 }
