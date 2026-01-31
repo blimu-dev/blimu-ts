@@ -1,6 +1,6 @@
 {
   "name": "@blimu/backend",
-  "version": "1.2.2",
+  "version": "1.2.4",
   "description": "TypeScript SDK for Blimu API (auto-generated)",
   "repository": {
     "type": "git",
