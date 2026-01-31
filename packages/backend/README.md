@@ -195,6 +195,7 @@ The SDK includes the following TypeScript interfaces:
 - **IntrospectionRequest**
 - **IntrospectionResponse**
 - **JWK**
+- **OAuthAccessTokenPayload**
 - **PlanAssignBody**
 - **PlanDeleteResponse**
 - **PlanResponse**

@@ -149,8 +149,8 @@ export function loginCommand(program: Command): void {
         // Small delay to let Ink fully cleanup
         await new Promise((resolve) => setTimeout(resolve, 100));
 
-        // Fetch workspaces and prompt for default selection if multiple exist
-        await promptForDefaultWorkspace();
+        // Fetch workspaces and prompt for default selection if multiple exist (use exec-env for platform URL)
+        await promptForDefaultWorkspace(environment);
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
         log.error(`Authentication failed: ${formatUserFriendlyError(errorMessage)}`);
@@ -165,15 +165,17 @@ export function loginCommand(program: Command): void {
 }
 
 /**
- * Prompt user to select a default workspace if they have multiple workspaces
+ * Prompt user to select a default workspace if they have multiple workspaces.
+ * Uses the given exec-env so platform URL matches the environment the user logged into.
  */
-async function promptForDefaultWorkspace(): Promise<void> {
+async function promptForDefaultWorkspace(execEnv: BlimuInternalEnvironment): Promise<void> {
   try {
     log.info('Fetching workspaces...');
 
-    // Create API client using stored credentials
+    // Create API client using stored credentials; platform URL is resolved from exec-env
     const client = await createPlatformApiClient({
       requireAuth: true,
+      environment: execEnv,
     });
 
     // Fetch workspaces
@@ -217,15 +219,21 @@ async function promptForDefaultWorkspace(): Promise<void> {
     // Silently fail workspace selection - not critical for login
     log.warn('Could not fetch workspaces for default selection');
     if (error instanceof Error) {
-      log.info(`Reason: ${error.message}`);
-      // Log full error details for debugging
-      const err = error as Error & { status?: number; data?: unknown };
-      console.error('Full error details:', error);
-      if (err.status !== undefined) {
-        console.error('HTTP Status:', err.status);
+      const err = error as Error & {
+        status?: number;
+        data?: { message?: string; response?: { message?: string } };
+      };
+      const apiMessage = err.data?.message ?? err.data?.response?.message ?? err.message;
+      log.info(`Reason: ${apiMessage}`);
+      if (err.status === 401 && apiMessage?.includes('Invalid or expired')) {
+        log.info(
+          'Tip: For local-dev, ensure platform-api has BLIMU_API_URL=https://runtime-api.dev-blimu.dev and BLIMU_CLI_OAUTH_CLIENT_ID set to the CLI OAuth app client_id.'
+        );
       }
-      if (err.data !== undefined) {
-        console.error('Response data:', err.data);
+      if (process.env['DEBUG']) {
+        console.error('Full error details:', error);
+        if (err.status !== undefined) console.error('HTTP Status:', err.status);
+        if (err.data !== undefined) console.error('Response data:', err.data);
       }
     }
   }

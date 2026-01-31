@@ -185,6 +185,16 @@ export interface JWK {
   keys: { alg: string; e: string; kid: string; kty: string; n: string; use: string }[];
 }
 
+export interface OAuthAccessTokenPayload {
+  client_id: string;
+  environment_id: string;
+  exp: number;
+  iat: number;
+  scope: string;
+  sub: string;
+  token_type: string;
+}
+
 export interface PlanAssignBody {
   planKey: PlanType;
 }

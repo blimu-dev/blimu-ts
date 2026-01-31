@@ -72,7 +72,7 @@ const RUNTIME_API_URLS: Record<BlimuInternalEnvironment, string> = {
  */
 const PLATFORM_API_URLS: Record<BlimuInternalEnvironment, string> = {
   'local-dev': 'https://platform-api.dev-blimu.dev',
-  'local-prod': 'https://platform.blimu.dev',
+  'local-prod': 'https://platform-api.dev-blimu.dev',
   'cloud-dev': 'https://platform.blimu.dev',
   'cloud-prod': 'https://platform.blimu.dev',
 };

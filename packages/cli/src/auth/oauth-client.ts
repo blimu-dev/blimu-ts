@@ -9,7 +9,7 @@ import type { BlimuInternalEnvironment } from '../config/client-ids';
  * Create a custom fetch function that accepts self-signed certificates
  * This is needed for local development with self-signed SSL certificates
  */
-function createLocalDevFetch(): typeof fetch {
+export function createLocalDevFetch(): typeof fetch {
   // Create an undici Agent that accepts self-signed certificates
   // undici is built into Node.js 18+, so no need to install it
   const agent = new Agent({

@@ -132,7 +132,8 @@ export class TokenVerifier {
       const authJwks = new AuthJwksService(core);
       fetchJwks = () => authJwks.getJwks();
     } else {
-      cacheKey = `oauth:${clientId!}`;
+      // Include baseURL so we don't reuse JWKS from a different runtime (e.g. after DB reset or wrong BLIMU_API_URL)
+      cacheKey = `oauth:${baseURL}:${clientId!}`;
       const core = new FetchClient({ baseURL });
       const authJwks = new AuthJwksService(core);
       fetchJwks = () => authJwks.getOAuthAppJwks({ client_id: clientId! });

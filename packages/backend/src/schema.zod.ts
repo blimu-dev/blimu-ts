@@ -179,6 +179,19 @@ export const JWKSchema = z.object({
 });
 
 /**
+ * Zod schema for OAuthAccessTokenPayload
+ */
+export const OAuthAccessTokenPayloadSchema = z.object({
+  client_id: z.string(),
+  environment_id: z.string(),
+  exp: z.number().int(),
+  iat: z.number().int(),
+  scope: z.string(),
+  sub: z.string(),
+  token_type: z.string(),
+});
+
+/**
  * Zod schema for PlanDeleteResponse
  */
 export const PlanDeleteResponseSchema = z.object({ success: z.boolean() });
