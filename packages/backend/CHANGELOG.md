@@ -1,5 +1,13 @@
 # @blimu/backend
 
+## 1.2.4
+
+### Patch Changes
+
+- c16320c: - **@blimu/backend**: Include `OAuthAccessTokenPayload` in generated schema (from runtime-api OpenAPI). Re-export token verifier types.
+  - **blimu** (CLI): Fix `login --exec-env=local-dev` (accept self-signed certs for API client; improve 401 handling and config).
+  - **@blimu/client**: README updates.
+
 ## 1.2.2
 
 ### Patch Changes
