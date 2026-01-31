@@ -1,4 +1,3 @@
-import type * as clack from '@clack/prompts';
 import { BlimuCli } from '../api-sdk/client';
 import { loadRcConfig, getPlatformApiBaseUrl } from '../config/rc-config';
 import { hasCredentials, readCredentials } from '../auth/credentials';
@@ -11,7 +10,6 @@ export interface CreatePlatformClientOptions {
   bearer?: string;
   platformApiUrl?: string;
   requireAuth?: boolean;
-  spinner?: ReturnType<typeof clack.spinner>;
 }
 
 /**
@@ -29,7 +27,7 @@ export interface CreatePlatformClientOptions {
 export async function createPlatformApiClient(
   options: CreatePlatformClientOptions = {}
 ): Promise<BlimuCli> {
-  const { apiKey, bearer, platformApiUrl, requireAuth = true, spinner } = options;
+  const { apiKey, bearer, platformApiUrl, requireAuth = true } = options;
 
   // Load RC config
   const rcConfig = loadRcConfig();
@@ -88,19 +86,8 @@ export async function createPlatformApiClient(
     const runtimeApiBaseUrl = getRuntimeApiBaseUrl(undefined, rcConfig, environment);
     const clientId = getClientId(environment);
 
-    if (spinner) {
-      spinner.start('Refreshing authentication token...');
-    }
-
     finalBearer = await getValidAccessToken(runtimeApiBaseUrl, clientId, environment);
-
-    if (spinner) {
-      spinner.stop('✓ Token refreshed');
-    }
   } catch (error) {
-    if (spinner) {
-      spinner.stop('❌ Failed to refresh token');
-    }
     throw new Error(
       `Failed to authenticate: ${error instanceof Error ? error.message : String(error)}\n` +
         'Please run `blimu login` again.'

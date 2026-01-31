@@ -11,12 +11,12 @@ import {
  * Input type for defineConfig (allows partial config during definition)
  * Uses proper types inferred from Zod schemas for full type safety
  */
-export type BlimuConfigInput = {
+export interface BlimuConfigInput {
   resources: Record<string, ResourceDefinition>;
   entitlements?: Record<string, EntitlementDefinition>;
   features?: Record<string, FeatureDefinition>;
   plans?: Record<string, PlanDefinition>;
-};
+}
 
 /**
  * Defines and validates a Blimu configuration.
@@ -49,7 +49,8 @@ export type BlimuConfigInput = {
  */
 export function defineConfig<T extends BlimuConfigInput>(config: T): T {
   // Validate the config using Zod schema
-  const validated = BlimuConfigSchema.parse(config);
+  const _validated = BlimuConfigSchema.parse(config);
+  void _validated;
 
   // Return the original config (with proper typing) after validation
   // This preserves the exact structure and types from the input

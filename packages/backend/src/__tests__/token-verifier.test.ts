@@ -1,10 +1,28 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { TokenVerifier, verifyToken, type JWK, type JWKSet } from '../token-verifier';
+import {
+  TokenVerifier,
+  verifyToken,
+  verifyOAuthToken,
+  type JWK,
+  type JWKSet,
+} from '../token-verifier';
 import * as jwt from 'jsonwebtoken';
 import * as crypto from 'crypto';
 
 // Mock fetch globally
 global.fetch = vi.fn();
+
+/** Response-like object so FetchClient's parseResponse (response.headers.get) works when using AuthJwksService. */
+function createMockFetchResponse<T>(body: T) {
+  return {
+    ok: true,
+    status: 200,
+    headers: {
+      get: (name: string) => (name.toLowerCase() === 'content-type' ? 'application/json' : null),
+    },
+    json: () => Promise.resolve(body),
+  };
+}
 
 // Mock console methods to avoid noise in tests
 const consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => undefined);
@@ -21,90 +39,30 @@ describe('TokenVerifier', () => {
     vi.restoreAllMocks();
   });
 
-  describe('JWK fetching', () => {
-    it('should fetch JWK Set from endpoint', async () => {
+  describe('JWKS fetching (via TokenVerifier)', () => {
+    it('should call environment JWKS endpoint when secretKey is provided', async () => {
       const mockJWKSet: JWKSet = {
-        keys: [
-          {
-            kty: 'RSA',
-            use: 'sig',
-            kid: 'test-kid-1',
-            alg: 'RS256',
-            n: 'test-n-value',
-            e: 'AQAB',
-          },
-        ],
+        keys: [{ kty: 'RSA', use: 'sig', kid: 'test-kid-1', alg: 'RS256', n: 'n', e: 'AQAB' }],
       };
 
-      (global.fetch as any).mockResolvedValueOnce({
-        ok: true,
-        status: 200,
-        statusText: 'OK',
-        json: () => Promise.resolve(mockJWKSet),
-      });
+      (global.fetch as any).mockResolvedValueOnce(createMockFetchResponse(mockJWKSet));
 
       const verifier = new TokenVerifier();
-      const endpoint = 'https://api.blimu.dev/v1/auth/.well-known/jwks.json';
-
-      // Access private method via type assertion (for testing)
-      const result = await (verifier as any).fetchJWKSet(endpoint);
-
-      expect(result).toEqual(mockJWKSet);
-      expect(global.fetch).toHaveBeenCalledWith(endpoint, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-    });
-
-    it('should include custom headers when provided', async () => {
-      const mockJWKSet: JWKSet = {
-        keys: [
-          {
-            kty: 'RSA',
-            use: 'sig',
-            kid: 'test-kid-1',
-            alg: 'RS256',
-            n: 'test-n-value',
-            e: 'AQAB',
-          },
-        ],
-      };
-
-      (global.fetch as any).mockResolvedValueOnce({
-        ok: true,
-        status: 200,
-        json: () => Promise.resolve(mockJWKSet),
+      const token = jwt.sign({ sub: 'user123' }, 'secret', {
+        algorithm: 'HS256',
+        header: { alg: 'HS256', kid: 'test-kid-1' },
       });
 
-      const verifier = new TokenVerifier();
-      const endpoint = 'https://api.blimu.dev/v1/auth/.well-known/jwks.json';
-      const headers = { 'x-api-key': 'test-key' };
+      try {
+        await verifier.verifyToken({ secretKey: 'test-key', token });
+      } catch {
+        // Verification fails; we only check fetch was called with env JWKS URL
+      }
 
-      await (verifier as any).fetchJWKSet(endpoint, headers);
-
-      expect(global.fetch).toHaveBeenCalledWith(endpoint, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': 'test-key',
-        },
-      });
-    });
-
-    it('should throw error when fetch fails', async () => {
-      (global.fetch as any).mockResolvedValueOnce({
-        ok: false,
-        status: 404,
-        statusText: 'Not Found',
-        text: () => Promise.resolve('Not found'),
-      });
-
-      const verifier = new TokenVerifier();
-      const endpoint = 'https://api.blimu.dev/v1/auth/.well-known/jwks.json';
-
-      await expect((verifier as any).fetchJWKSet(endpoint)).rejects.toThrow('Failed to fetch JWKs');
+      expect(global.fetch).toHaveBeenCalledWith(
+        'https://api.blimu.dev/v1/auth/.well-known/jwks.json',
+        expect.any(Object)
+      );
     });
   });
 
@@ -155,26 +113,68 @@ describe('TokenVerifier', () => {
   });
 
   describe('Token verification', () => {
-    it('should throw error if neither url nor secretKey is provided', async () => {
+    it('should throw error if none of secretKey or clientId is provided', async () => {
       const verifier = new TokenVerifier();
 
       await expect(
         verifier.verifyToken({
           token: 'invalid-token',
         })
-      ).rejects.toThrow('Either url or secretKey must be provided');
+      ).rejects.toThrow('Exactly one of secretKey or clientId must be provided');
     });
 
-    it('should throw error if both url and secretKey are provided', async () => {
+    it('should throw error if more than one of secretKey, clientId is provided', async () => {
       const verifier = new TokenVerifier();
 
       await expect(
         verifier.verifyToken({
-          url: 'https://example.com/jwks.json',
           secretKey: 'test-key',
+          clientId: 'my-client',
           token: 'invalid-token',
         })
-      ).rejects.toThrow('Cannot provide both url and secretKey');
+      ).rejects.toThrow('Exactly one of secretKey or clientId must be provided');
+    });
+
+    it('should use OAuth JWKS endpoint when clientId is provided', async () => {
+      const customUrl = 'https://custom-api.example.com';
+      const verifier = new TokenVerifier({ runtimeApiUrl: customUrl });
+      const clientId = 'my-oauth-app-client-id';
+
+      const token = jwt.sign({ sub: 'user123' }, 'secret', {
+        algorithm: 'HS256',
+        header: { alg: 'HS256', kid: 'test-kid' },
+      });
+
+      const mockJWKSet: JWKSet = {
+        keys: [
+          {
+            kty: 'RSA',
+            use: 'sig',
+            kid: 'test-kid',
+            alg: 'RS256',
+            n: 'test-n-value',
+            e: 'AQAB',
+          },
+        ],
+      };
+
+      (global.fetch as any).mockResolvedValueOnce(createMockFetchResponse(mockJWKSet));
+
+      try {
+        await verifier.verifyToken({
+          clientId,
+          token,
+        });
+      } catch {
+        // Expected to fail at verification; we only check the endpoint
+      }
+
+      const expectedUrl = `${customUrl}/v1/auth/oauth/.well-known/jwks.json?client_id=${encodeURIComponent(clientId)}`;
+      expect(global.fetch).toHaveBeenCalledWith(expectedUrl, expect.any(Object));
+      // OAuth endpoint does not use api key
+      const firstCall = (global.fetch as any).mock.calls[0];
+      const init = firstCall?.[1];
+      expect(init?.headers?.get?.('X-API-KEY') ?? init?.headers?.['X-API-KEY']).toBeFalsy();
     });
 
     it('should throw error for invalid token format', async () => {
@@ -228,11 +228,7 @@ describe('TokenVerifier', () => {
         ],
       };
 
-      (global.fetch as any).mockResolvedValueOnce({
-        ok: true,
-        status: 200,
-        json: () => Promise.resolve(mockJWKSet),
-      });
+      (global.fetch as any).mockResolvedValueOnce(createMockFetchResponse(mockJWKSet));
 
       // This will fail at verification, but we can check the endpoint
       try {
@@ -251,15 +247,13 @@ describe('TokenVerifier', () => {
   });
 
   describe('Cache functionality', () => {
-    it('should cache JWK keys', async () => {
-      // Generate a real RSA key pair for testing
+    it('should cache JWK keys (second call uses cache)', async () => {
       const { publicKey, privateKey } = crypto.generateKeyPairSync('rsa', {
         modulusLength: 2048,
         publicKeyEncoding: { type: 'spki', format: 'pem' },
         privateKeyEncoding: { type: 'pkcs8', format: 'pem' },
       });
 
-      // Export public key as JWK
       const keyObject = crypto.createPublicKey(publicKey);
       const jwk = keyObject.export({ format: 'jwk' }) as any;
 
@@ -276,37 +270,26 @@ describe('TokenVerifier', () => {
         ],
       };
 
-      // Create a valid JWT token
       const token = jwt.sign({ sub: 'user123' }, privateKey, {
         algorithm: 'RS256',
         header: { alg: 'RS256', kid: 'test-kid-1' },
       });
 
-      (global.fetch as any).mockResolvedValue({
-        ok: true,
-        status: 200,
-        json: () => Promise.resolve(mockJWKSet),
-      });
+      (global.fetch as any).mockResolvedValue(createMockFetchResponse(mockJWKSet));
 
       const verifier = new TokenVerifier();
-      const endpoint = 'https://api.blimu.dev/v1/auth/.well-known/jwks.json';
 
-      // First call should fetch from API
       const payload1 = await verifier.verifyToken({
-        url: endpoint,
+        secretKey: 'test-api-key',
         token,
       });
-
       expect(global.fetch).toHaveBeenCalledTimes(1);
       expect(payload1).toBeDefined();
 
-      // Second call should use cache
       const payload2 = await verifier.verifyToken({
-        url: endpoint,
+        secretKey: 'test-api-key',
         token,
       });
-
-      // Should still be called once (cached)
       expect(global.fetch).toHaveBeenCalledTimes(1);
       expect(payload2).toBeDefined();
     });
@@ -380,26 +363,21 @@ describe('TokenVerifier', () => {
         header: { alg: 'RS256', kid: 'test-kid-1' },
       });
 
-      const endpoint = 'https://api.blimu.dev/v1/auth/.well-known/jwks.json';
-
-      // First call fails, second succeeds
+      // First call fails, second succeeds (FetchClient needs headers.get on response)
       (global.fetch as any)
         .mockResolvedValueOnce({
           ok: false,
           status: 500,
+          headers: { get: () => null },
           text: () => Promise.resolve('Internal Server Error'),
         })
-        .mockResolvedValueOnce({
-          ok: true,
-          status: 200,
-          json: () => Promise.resolve(mockJWKSet),
-        });
+        .mockResolvedValueOnce(createMockFetchResponse(mockJWKSet));
 
       const verifier = new TokenVerifier();
 
       // This should fail on first attempt, clear cache, retry, and succeed
       const payload = await verifier.verifyToken({
-        url: endpoint,
+        secretKey: 'test-api-key',
         token,
       });
 
@@ -409,6 +387,52 @@ describe('TokenVerifier', () => {
 
       // Should have been called twice (first failed, retry succeeded)
       expect(global.fetch).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  describe('verifyOAuthToken convenience function', () => {
+    it('should verify OAuth token using clientId', async () => {
+      const { publicKey, privateKey } = crypto.generateKeyPairSync('rsa', {
+        modulusLength: 2048,
+        publicKeyEncoding: { type: 'spki', format: 'pem' },
+        privateKeyEncoding: { type: 'pkcs8', format: 'pem' },
+      });
+
+      const keyObject = crypto.createPublicKey(publicKey);
+      const jwk = keyObject.export({ format: 'jwk' }) as any;
+
+      const mockJWKSet: JWKSet = {
+        keys: [
+          {
+            kty: jwk.kty,
+            use: 'sig',
+            kid: 'test-kid-1',
+            alg: 'RS256',
+            n: jwk.n!,
+            e: jwk.e!,
+          },
+        ],
+      };
+
+      const token = jwt.sign({ sub: 'user123' }, privateKey, {
+        algorithm: 'RS256',
+        header: { alg: 'RS256', kid: 'test-kid-1' },
+      });
+
+      (global.fetch as any).mockResolvedValueOnce(createMockFetchResponse(mockJWKSet));
+
+      const payload = await verifyOAuthToken({
+        token,
+        clientId: 'my-oauth-client',
+        runtimeApiUrl: 'https://api.blimu.dev',
+      });
+
+      expect(payload).toBeDefined();
+      expect((payload as any).sub).toBe('user123');
+      expect(global.fetch).toHaveBeenCalledWith(
+        'https://api.blimu.dev/v1/auth/oauth/.well-known/jwks.json?client_id=my-oauth-client',
+        expect.any(Object)
+      );
     });
   });
 
@@ -442,15 +466,10 @@ describe('TokenVerifier', () => {
         header: { alg: 'RS256', kid: 'test-kid-1' },
       });
 
-      (global.fetch as any).mockResolvedValueOnce({
-        ok: true,
-        status: 200,
-        json: () => Promise.resolve(mockJWKSet),
-      });
+      (global.fetch as any).mockResolvedValueOnce(createMockFetchResponse(mockJWKSet));
 
-      const endpoint = 'https://api.blimu.dev/v1/auth/.well-known/jwks.json';
       const payload = await verifyToken({
-        url: endpoint,
+        secretKey: 'test-api-key',
         token,
       });
 

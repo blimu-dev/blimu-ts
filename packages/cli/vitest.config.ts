@@ -8,4 +8,7 @@ export default defineConfig({
     environment: 'node',
     setupFiles: ['./src/__tests__/setup.ts'],
   },
+  typecheck: {
+    include: ['src/**/*.test-d.ts'],
+  },
 });

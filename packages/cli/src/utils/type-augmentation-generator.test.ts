@@ -34,7 +34,7 @@ describe('generateTypeAugmentationFile', () => {
 
       // Check for type definitions (should appear twice, once per package)
       const resourceTypeMatches = content.match(
-        /type ResourceType = InferResourceTypes<typeof config>;/g,
+        /type ResourceType = InferResourceTypes<typeof config>;/g
       );
       expect(resourceTypeMatches).toHaveLength(2);
       expect(content).toContain('type EntitlementType = InferEntitlementTypes<typeof config>;');

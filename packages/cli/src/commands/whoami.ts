@@ -2,8 +2,8 @@ import type { Command } from 'commander';
 import { readCredentials } from '../auth/credentials';
 import { toText } from '../utils/format';
 import { decodeJwtPayload } from '../utils/jwt';
-import { log } from '../utils/logger';
 import chalk from 'chalk';
+import { createTaskRunner } from '../ui/task-runner';
 
 /**
  * Format timestamp as readable date
@@ -19,7 +19,8 @@ export function whoamiCommand(program: Command): void {
   program
     .command('whoami')
     .description('Display current authentication information')
-    .action(() => {
+    .action(async () => {
+      const runner = await createTaskRunner();
       try {
         const creds = readCredentials();
         const payload = decodeJwtPayload(creds.access_token);
@@ -38,12 +39,12 @@ export function whoamiCommand(program: Command): void {
             : { [`${chalk.red('@expired')}`]: true }),
         };
 
-        log.info('Current authentication:\n\n' + toText(info) + '\n');
+        runner.info('Current authentication:\n\n' + toText(info) + '\n');
       } catch (error) {
         if (error instanceof Error && error.message.includes('No credentials found')) {
-          log.error('Not authenticated. Please run `blimu login` first.');
+          runner.error('Not authenticated. Please run `blimu login` first.');
         } else {
-          log.error(
+          runner.error(
             `Failed to get user info: ${error instanceof Error ? error.message : String(error)}`
           );
         }

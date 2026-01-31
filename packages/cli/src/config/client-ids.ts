@@ -13,7 +13,7 @@ export const CLIENT_IDS: Record<BlimuInternalEnvironment, string> = {
   'local-dev': '9MhKB71lI9jF5p5OSfykG4juDo5hiGYm',
   'local-prod': 'client_id_for_local_prod',
   'cloud-dev': 'client_id_for_cloud_dev',
-  'cloud-prod': 'client_id_for_cloud_prod',
+  'cloud-prod': 'Vu_yzofw-d7AzNvR4k8ZHyj05zrQ8Qxp',
 };
 
 /**

@@ -337,6 +337,7 @@ export const EnvironmentAuthConfigDto_OutputSchema = z.object({
   authMethod: z.enum(['code', 'password', 'both']).optional(),
   codeExpirationMinutes: z.number().int().optional(),
   maxCodeAttempts: z.number().int().optional(),
+  passkeyEnabled: z.boolean().optional(),
   requireEmailVerification: z.boolean().optional(),
 });
 
@@ -347,6 +348,7 @@ export const EnvironmentAuthConfigUpdateDtoSchema = z.object({
   authMethod: z.enum(['code', 'password', 'both']).optional(),
   codeExpirationMinutes: z.number().int().optional(),
   maxCodeAttempts: z.number().int().optional(),
+  passkeyEnabled: z.boolean().optional(),
   requireEmailVerification: z.boolean().optional(),
 });
 

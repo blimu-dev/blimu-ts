@@ -41,8 +41,8 @@ export async function loadConfig(configPath: string): Promise<unknown> {
   }
 
   // For .ts, .mjs, .js files, use dynamic import
-  const module = await import(absolutePath);
-  return module.default || module;
+  const mod = (await import(absolutePath)) as { default?: unknown };
+  return mod.default ?? mod;
 }
 
 /**

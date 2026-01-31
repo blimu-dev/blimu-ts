@@ -100,42 +100,6 @@ export function mockProcessExit(): { mockExit: ReturnType<typeof vi.fn>; restore
 }
 
 /**
- * Mock clack prompts to avoid interactive prompts in tests
- */
-export function mockClackPrompts(): {
-  mockSpinner: ReturnType<typeof vi.fn>;
-  mockLog: ReturnType<typeof vi.fn>;
-} {
-  const mockSpinner = {
-    start: vi.fn(),
-    stop: vi.fn(),
-  };
-
-  const mockLog = {
-    info: vi.fn(),
-    success: vi.fn(),
-    error: vi.fn(),
-    warn: vi.fn(),
-    step: vi.fn(),
-  };
-
-  vi.mock('@clack/prompts', () => ({
-    default: {
-      spinner: () => mockSpinner,
-      log: mockLog,
-      cancel: vi.fn(),
-      intro: vi.fn(),
-      outro: vi.fn(),
-    },
-  }));
-
-  return {
-    mockSpinner: mockSpinner as unknown as ReturnType<typeof vi.fn>,
-    mockLog: mockLog as unknown as ReturnType<typeof vi.fn>,
-  };
-}
-
-/**
  * Wait for async operations to complete
  */
 export function waitFor(ms: number): Promise<void> {

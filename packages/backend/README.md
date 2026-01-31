@@ -34,6 +34,14 @@ const client = new BlimuClient({
   ],
 });
 
+// Example: Get JSON Web Key Set for environment (Public)
+try {
+  const result = await client.authJwks.getJwks();
+  console.log('Result:', result);
+} catch (error) {
+  // FetchError with structured data
+  console.error(error);
+}
 // Example: Bulk create resources
 try {
   const result = await client.bulkResources.create(
@@ -186,6 +194,7 @@ The SDK includes the following TypeScript interfaces:
 - **EntitlementsListResult**
 - **IntrospectionRequest**
 - **IntrospectionResponse**
+- **JWK**
 - **PlanAssignBody**
 - **PlanDeleteResponse**
 - **PlanResponse**

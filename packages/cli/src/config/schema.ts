@@ -12,7 +12,7 @@ export const ResourceDefinitionSchema = z.object({
       z.string().min(1), // local role
       // Allow tokens containing letters, numbers, underscores or dashes
       // Examples: parent->editor, organization->admin, workspace_v2->viewer
-      z.array(z.string().regex(/^([a-z0-9_-]+->)*[a-z0-9_-]+$/i)).min(1),
+      z.array(z.string().regex(/^([a-z0-9_-]+->)*[a-z0-9_-]+$/i)).min(1)
     )
     .optional(),
 });
@@ -51,7 +51,7 @@ export const PlanDefinitionSchema = z.object({
       z.object({
         value: z.number().int().min(0),
         period: z.enum(['monthly', 'yearly', 'lifetime']),
-      }),
+      })
     )
     .optional(),
 });
