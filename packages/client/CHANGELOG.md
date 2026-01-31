@@ -1,5 +1,11 @@
 # @blimu/client
 
+## 1.2.2
+
+### Patch Changes
+
+- 6a79cc2: JWKS support, CLI auth preferences and UI improvements: backend auth_jwks service and token verifier updates; CLI login/logout/whoami/push with preferences, interactive prompts and copyable output; nestjs jwk.service updates; client README.
+
 ## 1.2.1
 
 ### Patch Changes

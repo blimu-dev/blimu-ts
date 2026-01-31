@@ -1,5 +1,12 @@
 # @blimu/react
 
+## 1.2.2
+
+### Patch Changes
+
+- Updated dependencies [6a79cc2]
+  - @blimu/client@1.2.2
+
 ## 1.2.1
 
 ### Patch Changes
